@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
 import { checkVersionFormulas } from "@/modules/config/formula-rules";
+import { checkVersionWeights } from "@/modules/config/weight-rules";
 import type { FormulaNode } from "@/modules/metrics/domain";
 import {
   catalogIdSchema,
@@ -287,7 +288,25 @@ export const createVersion = createServerFn({ method: "POST" })
             .select("id"),
         );
       }
+
+      // Los pesos también se heredan: publicar una versión nueva no debe
+      // obligar al entrenador a reintroducir toda la configuración vigente.
+      const inheritedWeights = unwrap(
+        await context.supabase
+          .from("metric_weights")
+          .select("profile_id, metric_id, season_id, competition_id, scope_extra, weight, sign")
+          .eq("version_id", previous.id),
+      );
+      if (inheritedWeights.length > 0) {
+        unwrap(
+          await context.supabase
+            .from("metric_weights")
+            .insert(inheritedWeights.map((row) => ({ ...row, version_id: created.id })))
+            .select("id"),
+        );
+      }
     }
+
 
     return created;
   });
@@ -337,6 +356,35 @@ export const publishVersion = createServerFn({ method: "POST" })
     if (formulaIssues.length > 0) {
       throw new Error(`No se puede publicar la versión: ${formulaIssues.join(" ")}`);
     }
+
+    // Cada perfil de valoración activo debe llevar pesos utilizables.
+    const profiles = unwrap(
+      await context.supabase
+        .from("valuation_profiles")
+        .select("id, code, name, status")
+        .eq("catalog_id", version.catalog_id),
+    ) as { id: string; code: string; name: string; status: string }[];
+    if (profiles.length > 0) {
+      const weightRows = unwrap(
+        await context.supabase
+          .from("metric_weights")
+          .select("profile_id, metric_id, weight, sign, season_id, competition_id")
+          .eq("version_id", version.id),
+      ) as {
+        profile_id: string;
+        metric_id: string;
+        weight: number;
+        sign: number;
+        season_id: string | null;
+        competition_id: string | null;
+      }[];
+      const weightIssues = checkVersionWeights(profiles, allMetrics, weightRows);
+      if (weightIssues.length > 0) {
+        throw new Error(`No se puede publicar la versión: ${weightIssues.join(" ")}`);
+      }
+    }
+
+
 
 
     // El contenido sólo puede escribirse mientras la versión sigue en borrador.

@@ -153,3 +153,41 @@ export const upsertFormulaSchema = z.object({
 export const deleteFormulaSchema = z.object({ id: z.string().uuid() });
 export type UpsertFormulaInput = z.infer<typeof upsertFormulaSchema>;
 
+
+// Perfiles de valoración y pesos (Fase 1C)
+export const createValuationProfileSchema = z.object({
+  catalogId: z.string().uuid(),
+  code: codeSchema,
+  name: nameSchema,
+  description: optionalText(500),
+});
+export const updateValuationProfileSchema = z.object({
+  id: z.string().uuid(),
+  name: nameSchema,
+  description: optionalText(500),
+  status: entityStatusSchema,
+});
+
+const optionalUuid = z
+  .string()
+  .uuid()
+  .optional()
+  .nullable()
+  .transform((v) => v ?? null);
+
+export const listWeightsSchema = z.object({
+  versionId: z.string().uuid(),
+  profileId: z.string().uuid().optional().nullable(),
+});
+export const upsertWeightSchema = z.object({
+  id: z.string().uuid().optional().nullable(),
+  versionId: z.string().uuid(),
+  profileId: z.string().uuid(),
+  metricId: z.string().uuid(),
+  weight: z.number().positive("El peso debe ser mayor que 0").max(1000),
+  sign: z.union([z.literal(1), z.literal(-1)]),
+  seasonId: optionalUuid,
+  competitionId: optionalUuid,
+});
+export const deleteWeightSchema = z.object({ id: z.string().uuid() });
+export type UpsertWeightInput = z.infer<typeof upsertWeightSchema>;
