@@ -17,6 +17,7 @@ import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppTemporadasRouteImport } from './routes/_authenticated/app/temporadas'
 import { Route as AuthenticatedAppDeportesRouteImport } from './routes/_authenticated/app/deportes'
 import { Route as AuthenticatedAppCompeticionesRouteImport } from './routes/_authenticated/app/competiciones'
+import { Route as AuthenticatedAppCatalogosIndexRouteImport } from './routes/_authenticated/app/catalogos/index'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -60,6 +61,12 @@ const AuthenticatedAppCompeticionesRoute =
     path: '/competiciones',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppCatalogosIndexRoute =
+  AuthenticatedAppCatalogosIndexRouteImport.update({
+    id: '/catalogos/',
+    path: '/catalogos/',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,6 +85,7 @@ export interface FileRoutesByTo {
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/catalogos': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,6 +97,7 @@ export interface FileRoutesById {
   '/_authenticated/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/_authenticated/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/app/deportes'
     | '/app/temporadas'
     | '/app/'
+    | '/app/catalogos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/app/deportes'
     | '/app/temporadas'
     | '/app'
+    | '/app/catalogos'
   id:
     | '__root__'
     | '/'
@@ -117,6 +129,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/deportes'
     | '/_authenticated/app/temporadas'
     | '/_authenticated/app/'
+    | '/_authenticated/app/catalogos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCompeticionesRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/catalogos/': {
+      id: '/_authenticated/app/catalogos/'
+      path: '/catalogos'
+      fullPath: '/app/catalogos/'
+      preLoaderRoute: typeof AuthenticatedAppCatalogosIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
   }
 }
 
@@ -191,6 +211,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppDeportesRoute: typeof AuthenticatedAppDeportesRoute
   AuthenticatedAppTemporadasRoute: typeof AuthenticatedAppTemporadasRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppCatalogosIndexRoute: typeof AuthenticatedAppCatalogosIndexRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
@@ -198,6 +219,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppDeportesRoute: AuthenticatedAppDeportesRoute,
   AuthenticatedAppTemporadasRoute: AuthenticatedAppTemporadasRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppCatalogosIndexRoute: AuthenticatedAppCatalogosIndexRoute,
 }
 
 const AuthenticatedAppRouteRouteWithChildren =
