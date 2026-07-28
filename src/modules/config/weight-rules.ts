@@ -17,7 +17,7 @@ export interface WeightRow {
 export interface WeightMetricRef {
   id: string;
   code: string;
-  name: string;
+  name?: string;
   nature: MetricNature | string;
   status: string;
 }
