@@ -12,7 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
+import { Route as AuthenticatedAppTemporadasRouteImport } from './routes/_authenticated/app/temporadas'
+import { Route as AuthenticatedAppDeportesRouteImport } from './routes/_authenticated/app/deportes'
+import { Route as AuthenticatedAppCompeticionesRouteImport } from './routes/_authenticated/app/competiciones'
+import { Route as AuthenticatedAppCatalogosIndexRouteImport } from './routes/_authenticated/app/catalogos/index'
+import { Route as AuthenticatedAppCatalogosCatalogIdRouteImport } from './routes/_authenticated/app/catalogos/$catalogId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -28,35 +34,115 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
+const AuthenticatedAppTemporadasRoute =
+  AuthenticatedAppTemporadasRouteImport.update({
+    id: '/temporadas',
+    path: '/temporadas',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppDeportesRoute =
+  AuthenticatedAppDeportesRouteImport.update({
+    id: '/deportes',
+    path: '/deportes',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppCompeticionesRoute =
+  AuthenticatedAppCompeticionesRouteImport.update({
+    id: '/competiciones',
+    path: '/competiciones',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppCatalogosIndexRoute =
+  AuthenticatedAppCatalogosIndexRouteImport.update({
+    id: '/catalogos/',
+    path: '/catalogos/',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppCatalogosCatalogIdRoute =
+  AuthenticatedAppCatalogosCatalogIdRouteImport.update({
+    id: '/catalogos/$catalogId',
+    path: '/catalogos/$catalogId',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/app': typeof AuthenticatedAppRoute
+  '/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
+  '/app/deportes': typeof AuthenticatedAppDeportesRoute
+  '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
+  '/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/app': typeof AuthenticatedAppRoute
+  '/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
+  '/app/deportes': typeof AuthenticatedAppDeportesRoute
+  '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
+  '/app': typeof AuthenticatedAppIndexRoute
+  '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
+  '/app/catalogos': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/app': typeof AuthenticatedAppRoute
+  '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/_authenticated/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
+  '/_authenticated/app/deportes': typeof AuthenticatedAppDeportesRoute
+  '/_authenticated/app/temporadas': typeof AuthenticatedAppTemporadasRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
+  '/_authenticated/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/app'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/app'
+    | '/app/competiciones'
+    | '/app/deportes'
+    | '/app/temporadas'
+    | '/app/'
+    | '/app/catalogos/$catalogId'
+    | '/app/catalogos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/app'
+  to:
+    | '/'
+    | '/auth'
+    | '/app/competiciones'
+    | '/app/deportes'
+    | '/app/temporadas'
+    | '/app'
+    | '/app/catalogos/$catalogId'
+    | '/app/catalogos'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/app'
+    | '/_authenticated/app/competiciones'
+    | '/_authenticated/app/deportes'
+    | '/_authenticated/app/temporadas'
+    | '/_authenticated/app/'
+    | '/_authenticated/app/catalogos/$catalogId'
+    | '/_authenticated/app/catalogos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -92,18 +178,84 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/app'
       path: '/app'
       fullPath: '/app'
-      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      preLoaderRoute: typeof AuthenticatedAppRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/app/temporadas': {
+      id: '/_authenticated/app/temporadas'
+      path: '/temporadas'
+      fullPath: '/app/temporadas'
+      preLoaderRoute: typeof AuthenticatedAppTemporadasRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/app/deportes': {
+      id: '/_authenticated/app/deportes'
+      path: '/deportes'
+      fullPath: '/app/deportes'
+      preLoaderRoute: typeof AuthenticatedAppDeportesRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/app/competiciones': {
+      id: '/_authenticated/app/competiciones'
+      path: '/competiciones'
+      fullPath: '/app/competiciones'
+      preLoaderRoute: typeof AuthenticatedAppCompeticionesRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/app/catalogos/': {
+      id: '/_authenticated/app/catalogos/'
+      path: '/catalogos'
+      fullPath: '/app/catalogos/'
+      preLoaderRoute: typeof AuthenticatedAppCatalogosIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/app/catalogos/$catalogId': {
+      id: '/_authenticated/app/catalogos/$catalogId'
+      path: '/catalogos/$catalogId'
+      fullPath: '/app/catalogos/$catalogId'
+      preLoaderRoute: typeof AuthenticatedAppCatalogosCatalogIdRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
     }
   }
 }
 
+interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppCompeticionesRoute: typeof AuthenticatedAppCompeticionesRoute
+  AuthenticatedAppDeportesRoute: typeof AuthenticatedAppDeportesRoute
+  AuthenticatedAppTemporadasRoute: typeof AuthenticatedAppTemporadasRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppCatalogosCatalogIdRoute: typeof AuthenticatedAppCatalogosCatalogIdRoute
+  AuthenticatedAppCatalogosIndexRoute: typeof AuthenticatedAppCatalogosIndexRoute
+}
+
+const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppCompeticionesRoute: AuthenticatedAppCompeticionesRoute,
+  AuthenticatedAppDeportesRoute: AuthenticatedAppDeportesRoute,
+  AuthenticatedAppTemporadasRoute: AuthenticatedAppTemporadasRoute,
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppCatalogosCatalogIdRoute:
+    AuthenticatedAppCatalogosCatalogIdRoute,
+  AuthenticatedAppCatalogosIndexRoute: AuthenticatedAppCatalogosIndexRoute,
+}
+
+const AuthenticatedAppRouteRouteWithChildren =
+  AuthenticatedAppRouteRoute._addFileChildren(
+    AuthenticatedAppRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAppRoute: typeof AuthenticatedAppRoute
+  AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAppRoute: AuthenticatedAppRoute,
+  AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =

@@ -754,6 +754,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          owner_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
         }
@@ -762,6 +763,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          owner_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -770,6 +772,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          owner_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -1038,6 +1041,7 @@ export type Database = {
         Returns: boolean
       }
       can_read_version: { Args: { _version_id: string }; Returns: boolean }
+      can_use_sport: { Args: { _sport_id: string }; Returns: boolean }
       can_write_catalog: { Args: { _catalog_id: string }; Returns: boolean }
       has_role: {
         Args: {
