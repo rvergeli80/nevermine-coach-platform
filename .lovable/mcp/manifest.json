@@ -1,0 +1,175 @@
+{
+  "version": 1,
+  "sdk_version": "0.25.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://onoulxcyhszzoyolerru.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "nevermine-coach-mcp",
+      "version": "0.1.0",
+      "title": "Nevermine Coach MCP"
+    },
+    "tools": [
+      {
+        "name": "list_seasons",
+        "title": "Listar temporadas",
+        "description": "Devuelve las temporadas del entrenador autenticado, con fechas y estado.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_competitions",
+        "title": "Listar competiciones",
+        "description": "Devuelve las competiciones del entrenador autenticado y la temporada asociada.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_catalogs",
+        "title": "Listar catálogos de métricas",
+        "description": "Devuelve los catálogos de métricas accesibles (propios y globales) con su deporte y sus versiones.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_metrics",
+        "title": "Listar métricas de un catálogo",
+        "description": "Devuelve las métricas de un catálogo, indicando si son primarias o derivadas, su unidad y dirección.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "catalogId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Identificador del catálogo, obtenido con list_catalogs."
+            }
+          },
+          "required": [
+            "catalogId"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_valuation_weights",
+        "title": "Listar pesos de valoración",
+        "description": "Devuelve los perfiles de valoración de un catálogo y los pesos por métrica de una versión concreta.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "catalogId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Identificador del catálogo."
+            },
+            "versionId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Identificador de la versión del catálogo."
+            }
+          },
+          "required": [
+            "catalogId",
+            "versionId"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_season",
+        "title": "Crear temporada",
+        "description": "Crea una temporada para el entrenador autenticado.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Nombre de la temporada, por ejemplo 2025/2026."
+            },
+            "startsOn": {
+              "description": "Fecha de inicio en formato AAAA-MM-DD.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "endsOn": {
+              "description": "Fecha de fin en formato AAAA-MM-DD.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
