@@ -18,6 +18,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
 import { Route as AuthenticatedAppTemporadasRouteImport } from './routes/_authenticated/app/temporadas'
+import { Route as AuthenticatedAppEquiposRouteImport } from './routes/_authenticated/app/equipos'
 import { Route as AuthenticatedAppDeportesRouteImport } from './routes/_authenticated/app/deportes'
 import { Route as AuthenticatedAppCompeticionesRouteImport } from './routes/_authenticated/app/competiciones'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -72,6 +73,11 @@ const AuthenticatedAppTemporadasRoute =
     path: '/temporadas',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppEquiposRoute = AuthenticatedAppEquiposRouteImport.update({
+  id: '/equipos',
+  path: '/equipos',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppDeportesRoute =
   AuthenticatedAppDeportesRouteImport.update({
     id: '/deportes',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
+  '/app/equipos': typeof AuthenticatedAppEquiposRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
+  '/app/equipos': typeof AuthenticatedAppEquiposRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
   '/_authenticated/app/deportes': typeof AuthenticatedAppDeportesRoute
+  '/_authenticated/app/equipos': typeof AuthenticatedAppEquiposRoute
   '/_authenticated/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/app/competiciones'
     | '/app/deportes'
+    | '/app/equipos'
     | '/app/temporadas'
     | '/app/'
     | '/app/catalogos/$catalogId'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/app/competiciones'
     | '/app/deportes'
+    | '/app/equipos'
     | '/app/temporadas'
     | '/app'
     | '/app/catalogos/$catalogId'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/app/competiciones'
     | '/_authenticated/app/deportes'
+    | '/_authenticated/app/equipos'
     | '/_authenticated/app/temporadas'
     | '/_authenticated/app/'
     | '/_authenticated/app/catalogos/$catalogId'
@@ -284,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTemporadasRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/equipos': {
+      id: '/_authenticated/app/equipos'
+      path: '/equipos'
+      fullPath: '/app/equipos'
+      preLoaderRoute: typeof AuthenticatedAppEquiposRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/app/deportes': {
       id: '/_authenticated/app/deportes'
       path: '/deportes'
@@ -332,6 +351,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppCompeticionesRoute: typeof AuthenticatedAppCompeticionesRoute
   AuthenticatedAppDeportesRoute: typeof AuthenticatedAppDeportesRoute
+  AuthenticatedAppEquiposRoute: typeof AuthenticatedAppEquiposRoute
   AuthenticatedAppTemporadasRoute: typeof AuthenticatedAppTemporadasRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppCatalogosCatalogIdRoute: typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -341,6 +361,7 @@ interface AuthenticatedAppRouteRouteChildren {
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppCompeticionesRoute: AuthenticatedAppCompeticionesRoute,
   AuthenticatedAppDeportesRoute: AuthenticatedAppDeportesRoute,
+  AuthenticatedAppEquiposRoute: AuthenticatedAppEquiposRoute,
   AuthenticatedAppTemporadasRoute: AuthenticatedAppTemporadasRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppCatalogosCatalogIdRoute:
