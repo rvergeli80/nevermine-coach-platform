@@ -10,6 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    next: typeof search.next === "string" ? search.next : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Acceso | Nevermine Coach" },
@@ -30,13 +33,29 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+/** Sólo se admiten rutas relativas del propio origen como destino tras el acceso. */
+function safeNext(next?: string) {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+}
+
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const target = safeNext(next);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function goAfterAuth() {
+    if (target) {
+      window.location.href = target;
+      return;
+    }
+    navigate({ to: "/app" });
+  }
+
 
   async function handleSignIn(event: React.FormEvent) {
     event.preventDefault();
