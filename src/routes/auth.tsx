@@ -10,6 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    next: typeof search.next === "string" ? search.next : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Acceso | Nevermine Coach" },
@@ -30,13 +33,29 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+/** Sólo se admiten rutas relativas del propio origen como destino tras el acceso. */
+function safeNext(next?: string) {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+}
+
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const target = safeNext(next);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function goAfterAuth() {
+    if (target) {
+      window.location.href = target;
+      return;
+    }
+    navigate({ to: "/app" });
+  }
+
 
   async function handleSignIn(event: React.FormEvent) {
     event.preventDefault();
@@ -48,7 +67,7 @@ function AuthPage() {
       setMessage(error.message);
       return;
     }
-    navigate({ to: "/app" });
+    goAfterAuth();
   }
 
   async function handleSignUp(event: React.FormEvent) {
@@ -59,7 +78,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: target ? window.location.origin + target : window.location.origin,
         data: { full_name: fullName },
       },
     });
@@ -67,20 +86,20 @@ function AuthPage() {
     setMessage(
       error ? error.message : "Cuenta creada. Revisa tu correo si se requiere confirmación.",
     );
-    if (!error) navigate({ to: "/app" });
+    if (!error) goAfterAuth();
   }
 
   async function handleGoogle() {
     setMessage(null);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: target ? window.location.origin + target : window.location.origin,
     });
     if (result.error) {
       setMessage("No se ha podido iniciar sesión con Google.");
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/app" });
+    goAfterAuth();
   }
 
   return (
