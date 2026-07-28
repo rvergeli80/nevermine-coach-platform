@@ -267,7 +267,7 @@ export const publishVersion = createServerFn({ method: "POST" })
         .select("id, catalog_id, status")
         .eq("id", data.versionId)
         .maybeSingle(),
-    );
+    ) as { id: string; catalog_id: string; status: string } | null;
     if (!version) throw new Error("Versión no encontrada");
     if (version.status !== "draft") throw new Error("Sólo puede publicarse una versión en borrador");
 
