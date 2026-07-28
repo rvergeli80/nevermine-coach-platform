@@ -287,7 +287,25 @@ export const createVersion = createServerFn({ method: "POST" })
             .select("id"),
         );
       }
+
+      // Los pesos también se heredan: publicar una versión nueva no debe
+      // obligar al entrenador a reintroducir toda la configuración vigente.
+      const inheritedWeights = unwrap(
+        await context.supabase
+          .from("metric_weights")
+          .select("profile_id, metric_id, season_id, competition_id, scope_extra, weight, sign")
+          .eq("version_id", previous.id),
+      );
+      if (inheritedWeights.length > 0) {
+        unwrap(
+          await context.supabase
+            .from("metric_weights")
+            .insert(inheritedWeights.map((row) => ({ ...row, version_id: created.id })))
+            .select("id"),
+        );
+      }
     }
+
 
     return created;
   });
