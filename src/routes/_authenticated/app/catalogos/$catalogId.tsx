@@ -270,6 +270,7 @@ function CatalogDetailPage() {
           <TabsTrigger value="metrics">Métricas</TabsTrigger>
           <TabsTrigger value="groups">Grupos</TabsTrigger>
           <TabsTrigger value="formulas">Fórmulas</TabsTrigger>
+          <TabsTrigger value="weights">Valoración</TabsTrigger>
           <TabsTrigger value="versions">Versiones</TabsTrigger>
 
         </TabsList>
