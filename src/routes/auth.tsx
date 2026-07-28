@@ -67,7 +67,7 @@ function AuthPage() {
       setMessage(error.message);
       return;
     }
-    navigate({ to: "/app" });
+    goAfterAuth();
   }
 
   async function handleSignUp(event: React.FormEvent) {
@@ -78,7 +78,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: target ? window.location.origin + target : window.location.origin,
         data: { full_name: fullName },
       },
     });
@@ -86,20 +86,20 @@ function AuthPage() {
     setMessage(
       error ? error.message : "Cuenta creada. Revisa tu correo si se requiere confirmación.",
     );
-    if (!error) navigate({ to: "/app" });
+    if (!error) goAfterAuth();
   }
 
   async function handleGoogle() {
     setMessage(null);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: target ? window.location.origin + target : window.location.origin,
     });
     if (result.error) {
       setMessage("No se ha podido iniciar sesión con Google.");
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/app" });
+    goAfterAuth();
   }
 
   return (
