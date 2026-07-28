@@ -1,24 +1,48 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Nevermine Coach | Motor de métricas deportivas" },
+      {
+        name: "description",
+        content:
+          "Plataforma para entrenadores: catálogos de métricas configurables por deporte, valoraciones versionadas e histórico inmutable.",
+      },
+      { property: "og:title", content: "Nevermine Coach | Motor de métricas deportivas" },
+      {
+        property: "og:description",
+        content:
+          "Catálogos de métricas configurables, fórmulas y pesos versionados, histórico inmutable.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Landing,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Landing() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="max-w-xl text-center">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Fase 0</p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
+          Nevermine Coach
+        </h1>
+        <p className="mt-4 text-muted-foreground">
+          Motor de métricas deportivas configurable. Base técnica en construcción: autenticación,
+          modelo de dominio y seguridad. Sin interfaz definitiva todavía.
+        </p>
+        <div className="mt-8">
+          <Link
+            to="/auth"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Acceder
+          </Link>
+        </div>
+      </div>
+    </main>
   );
 }
