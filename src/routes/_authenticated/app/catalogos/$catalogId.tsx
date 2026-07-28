@@ -375,6 +375,13 @@ function CatalogDetailPage() {
           />
         </TabsContent>
 
+        <TabsContent value="weights" className="mt-4">
+          <WeightsPanel
+            catalogId={catalogId}
+            versions={versionRows}
+            versionsLoading={versions.isLoading}
+          />
+        </TabsContent>
 
 
         <TabsContent value="versions" className="mt-4 space-y-4">
