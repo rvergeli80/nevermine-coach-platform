@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
 import { checkVersionFormulas } from "@/modules/config/formula-rules";
+import { checkVersionWeights } from "@/modules/config/weight-rules";
 import type { FormulaNode } from "@/modules/metrics/domain";
 import {
   catalogIdSchema,
