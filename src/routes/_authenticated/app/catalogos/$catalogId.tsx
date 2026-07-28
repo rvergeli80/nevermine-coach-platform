@@ -17,6 +17,7 @@ import {
 } from "@/lib/config.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
 import { FormulasPanel } from "@/components/app/formulas-panel";
+import { WeightsPanel } from "@/components/app/weights-panel";
 import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
