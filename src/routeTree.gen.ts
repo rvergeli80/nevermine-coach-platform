@@ -18,6 +18,7 @@ import { Route as AuthenticatedAppTemporadasRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppDeportesRouteImport } from './routes/_authenticated/app/deportes'
 import { Route as AuthenticatedAppCompeticionesRouteImport } from './routes/_authenticated/app/competiciones'
 import { Route as AuthenticatedAppCatalogosIndexRouteImport } from './routes/_authenticated/app/catalogos/index'
+import { Route as AuthenticatedAppCatalogosCatalogIdRouteImport } from './routes/_authenticated/app/catalogos/$catalogId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -67,6 +68,12 @@ const AuthenticatedAppCatalogosIndexRoute =
     path: '/catalogos/',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppCatalogosCatalogIdRoute =
+  AuthenticatedAppCatalogosCatalogIdRouteImport.update({
+    id: '/catalogos/$catalogId',
+    path: '/catalogos/$catalogId',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
   '/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +93,7 @@ export interface FileRoutesByTo {
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
   '/app/catalogos': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRoutesById {
@@ -97,6 +106,7 @@ export interface FileRoutesById {
   '/_authenticated/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/_authenticated/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
   '/_authenticated/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
 }
 export interface FileRouteTypes {
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/app/deportes'
     | '/app/temporadas'
     | '/app/'
+    | '/app/catalogos/$catalogId'
     | '/app/catalogos/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/app/deportes'
     | '/app/temporadas'
     | '/app'
+    | '/app/catalogos/$catalogId'
     | '/app/catalogos'
   id:
     | '__root__'
@@ -129,6 +141,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/deportes'
     | '/_authenticated/app/temporadas'
     | '/_authenticated/app/'
+    | '/_authenticated/app/catalogos/$catalogId'
     | '/_authenticated/app/catalogos/'
   fileRoutesById: FileRoutesById
 }
@@ -203,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCatalogosIndexRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/catalogos/$catalogId': {
+      id: '/_authenticated/app/catalogos/$catalogId'
+      path: '/catalogos/$catalogId'
+      fullPath: '/app/catalogos/$catalogId'
+      preLoaderRoute: typeof AuthenticatedAppCatalogosCatalogIdRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
   }
 }
 
@@ -211,6 +231,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppDeportesRoute: typeof AuthenticatedAppDeportesRoute
   AuthenticatedAppTemporadasRoute: typeof AuthenticatedAppTemporadasRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppCatalogosCatalogIdRoute: typeof AuthenticatedAppCatalogosCatalogIdRoute
   AuthenticatedAppCatalogosIndexRoute: typeof AuthenticatedAppCatalogosIndexRoute
 }
 
@@ -219,6 +240,8 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppDeportesRoute: AuthenticatedAppDeportesRoute,
   AuthenticatedAppTemporadasRoute: AuthenticatedAppTemporadasRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppCatalogosCatalogIdRoute:
+    AuthenticatedAppCatalogosCatalogIdRoute,
   AuthenticatedAppCatalogosIndexRoute: AuthenticatedAppCatalogosIndexRoute,
 }
 
