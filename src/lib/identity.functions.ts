@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { AppRole, CurrentUser } from "@/modules/identity/types";
 
 /**
@@ -7,15 +8,17 @@ import type { AppRole, CurrentUser } from "@/modules/identity/types";
  * Módulo delgado: sólo declaraciones de server functions.
  */
 export const getCurrentUser = createServerFn({ method: "GET" })
-  .middleware([
-    (await import("@/integrations/supabase/auth-middleware")).requireSupabaseAuth,
-  ])
+  .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CurrentUser> => {
     const { supabase, userId } = context;
 
     const [{ data: profile, error: profileError }, { data: roles, error: rolesError }] =
       await Promise.all([
-        supabase.from("profiles").select("id, email, full_name, locale").eq("id", userId).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("id, email, full_name, locale")
+          .eq("id", userId)
+          .maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", userId),
       ]);
 
