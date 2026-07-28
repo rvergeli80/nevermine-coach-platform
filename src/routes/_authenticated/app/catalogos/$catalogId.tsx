@@ -16,6 +16,7 @@ import {
   updateMetric,
 } from "@/lib/config.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
+import { FormulasPanel } from "@/components/app/formulas-panel";
 import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -268,7 +269,9 @@ function CatalogDetailPage() {
         <TabsList>
           <TabsTrigger value="metrics">Métricas</TabsTrigger>
           <TabsTrigger value="groups">Grupos</TabsTrigger>
+          <TabsTrigger value="formulas">Fórmulas</TabsTrigger>
           <TabsTrigger value="versions">Versiones</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="metrics" className="mt-4 space-y-4">
@@ -362,6 +365,16 @@ function CatalogDetailPage() {
             </div>
           </QueryState>
         </TabsContent>
+
+        <TabsContent value="formulas" className="mt-4">
+          <FormulasPanel
+            catalogId={catalogId}
+            versions={versionRows}
+            versionsLoading={versions.isLoading}
+          />
+        </TabsContent>
+
+
 
         <TabsContent value="versions" className="mt-4 space-y-4">
           <div className="flex justify-end">

@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
+import { checkVersionFormulas } from "@/modules/config/formula-rules";
+import type { FormulaNode } from "@/modules/metrics/domain";
 import {
   catalogIdSchema,
   createCatalogSchema,
@@ -243,7 +245,7 @@ export const createVersion = createServerFn({ method: "POST" })
       throw new Error("Ya existe un borrador abierto en este catálogo");
     }
 
-    return unwrap(
+    const created = unwrap(
       await context.supabase
         .from("catalog_versions")
         .insert({
@@ -254,8 +256,42 @@ export const createVersion = createServerFn({ method: "POST" })
         })
         .select("id")
         .single(),
-    );
+    ) as { id: string };
+
+
+    // El borrador hereda las fórmulas de la última versión publicada: el
+    // histórico queda intacto y el usuario parte de la configuración vigente.
+    const previous = unwrap(
+      await context.supabase
+        .from("catalog_versions")
+        .select("id")
+        .eq("catalog_id", data.catalogId)
+        .eq("status", "published")
+        .order("version_number", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ) as { id: string } | null;
+
+    if (previous) {
+      const inherited = unwrap(
+        await context.supabase
+          .from("metric_formulas")
+          .select("metric_id, expression, ast, dependencies, null_policy")
+          .eq("version_id", previous.id),
+      );
+      if (inherited.length > 0) {
+        unwrap(
+          await context.supabase
+            .from("metric_formulas")
+            .insert(inherited.map((row) => ({ ...row, version_id: created.id })))
+            .select("id"),
+        );
+      }
+    }
+
+    return created;
   });
+
 
 export const publishVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -271,17 +307,37 @@ export const publishVersion = createServerFn({ method: "POST" })
     if (!version) throw new Error("Versión no encontrada");
     if (version.status !== "draft") throw new Error("Sólo puede publicarse una versión en borrador");
 
-    const metrics = unwrap(
+    const allMetrics = unwrap(
       await context.supabase
         .from("metrics")
-        .select("id")
+        .select("id, code, nature, status")
         .eq("catalog_id", version.catalog_id)
-        .eq("status", "active")
         .order("code"),
-    );
+    ) as { id: string; code: string; nature: "primary" | "derived"; status: string }[];
+    const metrics = allMetrics.filter((metric) => metric.status === "active");
     if (metrics.length === 0) {
       throw new Error("No se puede publicar una versión sin métricas activas");
     }
+
+    // El grafo de fórmulas debe ser completo y resoluble antes de congelar la versión.
+    const formulaRows = unwrap(
+      await context.supabase
+        .from("metric_formulas")
+        .select("metric_id, ast")
+        .eq("version_id", version.id),
+    ) as { metric_id: string; ast: unknown }[];
+    const codeById = new Map(allMetrics.map((metric) => [metric.id, metric.code]));
+    const formulaIssues = checkVersionFormulas(
+      metrics,
+      formulaRows.map((row) => ({
+        metricCode: codeById.get(row.metric_id) ?? "",
+        ast: row.ast as FormulaNode,
+      })),
+    );
+    if (formulaIssues.length > 0) {
+      throw new Error(`No se puede publicar la versión: ${formulaIssues.join(" ")}`);
+    }
+
 
     // El contenido sólo puede escribirse mientras la versión sigue en borrador.
     unwrap(

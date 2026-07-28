@@ -136,3 +136,20 @@ export const updateMetricSchema = createMetricSchema
 
 export type CreateMetricInput = z.infer<typeof createMetricSchema>;
 export type UpdateMetricInput = z.infer<typeof updateMetricSchema>;
+
+// Fórmulas (Fase 1B)
+export const nullPolicySchema = z.enum(["zero", "propagate"]);
+export const versionIdOnlySchema = z.object({ versionId: z.string().uuid() });
+export const upsertFormulaSchema = z.object({
+  versionId: z.string().uuid(),
+  metricId: z.string().uuid(),
+  expression: z
+    .string()
+    .trim()
+    .min(1, "La expresión no puede estar vacía")
+    .max(500, "La expresión no puede superar 500 caracteres"),
+  nullPolicy: nullPolicySchema.default("zero"),
+});
+export const deleteFormulaSchema = z.object({ id: z.string().uuid() });
+export type UpsertFormulaInput = z.infer<typeof upsertFormulaSchema>;
+
