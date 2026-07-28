@@ -191,3 +191,35 @@ export const upsertWeightSchema = z.object({
 });
 export const deleteWeightSchema = z.object({ id: z.string().uuid() });
 export type UpsertWeightInput = z.infer<typeof upsertWeightSchema>;
+
+// Organización deportiva (Fase 1D)
+export const createTeamSchema = z.object({
+  sportId: z.string().uuid(),
+  name: nameSchema,
+  category: optionalText(60),
+});
+export const updateTeamSchema = createTeamSchema.extend({
+  id: z.string().uuid(),
+  status: entityStatusSchema,
+});
+
+export const createPlayerSchema = z.object({
+  teamId: z
+    .string()
+    .uuid()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? null),
+  fullName: nameSchema,
+  birthDate: z
+    .string()
+    .date()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? null),
+});
+export const updatePlayerSchema = createPlayerSchema.extend({
+  id: z.string().uuid(),
+  status: entityStatusSchema,
+});
+

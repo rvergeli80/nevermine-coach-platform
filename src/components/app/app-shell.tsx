@@ -1,6 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Trophy, CalendarDays, Medal, Library, LayoutGrid } from "lucide-react";
+import {
+  LogOut,
+  Trophy,
+  CalendarDays,
+  Medal,
+  Library,
+  LayoutGrid,
+  Users,
+  UserRound,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -11,8 +20,11 @@ const NAV = [
   { to: "/app/deportes", label: "Deportes", icon: Trophy, exact: false },
   { to: "/app/temporadas", label: "Temporadas", icon: CalendarDays, exact: false },
   { to: "/app/competiciones", label: "Competiciones", icon: Medal, exact: false },
+  { to: "/app/equipos", label: "Equipos", icon: Users, exact: false },
+  { to: "/app/jugadores", label: "Jugadores", icon: UserRound, exact: false },
   { to: "/app/catalogos", label: "Catálogos", icon: Library, exact: false },
 ] as const;
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
