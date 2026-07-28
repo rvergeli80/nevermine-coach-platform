@@ -356,6 +356,35 @@ export const publishVersion = createServerFn({ method: "POST" })
       throw new Error(`No se puede publicar la versión: ${formulaIssues.join(" ")}`);
     }
 
+    // Cada perfil de valoración activo debe llevar pesos utilizables.
+    const profiles = unwrap(
+      await context.supabase
+        .from("valuation_profiles")
+        .select("id, code, name, status")
+        .eq("catalog_id", version.catalog_id),
+    ) as { id: string; code: string; name: string; status: string }[];
+    if (profiles.length > 0) {
+      const weightRows = unwrap(
+        await context.supabase
+          .from("metric_weights")
+          .select("profile_id, metric_id, weight, sign, season_id, competition_id")
+          .eq("version_id", version.id),
+      ) as {
+        profile_id: string;
+        metric_id: string;
+        weight: number;
+        sign: number;
+        season_id: string | null;
+        competition_id: string | null;
+      }[];
+      const weightIssues = checkVersionWeights(profiles, allMetrics, weightRows);
+      if (weightIssues.length > 0) {
+        throw new Error(`No se puede publicar la versión: ${weightIssues.join(" ")}`);
+      }
+    }
+
+
+
 
     // El contenido sólo puede escribirse mientras la versión sigue en borrador.
     unwrap(
