@@ -37,17 +37,24 @@ export const listSports = createServerFn({ method: "GET" })
   );
 
 export const createSport = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => createSportSchema.parse(data))
   .handler(async ({ data, context }) =>
     unwrap(
       await context.supabase
         .from("sports")
-        .insert({ code: data.code, name: data.name, owner_id: context.userId })
+        .insert({
+          code: data.code,
+          name: data.name,
+          // Ámbito resuelto por el contexto activo (nunca desde owner_id).
+          sport_space_id: context.sportSpaceId,
+          owner_id: context.userId, // metadato de trazabilidad
+        })
         .select("id")
         .single(),
     ),
   );
+
 
 export const updateSport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
