@@ -1,6 +1,8 @@
 import { checkFormula, type CatalogMetricRef, type ExistingFormula } from "../config/formula-rules";
 import { codeSchema, nameSchema } from "../config/schemas";
 import type { StarterPack } from "./types";
+import { isValidVersion } from "./version";
+
 
 /**
  * Validación pura de un Starter Pack antes de instanciarlo.
@@ -20,6 +22,20 @@ export function checkStarterPack(pack: StarterPack): string[] {
     if (!codeSchema.safeParse(code).success) errors.push(`Código no válido: "${code}".`);
   }
   if (!nameSchema.safeParse(pack.name).success) errors.push("El nombre del pack no es válido.");
+
+  // Metadatos del catálogo oficial (FEATURE-003.1).
+  if (!isValidVersion(pack.version)) {
+    errors.push(`Versión no válida en el pack "${pack.id}": "${pack.version}".`);
+  }
+  if (!isValidVersion(pack.compatibility.minEngineVersion)) {
+    errors.push(`Versión mínima de engine no válida en el pack "${pack.id}".`);
+  }
+  if (!pack.compatibility.engine) errors.push(`El pack "${pack.id}" no declara engine.`);
+  if (!pack.author?.trim()) errors.push(`El pack "${pack.id}" no declara autor.`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(pack.publishedAt)) {
+    errors.push(`Fecha de publicación no válida en el pack "${pack.id}".`);
+  }
+
 
   const groupCodes = new Set(pack.groups.map((g) => g.code));
   if (groupCodes.size !== pack.groups.length) errors.push("Hay códigos de grupo duplicados.");
