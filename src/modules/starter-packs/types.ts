@@ -44,11 +44,40 @@ export interface PackProfile {
   weights: PackWeight[];
 }
 
+/** Estado del Pack dentro del catálogo oficial. */
+export type PackStatus = "published" | "deprecated";
+
+/**
+ * Origen del Pack. FEATURE-003.1 sólo distribuye packs oficiales; el campo
+ * existe desde ya para que comunidad/enterprise/privados no obliguen a
+ * cambiar el modelo en Features posteriores del EPIC-003.
+ */
+export type PackOrigin = "official" | "community" | "enterprise" | "private";
+
+/**
+ * Compatibilidad declarada del Pack con el Engine que lo instala.
+ * Se evalúa antes de instalar: un pack incompatible nunca toca la BD.
+ */
+export interface PackCompatibility {
+  /** Engine requerido (hoy siempre "sportspace"). */
+  engine: string;
+  /** Versión mínima del Engine, en formato semver. */
+  minEngineVersion: string;
+}
+
 export interface StarterPack {
   /** Identificador estable del pack (no del catálogo creado). */
   id: string;
   name: string;
   summary: string;
+  /** Versión del contenido del pack, en formato semver (mayor.menor.parche). */
+  version: string;
+  author: string;
+  /** Fecha de publicación de esta versión (ISO 8601, sólo fecha). */
+  publishedAt: string;
+  status: PackStatus;
+  origin: PackOrigin;
+  compatibility: PackCompatibility;
   sport: { code: string; name: string };
   catalog: { code: string; name: string; description: string };
   groups: PackGroup[];
@@ -61,6 +90,12 @@ export interface StarterPackSummary {
   id: string;
   name: string;
   summary: string;
+  version: string;
+  author: string;
+  publishedAt: string;
+  status: PackStatus;
+  origin: PackOrigin;
+  compatibility: PackCompatibility;
   sportName: string;
   catalogCode: string;
   catalogName: string;
@@ -75,6 +110,12 @@ export function summarizePack(pack: StarterPack): StarterPackSummary {
     id: pack.id,
     name: pack.name,
     summary: pack.summary,
+    version: pack.version,
+    author: pack.author,
+    publishedAt: pack.publishedAt,
+    status: pack.status,
+    origin: pack.origin,
+    compatibility: pack.compatibility,
     sportName: pack.sport.name,
     catalogCode: pack.catalog.code,
     catalogName: pack.catalog.name,
@@ -84,3 +125,4 @@ export function summarizePack(pack: StarterPack): StarterPackSummary {
     profileCount: pack.profiles.length,
   };
 }
+

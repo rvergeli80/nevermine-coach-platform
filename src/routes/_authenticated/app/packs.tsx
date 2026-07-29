@@ -40,17 +40,26 @@ function StarterPacksPage() {
   const packs = useQuery({ queryKey: ["starter-packs"], queryFn: () => fetchPacks({}) });
 
   const mutation = useMutation({
-    mutationFn: (packId: string) => apply({ data: { packId } }),
+    mutationFn: (input: { packId: string; force?: boolean }) => apply({ data: input }),
     onSuccess: async (result) => {
       await queryClient.invalidateQueries({ queryKey: ["catalogs"] });
       await queryClient.invalidateQueries({ queryKey: ["sports"] });
-      toast.success("Starter Pack aplicado", {
-        description: `${result.metrics} métricas y ${result.formulas} fórmulas en un borrador listo para revisar.`,
-      });
-      navigate({
-        to: "/app/catalogos/$catalogId",
-        params: { catalogId: result.catalogId },
-      });
+      await queryClient.invalidateQueries({ queryKey: ["starter-packs"] });
+
+      if (result.action === "noop") {
+        toast.info("Nada que instalar", { description: result.message });
+        return;
+      }
+
+      toast.success(
+        result.action === "update" ? "Starter Pack actualizado" : "Starter Pack aplicado",
+        {
+          description: `${result.metrics} métricas y ${result.formulas} fórmulas en un borrador listo para revisar.`,
+        },
+      );
+      if (result.catalogId) {
+        navigate({ to: "/app/catalogos/$catalogId", params: { catalogId: result.catalogId } });
+      }
     },
     onError: (error: unknown) =>
       toast.error(error instanceof Error ? error.message : "No se ha podido aplicar el pack"),
@@ -60,7 +69,7 @@ function StarterPacksPage() {
     <>
       <PageHeader
         title="Starter Packs"
-        description="Configuración de partida por deporte: grupos, métricas, fórmulas y pesos. Todo se crea en borrador para que lo revises antes de publicar."
+        description="Catálogo oficial de configuración por deporte: grupos, métricas, fórmulas y pesos. Todo se instala en borrador para que lo revises antes de publicar."
       />
 
       <QueryState
@@ -81,6 +90,14 @@ function StarterPacksPage() {
                   <Badge variant="secondary">{pack.sportName}</Badge>
                 </div>
                 <CardDescription>{pack.summary}</CardDescription>
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-muted-foreground">
+                  <Badge variant="outline">v{pack.latestVersion}</Badge>
+                  <span>{pack.author}</span>
+                  <StateBadge
+                    state={pack.state}
+                    installedVersion={pack.installedVersion}
+                  />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <dl className="grid grid-cols-2 gap-2 text-sm">
@@ -90,12 +107,24 @@ function StarterPacksPage() {
                   <Stat label="Métricas derivadas" value={pack.derivedCount} />
                 </dl>
                 <Button
-                  onClick={() => mutation.mutate(pack.id)}
+                  onClick={() =>
+                    mutation.mutate({
+                      packId: pack.id,
+                      force: pack.state === "installed",
+                    })
+                  }
                   disabled={mutation.isPending}
+                  variant={pack.state === "installed" ? "outline" : "default"}
                   className="w-full"
                 >
                   <Sparkles className="size-4" aria-hidden />
-                  {mutation.isPending ? "Aplicando…" : "Aplicar pack"}
+                  {mutation.isPending
+                    ? "Aplicando…"
+                    : pack.state === "outdated"
+                      ? `Actualizar a v${pack.latestVersion}`
+                      : pack.state === "installed"
+                        ? "Reinstalar"
+                        : "Instalar pack"}
                 </Button>
               </CardContent>
             </Card>
@@ -106,6 +135,21 @@ function StarterPacksPage() {
   );
 }
 
+function StateBadge({
+  state,
+  installedVersion,
+}: {
+  state: string;
+  installedVersion: string | null;
+}) {
+  if (state === "not_installed") return <Badge variant="outline">No instalado</Badge>;
+  if (state === "outdated") {
+    return <Badge variant="destructive">Actualización disponible (v{installedVersion})</Badge>;
+  }
+  if (state === "failed") return <Badge variant="destructive">Instalación fallida</Badge>;
+  return <Badge>Instalado v{installedVersion}</Badge>;
+}
+
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-md border border-border px-3 py-2">
@@ -114,3 +158,4 @@ function Stat({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+
