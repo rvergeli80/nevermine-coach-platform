@@ -6,6 +6,9 @@ import {
   discoverStarterPacks,
   findPackageDescriptor,
   resolveInstallOrder,
+  starterPackLifecycleState,
+  isStarterPackDistributable,
+  starterPackLifecycleHistory,
   summarizePack,
   toCatalogEntry,
   type InstallationRecord,
@@ -56,6 +59,10 @@ export interface KnowledgePackageCatalogEntry extends StarterPackCatalogEntry {
   dependsOn: string[];
   compatible: boolean;
   incompatibilityReasons: string[];
+  /** FEATURE-003.3 — estado del ciclo de vida de distribución. */
+  lifecycleState: string;
+  /** Sólo los paquetes publicados pueden instalarse. */
+  distributable: boolean;
 }
 
 export interface InstallStarterPackResult {
@@ -111,6 +118,8 @@ function toEntry(
     dependsOn: descriptor.dependencies.map((d) => d.packageId),
     compatible: plan.ok,
     incompatibilityReasons: plan.ok ? [] : plan.errors,
+    lifecycleState: starterPackLifecycleState(descriptor.id, descriptor.version) ?? descriptor.status,
+    distributable: isStarterPackDistributable(descriptor.id, descriptor.version),
   };
 }
 
@@ -158,6 +167,15 @@ export async function installStarterPack(
 
   // El repositorio valida compatibilidad y resuelve las dependencias: si algo
   // no encaja, la instalación no empieza y la base de datos no se toca.
+  // FEATURE-003.3: sólo se distribuye lo publicado. El repositorio comprueba
+  // ciclo de vida, compatibilidad y dependencias antes de tocar la base de datos.
+  if (!isStarterPackDistributable(descriptor.id, descriptor.version)) {
+    throw new Error(
+      `El paquete "${descriptor.id}" está en estado "${
+        starterPackLifecycleState(descriptor.id, descriptor.version) ?? descriptor.status
+      }" y todavía no es distribuible.`,
+    );
+  }
   const resolution = resolveInstallOrder(descriptor.id, descriptor.version);
   if (!resolution.ok) throw new Error(resolution.errors.join(" "));
 
@@ -207,4 +225,9 @@ export async function installStarterPack(
   ) as InstallStarterPackResult;
 
   return result;
+}
+
+/** Historial append-only de transiciones de ciclo de vida (FEATURE-003.3). */
+export function listPackageLifecycleHistory(packId?: string, version?: string) {
+  return starterPackLifecycleHistory(packId, version);
 }
