@@ -13,12 +13,15 @@ import {
 /* ----------------------------------- Equipos ---------------------------------- */
 
 export const listTeams = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  // El listado se acota al SportSpace activo (FEATURE-002.5): RLS delimita lo
+  // accesible, el contexto delimita lo visible en la sesión.
+  .middleware([requireApplicationContext])
   .handler(async ({ context }) =>
     unwrap(
       await context.supabase
         .from("teams")
         .select("id, name, category, status, sport_id, owner_id, sport_space_id, sports(name), players(count)")
+        .eq("sport_space_id", context.sportSpaceId)
         .order("name"),
     ),
   );
@@ -64,12 +67,13 @@ export const updateTeam = createServerFn({ method: "POST" })
 /* ---------------------------------- Jugadores --------------------------------- */
 
 export const listPlayers = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .handler(async ({ context }) =>
     unwrap(
       await context.supabase
         .from("players")
         .select("id, full_name, birth_date, status, team_id, owner_id, sport_space_id, teams(name)")
+        .eq("sport_space_id", context.sportSpaceId)
         .order("full_name"),
     ),
   );
