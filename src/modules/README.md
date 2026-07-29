@@ -9,6 +9,7 @@ routes/            Rutas y pantallas (Fase 0: mínimas y temporales)
 lib/*.functions.ts Server functions (RPC tipado hacia el backend)
 modules/           Dominio y aplicación, sin React ni acceso directo a datos
   identity/          Usuario, perfil y roles
+  sport-space/       Agregados SportSpace y Membership (bounded context)
   metrics/domain/    Motor de métricas (capa pura)
 integrations/      Clientes generados de la plataforma (no editar)
 ```
