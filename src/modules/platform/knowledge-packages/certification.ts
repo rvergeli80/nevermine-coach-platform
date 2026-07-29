@@ -101,8 +101,11 @@ export function certifyPackage(
       skipped: true,
     });
   } else {
+    // El estado de distribución lo gobierna el ciclo de vida, no la
+    // compatibilidad: aquí sólo se comprueba producto, versión y Engines.
+    const candidate = { ...descriptor, status: "published" as const };
     const errors = hosts.flatMap((host) => {
-      const result = checkCompatibility(descriptor, host);
+      const result = checkCompatibility(candidate, host);
       return result.ok ? [] : result.errors;
     });
     checks.push({
