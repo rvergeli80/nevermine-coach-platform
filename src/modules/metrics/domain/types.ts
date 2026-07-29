@@ -22,6 +22,12 @@ export interface Sport {
   code: string;
   name: string;
   status: EntityStatus;
+  /**
+   * FEATURE-002.3 (Dual Write): SportSpace propietario, en transición.
+   * Se sincroniza automáticamente con `ownerId`; la autorización sigue
+   * basándose en `ownerId` hasta FEATURE-002.4.
+   */
+  sportSpaceId?: string | null;
 }
 
 export interface MetricCatalog {
@@ -33,6 +39,12 @@ export interface MetricCatalog {
   name: string;
   description: string | null;
   status: EntityStatus;
+  /**
+   * FEATURE-002.3 (Dual Write): SportSpace propietario, en transición.
+   * Se sincroniza automáticamente con `ownerId`; la autorización sigue
+   * basándose en `ownerId` hasta FEATURE-002.4.
+   */
+  sportSpaceId?: string | null;
 }
 
 export interface CatalogVersion {
