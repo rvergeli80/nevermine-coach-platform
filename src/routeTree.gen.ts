@@ -18,6 +18,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
 import { Route as AuthenticatedAppTemporadasRouteImport } from './routes/_authenticated/app/temporadas'
+import { Route as AuthenticatedAppSportspacesRouteImport } from './routes/_authenticated/app/sportspaces'
 import { Route as AuthenticatedAppPacksRouteImport } from './routes/_authenticated/app/packs'
 import { Route as AuthenticatedAppJugadoresRouteImport } from './routes/_authenticated/app/jugadores'
 import { Route as AuthenticatedAppEquiposRouteImport } from './routes/_authenticated/app/equipos'
@@ -73,6 +74,12 @@ const AuthenticatedAppTemporadasRoute =
   AuthenticatedAppTemporadasRouteImport.update({
     id: '/temporadas',
     path: '/temporadas',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppSportspacesRoute =
+  AuthenticatedAppSportspacesRouteImport.update({
+    id: '/sportspaces',
+    path: '/sportspaces',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
 const AuthenticatedAppPacksRoute = AuthenticatedAppPacksRouteImport.update({
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/app/equipos': typeof AuthenticatedAppEquiposRoute
   '/app/jugadores': typeof AuthenticatedAppJugadoresRoute
   '/app/packs': typeof AuthenticatedAppPacksRoute
+  '/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -159,6 +167,7 @@ export interface FileRoutesByTo {
   '/app/equipos': typeof AuthenticatedAppEquiposRoute
   '/app/jugadores': typeof AuthenticatedAppJugadoresRoute
   '/app/packs': typeof AuthenticatedAppPacksRoute
+  '/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -180,6 +189,7 @@ export interface FileRoutesById {
   '/_authenticated/app/equipos': typeof AuthenticatedAppEquiposRoute
   '/_authenticated/app/jugadores': typeof AuthenticatedAppJugadoresRoute
   '/_authenticated/app/packs': typeof AuthenticatedAppPacksRoute
+  '/_authenticated/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
   '/_authenticated/app/temporadas': typeof AuthenticatedAppTemporadasRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/app/equipos'
     | '/app/jugadores'
     | '/app/packs'
+    | '/app/sportspaces'
     | '/app/temporadas'
     | '/app/'
     | '/app/catalogos/$catalogId'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/app/equipos'
     | '/app/jugadores'
     | '/app/packs'
+    | '/app/sportspaces'
     | '/app/temporadas'
     | '/app'
     | '/app/catalogos/$catalogId'
@@ -239,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/equipos'
     | '/_authenticated/app/jugadores'
     | '/_authenticated/app/packs'
+    | '/_authenticated/app/sportspaces'
     | '/_authenticated/app/temporadas'
     | '/_authenticated/app/'
     | '/_authenticated/app/catalogos/$catalogId'
@@ -321,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTemporadasRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/sportspaces': {
+      id: '/_authenticated/app/sportspaces'
+      path: '/sportspaces'
+      fullPath: '/app/sportspaces'
+      preLoaderRoute: typeof AuthenticatedAppSportspacesRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/app/packs': {
       id: '/_authenticated/app/packs'
       path: '/packs'
@@ -393,6 +413,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppEquiposRoute: typeof AuthenticatedAppEquiposRoute
   AuthenticatedAppJugadoresRoute: typeof AuthenticatedAppJugadoresRoute
   AuthenticatedAppPacksRoute: typeof AuthenticatedAppPacksRoute
+  AuthenticatedAppSportspacesRoute: typeof AuthenticatedAppSportspacesRoute
   AuthenticatedAppTemporadasRoute: typeof AuthenticatedAppTemporadasRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppCatalogosCatalogIdRoute: typeof AuthenticatedAppCatalogosCatalogIdRoute
@@ -405,6 +426,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppEquiposRoute: AuthenticatedAppEquiposRoute,
   AuthenticatedAppJugadoresRoute: AuthenticatedAppJugadoresRoute,
   AuthenticatedAppPacksRoute: AuthenticatedAppPacksRoute,
+  AuthenticatedAppSportspacesRoute: AuthenticatedAppSportspacesRoute,
   AuthenticatedAppTemporadasRoute: AuthenticatedAppTemporadasRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppCatalogosCatalogIdRoute:
