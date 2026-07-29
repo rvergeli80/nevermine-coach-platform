@@ -4,6 +4,7 @@ import {
   type SportSpace,
   type SportSpaceType,
 } from "./types";
+import type { Membership } from "./membership-types";
 
 /**
  * Invariantes del agregado SportSpace. Capa pura y testeable: la persistencia
