@@ -931,6 +931,130 @@ export type Database = {
           },
         ]
       }
+      starter_pack_installation_events: {
+        Row: {
+          action: Database["public"]["Enums"]["starter_pack_installation_action"]
+          actor_id: string | null
+          catalog_version_id: string | null
+          created_at: string
+          from_version: string | null
+          id: string
+          installation_id: string | null
+          message: string | null
+          pack_id: string
+          sport_space_id: string
+          status: Database["public"]["Enums"]["starter_pack_installation_status"]
+          to_version: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["starter_pack_installation_action"]
+          actor_id?: string | null
+          catalog_version_id?: string | null
+          created_at?: string
+          from_version?: string | null
+          id?: string
+          installation_id?: string | null
+          message?: string | null
+          pack_id: string
+          sport_space_id: string
+          status: Database["public"]["Enums"]["starter_pack_installation_status"]
+          to_version: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["starter_pack_installation_action"]
+          actor_id?: string | null
+          catalog_version_id?: string | null
+          created_at?: string
+          from_version?: string | null
+          id?: string
+          installation_id?: string | null
+          message?: string | null
+          pack_id?: string
+          sport_space_id?: string
+          status?: Database["public"]["Enums"]["starter_pack_installation_status"]
+          to_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "starter_pack_installation_events_installation_id_fkey"
+            columns: ["installation_id"]
+            isOneToOne: false
+            referencedRelation: "starter_pack_installations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "starter_pack_installation_events_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      starter_pack_installations: {
+        Row: {
+          catalog_id: string | null
+          catalog_version_id: string | null
+          id: string
+          installed_at: string
+          installed_by: string | null
+          pack_checksum: string
+          pack_id: string
+          pack_version: string
+          sport_space_id: string
+          status: Database["public"]["Enums"]["starter_pack_installation_status"]
+          updated_at: string
+        }
+        Insert: {
+          catalog_id?: string | null
+          catalog_version_id?: string | null
+          id?: string
+          installed_at?: string
+          installed_by?: string | null
+          pack_checksum: string
+          pack_id: string
+          pack_version: string
+          sport_space_id: string
+          status?: Database["public"]["Enums"]["starter_pack_installation_status"]
+          updated_at?: string
+        }
+        Update: {
+          catalog_id?: string | null
+          catalog_version_id?: string | null
+          id?: string
+          installed_at?: string
+          installed_by?: string | null
+          pack_checksum?: string
+          pack_id?: string
+          pack_version?: string
+          sport_space_id?: string
+          status?: Database["public"]["Enums"]["starter_pack_installation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "starter_pack_installations_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "metric_catalogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "starter_pack_installations_catalog_version_id_fkey"
+            columns: ["catalog_version_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "starter_pack_installations_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           category: string | null
@@ -1252,6 +1376,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      install_starter_pack: {
+        Args: { _force?: boolean; _plan: Json; _sport_space_id: string }
+        Returns: Json
+      }
       is_sport_space_member: {
         Args: { _sport_space_id: string }
         Returns: boolean
@@ -1285,6 +1413,8 @@ export type Database = {
         | "personal"
         | "company"
         | "other"
+      starter_pack_installation_action: "install" | "reinstall" | "update"
+      starter_pack_installation_status: "installed" | "failed"
       subject_scope: "individual" | "collective"
       subject_type: "player" | "team"
       valuation_status: "current" | "superseded"
@@ -1431,6 +1561,8 @@ export const Constants = {
         "company",
         "other",
       ],
+      starter_pack_installation_action: ["install", "reinstall", "update"],
+      starter_pack_installation_status: ["installed", "failed"],
       subject_scope: ["individual", "collective"],
       subject_type: ["player", "team"],
       valuation_status: ["current", "superseded"],
