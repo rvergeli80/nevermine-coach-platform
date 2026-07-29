@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { requireApplicationContext } from "@/lib/application-context-middleware";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
 import { checkVersionFormulas } from "@/modules/config/formula-rules";
@@ -85,13 +86,14 @@ export const listSeasons = createServerFn({ method: "GET" })
   );
 
 export const createSeason = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => createSeasonSchema.parse(data))
   .handler(async ({ data, context }) =>
     unwrap(
       await context.supabase
         .from("seasons")
         .insert({
+          sport_space_id: context.sportSpaceId,
           owner_id: context.userId,
           name: data.name,
           starts_on: data.startsOn ?? null,
@@ -135,13 +137,18 @@ export const listCompetitions = createServerFn({ method: "GET" })
   );
 
 export const createCompetition = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => createCompetitionSchema.parse(data))
   .handler(async ({ data, context }) =>
     unwrap(
       await context.supabase
         .from("competitions")
-        .insert({ owner_id: context.userId, name: data.name, season_id: data.seasonId })
+        .insert({
+          sport_space_id: context.sportSpaceId,
+          owner_id: context.userId,
+          name: data.name,
+          season_id: data.seasonId,
+        })
         .select("id")
         .single(),
     ),
@@ -188,13 +195,14 @@ export const getCatalog = createServerFn({ method: "GET" })
   );
 
 export const createCatalog = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => createCatalogSchema.parse(data))
   .handler(async ({ data, context }) =>
     unwrap(
       await context.supabase
         .from("metric_catalogs")
         .insert({
+          sport_space_id: context.sportSpaceId,
           owner_id: context.userId,
           sport_id: data.sportId,
           code: data.code,

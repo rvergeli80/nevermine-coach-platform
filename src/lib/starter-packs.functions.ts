@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireApplicationContext } from "@/lib/application-context-middleware";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
 import { checkFormula, type CatalogMetricRef, type ExistingFormula } from "@/modules/config/formula-rules";
@@ -19,7 +20,7 @@ export const listStarterPacks = createServerFn({ method: "GET" })
  * perfil de valoración y pesos. Todo queda en borrador: el usuario revisa y publica.
  */
 export const applyStarterPack = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => applyPackSchema.parse(data))
   .handler(async ({ data, context }) => {
     const pack = findStarterPack(data.packId);
@@ -30,7 +31,7 @@ export const applyStarterPack = createServerFn({ method: "POST" })
       throw new Error(`El pack no es válido: ${packIssues.join(" ")}`);
     }
 
-    const { supabase, userId } = context;
+    const { supabase, userId, sportSpaceId } = context;
 
     // 1. Deporte: se reutiliza el visible con el mismo código (global o propio).
     const existingSport = unwrap(
@@ -48,7 +49,12 @@ export const applyStarterPack = createServerFn({ method: "POST" })
         unwrap(
           await supabase
             .from("sports")
-            .insert({ code: pack.sport.code, name: pack.sport.name, owner_id: userId })
+            .insert({
+              code: pack.sport.code,
+              name: pack.sport.name,
+              sport_space_id: sportSpaceId,
+              owner_id: userId,
+            })
             .select("id")
             .single(),
         ) as { id: string }
@@ -73,6 +79,7 @@ export const applyStarterPack = createServerFn({ method: "POST" })
       await supabase
         .from("metric_catalogs")
         .insert({
+          sport_space_id: sportSpaceId,
           owner_id: userId,
           sport_id: sportId,
           code: pack.catalog.code,
