@@ -3,7 +3,7 @@
  *
  * Capa de dominio pura: sin dependencias de Supabase, React ni infraestructura.
  * El SportSpace es la futura unidad de aislamiento organizativo; en esta Feature
- * sólo se introduce la estructura, sin sustituir todavía el modelo `owner_id`.
+ * FEATURE-002.4: es la unidad de aislamiento y de autorización del sistema.
  */
 
 export type SportSpaceType =

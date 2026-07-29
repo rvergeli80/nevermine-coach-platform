@@ -6,9 +6,10 @@ import { createSportSpaceSchema, sportSpaceIdSchema } from "@/modules/sport-spac
 import type { SportSpace } from "@/modules/sport-space/types";
 
 /* ------------------------------- SportSpaces ------------------------------- */
-/* FEATURE-002.1: sólo alta y lectura. No sustituye todavía a owner_id.        */
-/* `created_by` registra el usuario autenticado que ejecutó la creación; no    */
-/* implica propiedad (la propiedad llegará con Membership + rol Owner).        */
+/* FEATURE-002.4: alta y lectura. La autorización es exclusivamente RLS sobre  */
+/* Membership; estas funciones no filtran por propiedad. `created_by` es un    */
+/* dato histórico de auditoría (sólo habilita la ventana de arranque previa a  */
+/* la primera membresía).                                                      */
 
 const COLUMNS = "id, slug, name, description, type, status, created_by, created_at, updated_at";
 

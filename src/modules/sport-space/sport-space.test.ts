@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  canReadSportSpace,
+  canAccessSportSpace,
+  canAdminSportSpace,
   checkNewSportSpace,
   isSportSpaceOperable,
   slugifySportSpaceName,
@@ -74,9 +75,29 @@ describe("SportSpace — estado y autorización", () => {
     expect(isSportSpaceOperable({ status: "archived" })).toBe(false);
   });
 
-  it("aísla la lectura por creador mientras no exista Membership", () => {
-    expect(canReadSportSpace({ createdBy: "user-a" }, "user-a")).toBe(true);
-    expect(canReadSportSpace({ createdBy: "user-a" }, "user-b")).toBe(false);
+  it("autoriza el acceso únicamente por Membership (FEATURE-002.4)", () => {
+    const memberships = [
+      { sportSpaceId: "space-1", userId: "user-a", role: "owner" as const },
+      { sportSpaceId: "space-1", userId: "user-b", role: "coach" as const },
+    ];
+    expect(canAccessSportSpace(memberships, "space-1", "user-a")).toBe(true);
+    expect(canAccessSportSpace(memberships, "space-1", "user-b")).toBe(true);
+    // Creador sin membresía: sin acceso.
+    expect(canAccessSportSpace(memberships, "space-1", "user-c")).toBe(false);
+    // Membresía en otro SportSpace: sin acceso.
+    expect(canAccessSportSpace(memberships, "space-2", "user-a")).toBe(false);
+    // Pérdida de membresía: acceso revocado de inmediato.
+    expect(canAccessSportSpace([memberships[0]], "space-1", "user-b")).toBe(false);
+  });
+
+  it("reserva la administración al rol Owner", () => {
+    const memberships = [
+      { sportSpaceId: "space-1", userId: "user-a", role: "owner" as const },
+      { sportSpaceId: "space-1", userId: "user-b", role: "coach" as const },
+    ];
+    expect(canAdminSportSpace(memberships, "space-1", "user-a")).toBe(true);
+    expect(canAdminSportSpace(memberships, "space-1", "user-b")).toBe(false);
+    expect(canAdminSportSpace(memberships, "space-2", "user-a")).toBe(false);
   });
 
   it("normaliza tipos desconocidos al valor por defecto", () => {

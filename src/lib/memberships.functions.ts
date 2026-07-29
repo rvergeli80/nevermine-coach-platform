@@ -11,9 +11,9 @@ import {
 import type { Membership } from "@/modules/sport-space/membership-types";
 
 /* ------------------------------- Membership ------------------------------- */
-/* FEATURE-002.2: pertenencia usuario ↔ SportSpace. No sustituye todavía a     */
-/* `owner_id`: el resto de la aplicación sigue autorizando por propiedad       */
-/* individual. Las invariantes (primer miembro Owner, último Owner protegido)  */
+/* FEATURE-002.4: la pertenencia usuario ↔ SportSpace es la única fuente de    */
+/* autorización, aplicada por RLS en base de datos.                            */
+/* Las invariantes (primer miembro Owner, último Owner protegido)              */
 /* están además garantizadas por triggers en base de datos.                    */
 
 const COLUMNS = "id, sport_space_id, user_id, role, created_at, updated_at";
