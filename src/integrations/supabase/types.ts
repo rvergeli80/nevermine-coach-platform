@@ -1207,6 +1207,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_competition: {
+        Args: { _competition_id: string }
+        Returns: boolean
+      }
+      can_access_context: { Args: { _context_id: string }; Returns: boolean }
+      can_access_player: { Args: { _player_id: string }; Returns: boolean }
+      can_access_season: { Args: { _season_id: string }; Returns: boolean }
+      can_access_space: { Args: { _sport_space_id: string }; Returns: boolean }
+      can_access_subject: {
+        Args: {
+          _subject_id: string
+          _subject_type: Database["public"]["Enums"]["subject_type"]
+        }
+        Returns: boolean
+      }
+      can_access_team: { Args: { _team_id: string }; Returns: boolean }
+      can_admin_space: { Args: { _sport_space_id: string }; Returns: boolean }
       can_bootstrap_sport_space_membership: {
         Args: { _sport_space_id: string }
         Returns: boolean
@@ -1243,18 +1260,6 @@ export type Database = {
         Args: { _sport_space_id: string }
         Returns: boolean
       }
-      owns_competition: { Args: { _competition_id: string }; Returns: boolean }
-      owns_context: { Args: { _context_id: string }; Returns: boolean }
-      owns_player: { Args: { _player_id: string }; Returns: boolean }
-      owns_season: { Args: { _season_id: string }; Returns: boolean }
-      owns_subject: {
-        Args: {
-          _subject_id: string
-          _subject_type: Database["public"]["Enums"]["subject_type"]
-        }
-        Returns: boolean
-      }
-      owns_team: { Args: { _team_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "coach"

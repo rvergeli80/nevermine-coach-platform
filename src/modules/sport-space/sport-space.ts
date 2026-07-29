@@ -4,6 +4,7 @@ import {
   type SportSpace,
   type SportSpaceType,
 } from "./types";
+import type { Membership } from "./membership-types";
 
 /**
  * Invariantes del agregado SportSpace. Capa pura y testeable: la persistencia
@@ -64,15 +65,31 @@ export function isSportSpaceOperable(space: Pick<SportSpace, "status">): boolean
 }
 
 /**
- * Autorización de lectura del agregado. En FEATURE-002.1 todavía no existe
- * Membership (FEATURE-002.2), por lo que el acceso se resuelve provisionalmente
- * por el usuario que ejecutó la creación (`createdBy`). Esto es una regla de
- * acceso temporal, NO una declaración de propiedad: la propiedad vendrá
- * determinada exclusivamente por Membership con rol Owner.
+ * Autorización de acceso al agregado (FEATURE-002.4): un usuario accede a un
+ * SportSpace **si y sólo si** tiene Membership en él. `createdBy` es un dato
+ * histórico y no interviene en ninguna decisión de seguridad.
+ *
+ * Esta función expresa la regla en el dominio; la barrera efectiva es RLS.
  */
-export function canReadSportSpace(space: Pick<SportSpace, "createdBy">, userId: string): boolean {
-  return space.createdBy === userId;
+export function canAccessSportSpace(
+  memberships: readonly Pick<Membership, "sportSpaceId" | "userId">[],
+  sportSpaceId: string,
+  userId: string,
+): boolean {
+  return memberships.some((m) => m.sportSpaceId === sportSpaceId && m.userId === userId);
 }
+
+/** Sólo un Owner puede administrar el SportSpace (regla de negocio, no de acceso). */
+export function canAdminSportSpace(
+  memberships: readonly Pick<Membership, "sportSpaceId" | "userId" | "role">[],
+  sportSpaceId: string,
+  userId: string,
+): boolean {
+  return memberships.some(
+    (m) => m.sportSpaceId === sportSpaceId && m.userId === userId && m.role === "owner",
+  );
+}
+
 
 export function sportSpaceTypeOrDefault(value: string | null | undefined): SportSpaceType {
   return SPORT_SPACE_TYPES.includes(value as SportSpaceType) ? (value as SportSpaceType) : "club";
