@@ -11,7 +11,6 @@
 export * from "./types";
 export * from "./rules";
 export * from "./version";
-export * from "./engine";
 export * from "./install-plan";
 export * from "./installation";
 export * from "./knowledge-package";
