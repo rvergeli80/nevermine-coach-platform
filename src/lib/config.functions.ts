@@ -31,7 +31,7 @@ export const listSports = createServerFn({ method: "GET" })
     unwrap(
       await context.supabase
         .from("sports")
-        .select("id, code, name, status, owner_id")
+        .select("id, code, name, status, owner_id, sport_space_id")
         .order("name"),
     ),
   );
@@ -71,7 +71,7 @@ export const listSeasons = createServerFn({ method: "GET" })
     unwrap(
       await context.supabase
         .from("seasons")
-        .select("id, name, starts_on, ends_on, status")
+        .select("id, name, starts_on, ends_on, status, owner_id, sport_space_id")
         .order("starts_on", { ascending: false, nullsFirst: false })
         .order("name"),
     ),
@@ -122,7 +122,7 @@ export const listCompetitions = createServerFn({ method: "GET" })
     unwrap(
       await context.supabase
         .from("competitions")
-        .select("id, name, status, season_id, seasons(name)")
+        .select("id, name, status, season_id, owner_id, sport_space_id, seasons(name)")
         .order("name"),
     ),
   );
@@ -162,7 +162,7 @@ export const listCatalogs = createServerFn({ method: "GET" })
     unwrap(
       await context.supabase
         .from("metric_catalogs")
-        .select("id, code, name, description, status, sport_id, owner_id, sports(name)")
+        .select("id, code, name, description, status, sport_id, owner_id, sport_space_id, sports(name)")
         .order("name"),
     ),
   );
@@ -174,7 +174,7 @@ export const getCatalog = createServerFn({ method: "GET" })
     unwrap(
       await context.supabase
         .from("metric_catalogs")
-        .select("id, code, name, description, status, sport_id, owner_id, sports(name)")
+        .select("id, code, name, description, status, sport_id, owner_id, sport_space_id, sports(name)")
         .eq("id", data.catalogId)
         .maybeSingle(),
     ),

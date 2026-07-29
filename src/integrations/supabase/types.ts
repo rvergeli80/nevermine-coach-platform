@@ -27,6 +27,7 @@ export type Database = {
           id: string
           owner_id: string | null
           reason: string | null
+          sport_space_id: string | null
         }
         Insert: {
           action: string
@@ -40,6 +41,7 @@ export type Database = {
           id?: string
           owner_id?: string | null
           reason?: string | null
+          sport_space_id?: string | null
         }
         Update: {
           action?: string
@@ -53,6 +55,7 @@ export type Database = {
           id?: string
           owner_id?: string | null
           reason?: string | null
+          sport_space_id?: string | null
         }
         Relationships: [
           {
@@ -60,6 +63,13 @@ export type Database = {
             columns: ["catalog_version_id"]
             isOneToOne: false
             referencedRelation: "catalog_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_log_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
             referencedColumns: ["id"]
           },
         ]
@@ -160,6 +170,7 @@ export type Database = {
           name: string
           owner_id: string
           season_id: string | null
+          sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
         }
         Insert: {
@@ -168,6 +179,7 @@ export type Database = {
           name: string
           owner_id: string
           season_id?: string | null
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
         }
         Update: {
@@ -176,6 +188,7 @@ export type Database = {
           name?: string
           owner_id?: string
           season_id?: string | null
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
         }
         Relationships: [
@@ -184,6 +197,13 @@ export type Database = {
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitions_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
             referencedColumns: ["id"]
           },
         ]
@@ -232,6 +252,7 @@ export type Database = {
           name: string
           owner_id: string | null
           sport_id: string
+          sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
         }
@@ -243,6 +264,7 @@ export type Database = {
           name: string
           owner_id?: string | null
           sport_id: string
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -254,6 +276,7 @@ export type Database = {
           name?: string
           owner_id?: string | null
           sport_id?: string
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -263,6 +286,13 @@ export type Database = {
             columns: ["sport_id"]
             isOneToOne: false
             referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_catalogs_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
             referencedColumns: ["id"]
           },
         ]
@@ -370,6 +400,7 @@ export type Database = {
           recorded_at: string
           recorded_by: string | null
           source: Database["public"]["Enums"]["data_source"]
+          sport_space_id: string | null
           subject_id: string
           subject_type: Database["public"]["Enums"]["subject_type"]
         }
@@ -383,6 +414,7 @@ export type Database = {
           recorded_at?: string
           recorded_by?: string | null
           source?: Database["public"]["Enums"]["data_source"]
+          sport_space_id?: string | null
           subject_id: string
           subject_type: Database["public"]["Enums"]["subject_type"]
         }
@@ -396,6 +428,7 @@ export type Database = {
           recorded_at?: string
           recorded_by?: string | null
           source?: Database["public"]["Enums"]["data_source"]
+          sport_space_id?: string | null
           subject_id?: string
           subject_type?: Database["public"]["Enums"]["subject_type"]
         }
@@ -412,6 +445,13 @@ export type Database = {
             columns: ["metric_id"]
             isOneToOne: false
             referencedRelation: "metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_values_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
             referencedColumns: ["id"]
           },
         ]
@@ -578,6 +618,7 @@ export type Database = {
           occurred_at: string
           owner_id: string
           season_id: string | null
+          sport_space_id: string | null
           team_id: string | null
           updated_at: string
         }
@@ -592,6 +633,7 @@ export type Database = {
           occurred_at?: string
           owner_id: string
           season_id?: string | null
+          sport_space_id?: string | null
           team_id?: string | null
           updated_at?: string
         }
@@ -606,6 +648,7 @@ export type Database = {
           occurred_at?: string
           owner_id?: string
           season_id?: string | null
+          sport_space_id?: string | null
           team_id?: string | null
           updated_at?: string
         }
@@ -639,6 +682,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "observation_contexts_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "observation_contexts_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -654,6 +704,7 @@ export type Database = {
           full_name: string
           id: string
           owner_id: string
+          sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
           team_id: string | null
           updated_at: string
@@ -664,6 +715,7 @@ export type Database = {
           full_name: string
           id?: string
           owner_id: string
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           team_id?: string | null
           updated_at?: string
@@ -674,11 +726,19 @@ export type Database = {
           full_name?: string
           id?: string
           owner_id?: string
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           team_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "players_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "players_team_id_fkey"
             columns: ["team_id"]
@@ -722,6 +782,7 @@ export type Database = {
           id: string
           name: string
           owner_id: string
+          sport_space_id: string | null
           starts_on: string | null
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
@@ -732,6 +793,7 @@ export type Database = {
           id?: string
           name: string
           owner_id: string
+          sport_space_id?: string | null
           starts_on?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
@@ -742,11 +804,20 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string
+          sport_space_id?: string | null
           starts_on?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "seasons_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sport_space_members: {
         Row: {
@@ -826,6 +897,7 @@ export type Database = {
           id: string
           name: string
           owner_id: string | null
+          sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
         }
@@ -835,6 +907,7 @@ export type Database = {
           id?: string
           name: string
           owner_id?: string | null
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -844,10 +917,19 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string | null
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sports_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teams: {
         Row: {
@@ -857,6 +939,7 @@ export type Database = {
           name: string
           owner_id: string
           sport_id: string
+          sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
         }
@@ -867,6 +950,7 @@ export type Database = {
           name: string
           owner_id: string
           sport_id: string
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -877,6 +961,7 @@ export type Database = {
           name?: string
           owner_id?: string
           sport_id?: string
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -886,6 +971,13 @@ export type Database = {
             columns: ["sport_id"]
             isOneToOne: false
             referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
             referencedColumns: ["id"]
           },
         ]
@@ -1011,6 +1103,7 @@ export type Database = {
           profile_id: string
           score: number
           season_id: string | null
+          sport_space_id: string | null
           status: Database["public"]["Enums"]["valuation_status"]
           subject_id: string
           subject_type: Database["public"]["Enums"]["subject_type"]
@@ -1030,6 +1123,7 @@ export type Database = {
           profile_id: string
           score: number
           season_id?: string | null
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["valuation_status"]
           subject_id: string
           subject_type: Database["public"]["Enums"]["subject_type"]
@@ -1049,6 +1143,7 @@ export type Database = {
           profile_id?: string
           score?: number
           season_id?: string | null
+          sport_space_id?: string | null
           status?: Database["public"]["Enums"]["valuation_status"]
           subject_id?: string
           subject_type?: Database["public"]["Enums"]["subject_type"]
@@ -1092,6 +1187,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "valuations_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "valuations_superseded_by_fkey"
             columns: ["superseded_by"]
             isOneToOne: false
@@ -1118,6 +1220,14 @@ export type Database = {
       can_read_version: { Args: { _version_id: string }; Returns: boolean }
       can_use_sport: { Args: { _sport_id: string }; Returns: boolean }
       can_write_catalog: { Args: { _catalog_id: string }; Returns: boolean }
+      ensure_personal_sport_space: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      ensure_sport_space_owner: {
+        Args: { _sport_space_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
