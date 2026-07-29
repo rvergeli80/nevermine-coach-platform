@@ -212,16 +212,16 @@ export class KnowledgePackageRepository {
   }
 
 
-  /** Una versión concreta, o la última si no se indica. */
+  /** Una versión concreta, o la última registrada si no se indica. */
   get(packageId: string, version?: string): KnowledgePackageDescriptor | undefined {
-    if (!version) return this.latest(packageId);
+    if (!version) return this.latestAny(packageId);
     return (this.byId.get(packageId) ?? []).find((v) => v.version === version);
   }
 
-  /** Catálogo completo: la última versión de cada paquete. */
+  /** Catálogo completo: la última versión registrada de cada paquete. */
   list(): KnowledgePackageDescriptor[] {
     return [...this.byId.keys()]
-      .map((id) => this.latest(id))
+      .map((id) => this.latestAny(id))
       .filter((p): p is KnowledgePackageDescriptor => Boolean(p))
       .sort((a, b) => a.name.localeCompare(b.name, "es"));
   }
@@ -239,9 +239,11 @@ export class KnowledgePackageRepository {
       : this.list();
 
     return candidates.filter((pkg) => {
+      // El estado vigente lo dicta el ciclo de vida, no el descriptor.
+      const state = this.stateOf(pkg.id, pkg.version) ?? pkg.status;
       if (query.kind && pkg.kind !== query.kind) return false;
       if (origins && !origins.includes(pkg.origin)) return false;
-      if (statuses && !statuses.includes(pkg.status)) return false;
+      if (statuses ? !statuses.includes(state) : state === "archived") return false;
       if (query.domain && pkg.domain !== query.domain) return false;
       if (query.category && pkg.category !== query.category) return false;
       if (query.tag && !pkg.tags.includes(query.tag)) return false;
@@ -258,9 +260,9 @@ export class KnowledgePackageRepository {
   }
 
   /**
-   * Plan de instalación: valida compatibilidad del paquete y de todas sus
-   * dependencias y devuelve el orden en que deben instalarse.
-   * Un solo incompatible aborta el plan completo.
+   * Plan de instalación: sólo paquetes **publicados**, compatibles y con todas
+   * sus dependencias resueltas. Un solo incompatible —o un solo paquete no
+   * distribuible— aborta el plan completo.
    */
   resolveInstall(
     packageId: string,
@@ -272,10 +274,17 @@ export class KnowledgePackageRepository {
       return { ok: false, errors: [`El paquete "${packageId}" no está en el repositorio.`] };
     }
 
+    // Las dependencias se resuelven únicamente sobre versiones publicadas.
     const resolved = resolveDependencies(root, (id) => this.latest(id));
     if (!resolved.ok) return { ok: false, errors: resolved.errors };
 
     const errors = resolved.order.flatMap((pkg) => {
+      const state = this.stateOf(pkg.id, pkg.version) ?? pkg.status;
+      if (!isDistributableState(state)) {
+        return [
+          `El paquete "${pkg.id}@${pkg.version}" está en estado "${state}" y no es distribuible: sólo se instalan paquetes publicados.`,
+        ];
+      }
       const check = checkCompatibility(pkg, host);
       return check.ok ? [] : check.errors;
     });
@@ -287,6 +296,8 @@ export class KnowledgePackageRepository {
 
 export function createKnowledgePackageRepository(
   descriptors: readonly KnowledgePackageDescriptor[] = [],
+  options: { hosts?: readonly HostEnvironment[] } = {},
 ): KnowledgePackageRepository {
-  return new KnowledgePackageRepository(descriptors);
+  return new KnowledgePackageRepository(descriptors, options);
 }
+
