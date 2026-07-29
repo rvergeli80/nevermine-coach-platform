@@ -4,60 +4,20 @@ import {
   CONTEXT_EMPTY_MESSAGE,
   CONTEXT_FORBIDDEN_MESSAGE,
   resolveApplicationContext,
-  type ContextCandidate,
 } from "@/modules/application-context";
+import { loadContextCandidates } from "@/lib/application-context-repository";
 
 /**
- * FEATURE-002.5 — Capa de aplicación del contexto activo.
+ * FEATURE-002.5 — Capa de aplicación del contexto activo (canal HTTP).
  *
- * Aquí (y sólo aquí) vive el mecanismo de transporte del contexto: una cookie
- * de sesión. El dominio consume `ApplicationContext` y nunca conoce cookies,
- * cabeceras ni JWT.
+ * Aquí (y sólo aquí) vive el mecanismo de transporte del contexto web: una
+ * cookie de sesión. El dominio consume `ApplicationContext` y nunca conoce
+ * cookies, cabeceras ni JWT. MCP usa el mismo repositorio y las mismas reglas
+ * de resolución con otro transporte (FEATURE-002.6).
  */
 
-type SupabaseClient = {
-  from: (table: string) => any;
-};
-
-type MembershipRow = {
-  sport_space_id: string;
-  role: ContextCandidate["role"];
-  created_at: string;
-  sport_spaces: { name: string; slug: string; type: string; status: string } | null;
-};
-
-export interface AvailableSportSpace {
-  id: string;
-  name: string;
-  slug: string;
-  role: ContextCandidate["role"];
-}
-
-/** Memberships válidas del usuario, base de todo contexto posible. */
-export async function loadContextCandidates(supabase: SupabaseClient, userId: string) {
-  const { data, error } = await supabase
-    .from("sport_space_members")
-    .select("sport_space_id, role, created_at, sport_spaces(name, slug, type, status)")
-    .eq("user_id", userId)
-    .order("created_at");
-
-  if (error) throw new Error(error.message);
-
-  const rows = (data ?? []) as MembershipRow[];
-  const candidates: ContextCandidate[] = rows.map((row) => ({
-    sportSpaceId: row.sport_space_id,
-    role: row.role,
-    joinedAt: row.created_at,
-  }));
-  const spaces: AvailableSportSpace[] = rows.map((row) => ({
-    id: row.sport_space_id,
-    name: row.sport_spaces?.name ?? "SportSpace",
-    slug: row.sport_spaces?.slug ?? "",
-    role: row.role,
-  }));
-
-  return { candidates, spaces };
-}
+export { loadContextCandidates };
+export type { AvailableSportSpace } from "@/lib/application-context-repository";
 
 /**
  * Middleware de contexto: exige sesión y un SportSpace activo válido.
@@ -69,7 +29,7 @@ export const requireApplicationContext = createMiddleware({ type: "function" })
   .server(async ({ next, context }) => {
     const { readRequestedSportSpaceId } = await import("@/lib/application-context.server");
     const { candidates } = await loadContextCandidates(
-      context.supabase as unknown as SupabaseClient,
+      context.supabase as never,
       context.userId,
     );
     const resolution = resolveApplicationContext({
