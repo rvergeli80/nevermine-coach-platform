@@ -37,7 +37,7 @@ function StarterPacksPage() {
   const fetchPacks = useServerFn(listStarterPacks);
   const apply = useServerFn(applyStarterPack);
 
-  const packs = useQuery({ queryKey: ["starter-packs"], queryFn: () => fetchPacks({}) });
+  const packs = useQuery({ queryKey: ["starter-packs"], queryFn: () => fetchPacks({ data: {} }) });
 
   const mutation = useMutation({
     mutationFn: (input: { packId: string; force?: boolean }) => apply({ data: input }),

@@ -17,7 +17,17 @@ import {
 
 const installSchema = z.object({
   packId: z.string().min(1),
+  version: z.string().min(1).optional(),
   force: z.boolean().optional().default(false),
+});
+
+/** Filtros de descubrimiento del repositorio de Knowledge Packages. */
+const discoverySchema = z.object({
+  domain: z.string().min(1).optional(),
+  category: z.string().min(1).optional(),
+  version: z.string().min(1).optional(),
+  tag: z.string().min(1).optional(),
+  search: z.string().min(1).optional(),
 });
 const historySchema = z.object({ packId: z.string().min(1).optional().nullable() });
 
@@ -30,7 +40,8 @@ const asServiceContext = (context: {
 /** Catálogo oficial con el estado de instalación del SportSpace activo. */
 export const listStarterPacks = createServerFn({ method: "GET" })
   .middleware([requireApplicationContext])
-  .handler(async ({ context }) => listStarterPackCatalog(asServiceContext(context)));
+  .inputValidator((data: unknown) => discoverySchema.parse(data ?? {}))
+  .handler(async ({ data, context }) => listStarterPackCatalog(asServiceContext(context), data));
 
 /** Historial de instalaciones del SportSpace activo. */
 export const listStarterPackHistory = createServerFn({ method: "GET" })
