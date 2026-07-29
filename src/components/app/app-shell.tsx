@@ -58,6 +58,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Button>
         </div>
 
+        <SportSpaceSwitcher />
+
+
+
         <nav aria-label="Navegación principal" className="px-2 pb-3">
           <ul className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
             {NAV.map((item) => (
