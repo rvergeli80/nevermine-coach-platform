@@ -5,6 +5,8 @@
  * pertenece a la plataforma: no depende de Coach ni de ningún otro producto.
  */
 
+export * from "./lifecycle";
+export * from "./certification";
 export * from "./types";
 export * from "./integrity";
 export * from "./validation";
