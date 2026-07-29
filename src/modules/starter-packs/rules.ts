@@ -1,5 +1,5 @@
-import { checkFormula, type CatalogMetricRef, type ExistingFormula } from "../formula-rules";
-import { codeSchema, nameSchema } from "../schemas";
+import { checkFormula, type CatalogMetricRef, type ExistingFormula } from "../config/formula-rules";
+import { codeSchema, nameSchema } from "../config/schemas";
 import type { StarterPack } from "./types";
 
 /**

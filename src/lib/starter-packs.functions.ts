@@ -5,7 +5,7 @@ import { requireApplicationContext } from "@/lib/application-context-middleware"
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
 import { checkFormula, type CatalogMetricRef, type ExistingFormula } from "@/modules/config/formula-rules";
-import { checkStarterPack, findStarterPack, starterPacks, summarizePack } from "@/modules/config/starter-packs";
+import { checkStarterPack, findStarterPack, starterPacks, summarizePack } from "@/modules/starter-packs";
 
 const applyPackSchema = z.object({ packId: z.string().min(1) });
 
