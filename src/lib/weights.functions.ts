@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
+import { requireApplicationContext } from "@/lib/application-context-middleware";
+import {
+  listValuationProfilesService,
+  listWeightsService,
+} from "@/lib/services/weights.service";
 import { checkWeight, type WeightMetricRef, type WeightRow } from "@/modules/config/weight-rules";
 import {
   catalogIdSchema,
@@ -16,17 +21,9 @@ import {
 
 /** Perfiles de valoración del catálogo (V1: "Rendimiento General"). */
 export const listValuationProfiles = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => catalogIdSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("valuation_profiles")
-        .select("id, code, name, description, algorithm, status")
-        .eq("catalog_id", data.catalogId)
-        .order("code"),
-    ),
-  );
+  .handler(async ({ data, context }) => listValuationProfilesService(context, data));
 
 export const createValuationProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -84,18 +81,9 @@ async function loadDraft(
 
 /** Pesos de un perfil dentro de una versión, con datos de la métrica. */
 export const listWeights = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => listWeightsSchema.parse(data))
-  .handler(async ({ data, context }) => {
-    let query = context.supabase
-      .from("metric_weights")
-      .select(
-        "id, profile_id, metric_id, weight, sign, season_id, competition_id, metrics(code, name, nature, status)",
-      )
-      .eq("version_id", data.versionId);
-    if (data.profileId) query = query.eq("profile_id", data.profileId);
-    return unwrap(await query);
-  });
+  .handler(async ({ data, context }) => listWeightsService(context, data));
 
 /** Crea o actualiza el peso de una métrica para un perfil y ámbito, sólo en borrador. */
 export const upsertWeight = createServerFn({ method: "POST" })

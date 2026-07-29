@@ -3,6 +3,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireApplicationContext } from "@/lib/application-context-middleware";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
+import {
+  createSeasonService,
+  listCatalogsService,
+  listCompetitionsService,
+  listMetricsService,
+  listSeasonsService,
+} from "@/lib/services/config.service";
 import { checkVersionFormulas } from "@/modules/config/formula-rules";
 import { checkVersionWeights } from "@/modules/config/weight-rules";
 import type { FormulaNode } from "@/modules/metrics/domain";
@@ -74,35 +81,13 @@ export const updateSport = createServerFn({ method: "POST" })
 /* --------------------------------- Temporadas -------------------------------- */
 
 export const listSeasons = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) =>
-    unwrap(
-      await context.supabase
-        .from("seasons")
-        .select("id, name, starts_on, ends_on, status, owner_id, sport_space_id")
-        .order("starts_on", { ascending: false, nullsFirst: false })
-        .order("name"),
-    ),
-  );
+  .middleware([requireApplicationContext])
+  .handler(async ({ context }) => listSeasonsService(context));
 
 export const createSeason = createServerFn({ method: "POST" })
   .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => createSeasonSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("seasons")
-        .insert({
-          sport_space_id: context.sportSpaceId,
-          owner_id: context.userId,
-          name: data.name,
-          starts_on: data.startsOn ?? null,
-          ends_on: data.endsOn ?? null,
-        })
-        .select("id")
-        .single(),
-    ),
-  );
+  .handler(async ({ data, context }) => createSeasonService(context, data));
 
 export const updateSeason = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -126,15 +111,8 @@ export const updateSeason = createServerFn({ method: "POST" })
 /* -------------------------------- Competiciones ------------------------------- */
 
 export const listCompetitions = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) =>
-    unwrap(
-      await context.supabase
-        .from("competitions")
-        .select("id, name, status, season_id, owner_id, sport_space_id, seasons(name)")
-        .order("name"),
-    ),
-  );
+  .middleware([requireApplicationContext])
+  .handler(async ({ context }) => listCompetitionsService(context));
 
 export const createCompetition = createServerFn({ method: "POST" })
   .middleware([requireApplicationContext])
@@ -171,15 +149,8 @@ export const updateCompetition = createServerFn({ method: "POST" })
 /* ---------------------------------- Catálogos --------------------------------- */
 
 export const listCatalogs = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) =>
-    unwrap(
-      await context.supabase
-        .from("metric_catalogs")
-        .select("id, code, name, description, status, sport_id, owner_id, sport_space_id, sports(name)")
-        .order("name"),
-    ),
-  );
+  .middleware([requireApplicationContext])
+  .handler(async ({ context }) => listCatalogsService(context));
 
 export const getCatalog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -496,19 +467,9 @@ export const updateGroup = createServerFn({ method: "POST" })
 /* ----------------------------------- Métricas ---------------------------------- */
 
 export const listMetrics = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => catalogIdSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("metrics")
-        .select(
-          "id, code, name, nature, value_type, direction, scope, unit, status, group_id, short_description, technical_description, icon, color",
-        )
-        .eq("catalog_id", data.catalogId)
-        .order("code"),
-    ),
-  );
+  .handler(async ({ data, context }) => listMetricsService(context, data));
 
 export const createMetric = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
