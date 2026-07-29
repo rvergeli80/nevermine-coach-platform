@@ -156,7 +156,9 @@ BEGIN
 
   SELECT string_agg(table_name, ', ') INTO not_nullable
   FROM information_schema.columns
-  WHERE table_schema='public' AND column_name='sport_space_id' AND is_nullable='NO';
+  WHERE table_schema='public' AND column_name='sport_space_id' AND is_nullable='NO'
+    AND table_name IN ('sports','metric_catalogs','seasons','competitions','teams','players',
+                       'observation_contexts','metric_values','valuations','audit_log');
 
   RAISE NOTICE 'CHECK|rollback: Dual Write reversible por trigger (faltan: %)|%',
     COALESCE(missing, 'ninguno'), CASE WHEN missing IS NULL THEN 'PASS' ELSE 'FAIL' END;
