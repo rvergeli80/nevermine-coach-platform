@@ -3,13 +3,16 @@ import type { ApplicationServiceContext } from "./service-context";
 import {
   buildInstallPlan,
   decideInstallAction,
-  findStarterPack,
-  starterPacks,
+  discoverStarterPacks,
+  findPackageDescriptor,
+  resolveInstallOrder,
   summarizePack,
   toCatalogEntry,
   type InstallationRecord,
   type StarterPackCatalogEntry,
+  type StarterPackDescriptor,
 } from "@/modules/starter-packs";
+import type { DiscoveryQuery } from "@/modules/platform/knowledge-packages";
 
 /**
  * FEATURE-003.1 — Application Service de Starter Packs.
@@ -39,6 +42,20 @@ export interface InstallationEventRow {
   from_version: string | null;
   to_version: string;
   created_at: string;
+}
+
+/** Entrada de catálogo enriquecida con los metadatos del repositorio (FEATURE-003.2). */
+export interface KnowledgePackageCatalogEntry extends StarterPackCatalogEntry {
+  kind: string;
+  domain: string;
+  category: string;
+  tags: string[];
+  trust: string;
+  checksum: string;
+  signed: boolean;
+  dependsOn: string[];
+  compatible: boolean;
+  incompatibilityReasons: string[];
 }
 
 export interface InstallStarterPackResult {
@@ -77,13 +94,38 @@ async function loadInstallations(
   return new Map(rows.map((row) => [row.pack_id, toRecord(row)]));
 }
 
-/** Catálogo oficial con el estado de instalación en el SportSpace activo. */
+function toEntry(
+  descriptor: StarterPackDescriptor,
+  record: InstallationRecord | null,
+): KnowledgePackageCatalogEntry {
+  const plan = resolveInstallOrder(descriptor.id, descriptor.version);
+  return {
+    ...toCatalogEntry(summarizePack(descriptor.payload), record),
+    kind: descriptor.kind,
+    domain: descriptor.domain,
+    category: descriptor.category,
+    tags: descriptor.tags,
+    trust: descriptor.trust,
+    checksum: descriptor.checksum,
+    signed: descriptor.signature.algorithm !== "none",
+    dependsOn: descriptor.dependencies.map((d) => d.packageId),
+    compatible: plan.ok,
+    incompatibilityReasons: plan.ok ? [] : plan.errors,
+  };
+}
+
+/**
+ * Descubrimiento de paquetes del repositorio con el estado de instalación en
+ * el SportSpace activo. Los filtros (dominio, categoría, versión, origen…) los
+ * aplica el repositorio de plataforma; el servicio sólo añade el estado local.
+ */
 export async function listStarterPackCatalog(
   ctx: ApplicationServiceContext,
-): Promise<StarterPackCatalogEntry[]> {
+  query: DiscoveryQuery = {},
+): Promise<KnowledgePackageCatalogEntry[]> {
   const installed = await loadInstallations(ctx);
-  return starterPacks.map((pack) =>
-    toCatalogEntry(summarizePack(pack), installed.get(pack.id) ?? null),
+  return discoverStarterPacks(query).map((descriptor) =>
+    toEntry(descriptor, installed.get(descriptor.id) ?? null),
   );
 }
 
@@ -108,10 +150,16 @@ export async function listInstallationHistory(
  */
 export async function installStarterPack(
   ctx: ApplicationServiceContext,
-  input: { packId: string; force?: boolean },
+  input: { packId: string; version?: string; force?: boolean },
 ): Promise<InstallStarterPackResult> {
-  const pack = findStarterPack(input.packId);
-  if (!pack) throw new Error("Starter Pack no encontrado en el catálogo oficial");
+  const descriptor = findPackageDescriptor(input.packId, input.version);
+  if (!descriptor) throw new Error("Paquete no encontrado en el repositorio de conocimiento");
+  const pack = descriptor.payload;
+
+  // El repositorio valida compatibilidad y resuelve las dependencias: si algo
+  // no encaja, la instalación no empieza y la base de datos no se toca.
+  const resolution = resolveInstallOrder(descriptor.id, descriptor.version);
+  if (!resolution.ok) throw new Error(resolution.errors.join(" "));
 
   const built = buildInstallPlan(pack);
   if (!built.ok) throw new Error(`El pack no es válido: ${built.errors.join(" ")}`);
@@ -135,6 +183,20 @@ export async function installStarterPack(
   }
 
   if (!ctx.supabase.rpc) throw new Error("El cliente de datos no permite operaciones transaccionales");
+
+  // Dependencias primero (el propio paquete es el último del orden resuelto).
+  for (const dependency of resolution.order.filter((p) => p.id !== descriptor.id)) {
+    if (installed.has(dependency.id)) continue;
+    const depPlan = buildInstallPlan((dependency as StarterPackDescriptor).payload);
+    if (!depPlan.ok) throw new Error(`Dependencia inválida "${dependency.id}": ${depPlan.errors.join(" ")}`);
+    unwrap(
+      await ctx.supabase.rpc("install_starter_pack", {
+        _sport_space_id: ctx.sportSpaceId,
+        _plan: depPlan.plan,
+        _force: false,
+      }),
+    );
+  }
 
   const result = unwrap(
     await ctx.supabase.rpc("install_starter_pack", {
