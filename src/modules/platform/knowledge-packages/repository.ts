@@ -9,8 +9,18 @@
  */
 
 import { compareVersions } from "../semver";
+import { certificationEvidence, certifyPackage, type CertificationReport } from "./certification";
 import { checkCompatibility, isCompatible } from "./compatibility";
 import { resolveDependencies } from "./dependencies";
+import {
+  evaluateTransition,
+  isDistributableState,
+  LifecycleHistory,
+  type LifecycleState,
+  type LifecycleTransition,
+  type TransitionRequest,
+  type TransitionResult,
+} from "./lifecycle";
 import { checkDescriptor } from "./validation";
 import type {
   DiscoveryQuery,
@@ -31,6 +41,9 @@ function asArray<T>(value: T | T[] | undefined): T[] | undefined {
   if (value === undefined) return undefined;
   return Array.isArray(value) ? value : [value];
 }
+
+const keyOf = (id: string, version: string) => `${id}@${version}`;
+
 
 export class KnowledgePackageRepository {
   /** id → versiones registradas, ordenadas de menor a mayor. */
