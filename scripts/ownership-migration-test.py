@@ -46,7 +46,7 @@ def main() -> int:
         print("SUPABASE_DB_URL no está definida")
         return 2
 
-    conn = psycopg2.connect(dsn)
+    conn = psycopg2.connect(dsn, client_encoding="UTF8")
     conn.autocommit = False
     cur = conn.cursor()
 
