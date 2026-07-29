@@ -1,0 +1,1 @@
+DELETE FROM public.seasons WHERE id IN ('9a46376b-b232-42a5-a679-a03620366cab','fdcd6b5f-bdd4-4ce0-8752-a010f18d760a');
