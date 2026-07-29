@@ -19,7 +19,7 @@
       {
         "name": "list_seasons",
         "title": "Listar temporadas",
-        "description": "Devuelve las temporadas del entrenador autenticado, con fechas y estado.",
+        "description": "Devuelve las temporadas del SportSpace activo, con fechas y estado.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -35,7 +35,7 @@
       {
         "name": "list_competitions",
         "title": "Listar competiciones",
-        "description": "Devuelve las competiciones del entrenador autenticado y la temporada asociada.",
+        "description": "Devuelve las competiciones del SportSpace activo y la temporada asociada.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -51,7 +51,7 @@
       {
         "name": "list_catalogs",
         "title": "Listar catálogos de métricas",
-        "description": "Devuelve los catálogos de métricas accesibles (propios y globales) con su deporte y sus versiones.",
+        "description": "Devuelve los catálogos de métricas accesibles en el SportSpace activo, con su deporte y sus versiones.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -126,7 +126,7 @@
       {
         "name": "create_season",
         "title": "Crear temporada",
-        "description": "Crea una temporada en el SportSpace del entrenador autenticado.",
+        "description": "Crea una temporada en el SportSpace activo del usuario autenticado.",
         "annotations": {
           "readOnlyHint": false,
           "destructiveHint": false,
