@@ -72,7 +72,7 @@ END $$;"""
         """DO $$
 DECLARE u uuid; assigned uuid; after_update uuid; other uuid; sid uuid;
 BEGIN
-  SELECT id INTO u FROM auth.users ORDER BY created_at LIMIT 1;
+  SELECT id INTO u FROM public.profiles ORDER BY created_at LIMIT 1;
   IF u IS NULL THEN
     RAISE NOTICE 'CHECK|doble escritura (sin usuarios en el entorno)|FAIL';
     RETURN;
@@ -133,7 +133,7 @@ def main() -> int:
     )
 
     results = []
-    for line in (proc.stderr + proc.stdout).splitlines():
+    for line in proc.stderr.splitlines():
         if "CHECK|" not in line:
             continue
         _, name, status = line.split("CHECK|", 1)[0], *line.split("CHECK|", 1)[1].rsplit("|", 1)
