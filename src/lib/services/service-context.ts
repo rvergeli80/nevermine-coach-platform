@@ -12,7 +12,8 @@ import type { ApplicationContext } from "@/modules/application-context";
 export interface DataClient {
   from: (table: string) => any;
   /** Ejecución de funciones de base de datos (operaciones transaccionales). */
-  rpc?: (fn: string, args?: Record<string, unknown>) => any;
+  rpc?: (fn: any, args?: any) => any;
+
 }
 
 
