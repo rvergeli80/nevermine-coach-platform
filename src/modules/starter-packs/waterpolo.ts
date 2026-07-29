@@ -10,7 +10,14 @@ export const waterpoloPack: StarterPack = {
   name: "Waterpolo — Rendimiento base",
   summary:
     "Catálogo inicial de waterpolo: ataque, defensa, portería, disciplina y participación, con métricas derivadas de eficacia y un perfil de valoración general.",
+  version: "1.0.0",
+  author: "Nevermine Platform",
+  publishedAt: "2026-01-01",
+  status: "published",
+  origin: "official",
+  compatibility: { engine: "sportspace", minEngineVersion: "1.0.0" },
   sport: { code: "waterpolo", name: "Waterpolo" },
+
   catalog: {
     code: "waterpolo_base",
     name: "Waterpolo — Rendimiento base",
