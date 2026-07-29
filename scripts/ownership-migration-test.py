@@ -148,7 +148,7 @@ BEGIN
   BEGIN
     DROP TRIGGER teams_sync_sport_space ON public.teams;
   EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'DBG|%', SQLERRM;
+    RAISE NOTICE 'CHECK|dbg %|FAIL', SQLERRM;
     RAISE NOTICE 'CHECK|rollback del trigger de Dual Write|FAIL';
     RETURN;
   END;
