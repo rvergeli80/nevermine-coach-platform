@@ -17,7 +17,7 @@ export const listTeams = createServerFn({ method: "GET" })
     unwrap(
       await context.supabase
         .from("teams")
-        .select("id, name, category, status, sport_id, sports(name), players(count)")
+        .select("id, name, category, status, sport_id, owner_id, sport_space_id, sports(name), players(count)")
         .order("name"),
     ),
   );
@@ -67,7 +67,7 @@ export const listPlayers = createServerFn({ method: "GET" })
     unwrap(
       await context.supabase
         .from("players")
-        .select("id, full_name, birth_date, status, team_id, teams(name)")
+        .select("id, full_name, birth_date, status, team_id, owner_id, sport_space_id, teams(name)")
         .order("full_name"),
     ),
   );
