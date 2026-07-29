@@ -30,8 +30,19 @@ import {
   SPORT_SPACE_TYPE_LABELS,
   slugifySportSpaceName,
   type SportSpaceType,
-} from "@/modules/organization";
+} from "@/modules/sport-space";
 
+/**
+ * Pantalla de ADMINISTRACIÓN de SportSpaces (FEATURE-002.1).
+ *
+ * Decisión de UX (no implementar aquí): esta ruta no forma parte del flujo
+ * principal de navegación y por eso no se añade a la navegación lateral.
+ * El modelo de experiencia objetivo es el de Slack/Notion/Linear:
+ *   login → selección del SportSpace activo → toda la navegación ocurre dentro
+ *   del contexto de ese SportSpace.
+ * El cambio de SportSpace se implementará en la FEATURE-002.5 mediante un
+ * selector de contexto, nunca mediante navegación continua hacia esta ruta.
+ */
 export const Route = createFileRoute("/_authenticated/app/sportspaces")({
   head: () => ({
     meta: [

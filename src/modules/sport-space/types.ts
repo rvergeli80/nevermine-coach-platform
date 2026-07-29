@@ -6,7 +6,13 @@
  * sólo se introduce la estructura, sin sustituir todavía el modelo `owner_id`.
  */
 
-export type SportSpaceType = "club" | "federation" | "academy" | "personal";
+export type SportSpaceType =
+  | "club"
+  | "academy"
+  | "federation"
+  | "company"
+  | "personal"
+  | "other";
 
 export type SportSpaceStatus = "active" | "inactive" | "archived";
 
@@ -17,6 +23,11 @@ export interface SportSpace {
   description: string | null;
   type: SportSpaceType;
   status: SportSpaceStatus;
+  /**
+   * Usuario autenticado que ejecutó la creación del SportSpace.
+   * NO representa la propiedad del SportSpace: la propiedad se determinará
+   * exclusivamente por la entidad Membership con rol Owner (FEATURE-002.2).
+   */
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -32,14 +43,18 @@ export interface NewSportSpace {
 
 export const SPORT_SPACE_TYPES: readonly SportSpaceType[] = [
   "club",
-  "federation",
   "academy",
+  "federation",
+  "company",
   "personal",
+  "other",
 ];
 
 export const SPORT_SPACE_TYPE_LABELS: Record<SportSpaceType, string> = {
   club: "Club",
-  federation: "Federación",
   academy: "Academia",
+  federation: "Federación",
+  company: "Empresa",
   personal: "Personal",
+  other: "Otro",
 };

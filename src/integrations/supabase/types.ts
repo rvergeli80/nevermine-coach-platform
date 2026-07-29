@@ -1107,7 +1107,13 @@ export type Database = {
       metric_direction: "higher_is_better" | "lower_is_better" | "neutral"
       metric_nature: "primary" | "derived"
       metric_value_type: "counter" | "duration" | "boolean" | "ratio" | "scale"
-      sport_space_type: "club" | "federation" | "academy" | "personal"
+      sport_space_type:
+        | "club"
+        | "federation"
+        | "academy"
+        | "personal"
+        | "company"
+        | "other"
       subject_scope: "individual" | "collective"
       subject_type: "player" | "team"
       valuation_status: "current" | "superseded"
@@ -1245,7 +1251,14 @@ export const Constants = {
       metric_direction: ["higher_is_better", "lower_is_better", "neutral"],
       metric_nature: ["primary", "derived"],
       metric_value_type: ["counter", "duration", "boolean", "ratio", "scale"],
-      sport_space_type: ["club", "federation", "academy", "personal"],
+      sport_space_type: [
+        "club",
+        "federation",
+        "academy",
+        "personal",
+        "company",
+        "other",
+      ],
       subject_scope: ["individual", "collective"],
       subject_type: ["player", "team"],
       valuation_status: ["current", "superseded"],

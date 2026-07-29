@@ -65,7 +65,10 @@ export function isSportSpaceOperable(space: Pick<SportSpace, "status">): boolean
 
 /**
  * Autorización de lectura del agregado. En FEATURE-002.1 todavía no existe
- * Membership (FEATURE-002.2), por lo que la pertenencia se resuelve por creador.
+ * Membership (FEATURE-002.2), por lo que el acceso se resuelve provisionalmente
+ * por el usuario que ejecutó la creación (`createdBy`). Esto es una regla de
+ * acceso temporal, NO una declaración de propiedad: la propiedad vendrá
+ * determinada exclusivamente por Membership con rol Owner.
  */
 export function canReadSportSpace(space: Pick<SportSpace, "createdBy">, userId: string): boolean {
   return space.createdBy === userId;

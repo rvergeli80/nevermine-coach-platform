@@ -2,11 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
-import { createSportSpaceSchema, sportSpaceIdSchema } from "@/modules/organization/schemas";
-import type { SportSpace } from "@/modules/organization/types";
+import { createSportSpaceSchema, sportSpaceIdSchema } from "@/modules/sport-space/schemas";
+import type { SportSpace } from "@/modules/sport-space/types";
 
 /* ------------------------------- SportSpaces ------------------------------- */
 /* FEATURE-002.1: sólo alta y lectura. No sustituye todavía a owner_id.        */
+/* `created_by` registra el usuario autenticado que ejecutó la creación; no    */
+/* implica propiedad (la propiedad llegará con Membership + rol Owner).        */
 
 const COLUMNS = "id, slug, name, description, type, status, created_by, created_at, updated_at";
 
