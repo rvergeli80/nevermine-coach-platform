@@ -119,8 +119,57 @@ BEGIN
 END $$;"""
     )
 
+    # Integridad: CHECK de sincronizacion, FK e indice por tabla de negocio.
+    for table in TABLES:
+        parts.append(
+            f"""DO $$
+DECLARE has_check boolean; has_fk boolean; has_idx boolean;
+BEGIN
+  SELECT EXISTS (SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
+    WHERE t.relname='{table}' AND c.contype='c' AND pg_get_constraintdef(c.oid) ILIKE '%sport_space_id IS NOT NULL%')
+    INTO has_check;
+  SELECT EXISTS (SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
+    WHERE t.relname='{table}' AND c.contype='f' AND pg_get_constraintdef(c.oid) ILIKE '%REFERENCES sport_spaces%')
+    INTO has_fk;
+  SELECT EXISTS (SELECT 1 FROM pg_indexes WHERE schemaname='public' AND tablename='{table}'
+    AND indexdef ILIKE '%sport_space_id%') INTO has_idx;
+  RAISE NOTICE 'CHECK|integridad en {table} (check/fk/indice)|%',
+    CASE WHEN has_check AND has_fk AND has_idx THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+        )
+
+    # Rollback (reversibilidad): el Dual Write se implementa exclusivamente
+    # mediante triggers eliminables y ninguna columna sport_space_id es
+    # NOT NULL, de modo que un DROP TRIGGER por tabla revierte la migracion
+    # sin romper la escritura clasica basada en owner_id.
+    parts.append(
+        """DO $$
+DECLARE missing text; not_nullable text;
+BEGIN
+  SELECT string_agg(t, ', ') INTO missing
+  FROM unnest(ARRAY['sports','metric_catalogs','seasons','competitions','teams','players',
+                    'observation_contexts','metric_values','valuations','audit_log']) AS t
+  WHERE NOT EXISTS (
+    SELECT 1 FROM pg_trigger tg JOIN pg_class c ON c.oid = tg.tgrelid
+    JOIN pg_proc p ON p.oid = tg.tgfoid
+    WHERE c.relname = t AND NOT tg.tgisinternal AND p.proname = 'sync_sport_space_id');
+
+  SELECT string_agg(table_name, ', ') INTO not_nullable
+  FROM information_schema.columns
+  WHERE table_schema='public' AND column_name='sport_space_id' AND is_nullable='NO'
+    AND table_name IN ('sports','metric_catalogs','seasons','competitions','teams','players',
+                       'observation_contexts','metric_values','valuations','audit_log');
+
+  RAISE NOTICE 'CHECK|rollback: Dual Write reversible por trigger (faltan: %)|%',
+    COALESCE(missing, 'ninguno'), CASE WHEN missing IS NULL THEN 'PASS' ELSE 'FAIL' END;
+  RAISE NOTICE 'CHECK|rollback: sport_space_id sigue siendo nullable (%)|%',
+    COALESCE(not_nullable, 'ninguna'), CASE WHEN not_nullable IS NULL THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+    )
+
     parts.append("ROLLBACK;")
     return "\n".join(parts)
+
 
 
 def main() -> int:
