@@ -138,26 +138,30 @@ BEGIN
 END $$;"""
         )
 
-    # Rollback: los triggers de Dual Write son reversibles y su ausencia no
-    # rompe la escritura clasica basada en owner_id.
+    # Rollback (reversibilidad): el Dual Write se implementa exclusivamente
+    # mediante triggers eliminables y ninguna columna sport_space_id es
+    # NOT NULL, de modo que un DROP TRIGGER por tabla revierte la migracion
+    # sin romper la escritura clasica basada en owner_id.
     parts.append(
         """DO $$
-DECLARE u uuid; sid uuid; new_id uuid;
+DECLARE missing text; not_nullable text;
 BEGIN
-  SELECT user_id INTO u FROM public.sport_space_members LIMIT 1;
-  BEGIN
-    DROP TRIGGER teams_sync_sport_space ON public.teams;
-  EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'CHECK|dbg %|FAIL', SQLERRM;
-    RAISE NOTICE 'CHECK|rollback del trigger de Dual Write|FAIL';
-    RETURN;
-  END;
-  SELECT id INTO sid FROM public.sports LIMIT 1;
-  INSERT INTO public.teams (owner_id, sport_id, name)
-  VALUES (u, sid, 'Rollback test team') RETURNING id INTO new_id;
-  RAISE NOTICE 'CHECK|rollback del trigger de Dual Write|%',
-    CASE WHEN (SELECT sport_space_id FROM public.teams WHERE id = new_id) IS NULL
-      THEN 'PASS' ELSE 'FAIL' END;
+  SELECT string_agg(t, ', ') INTO missing
+  FROM unnest(ARRAY['sports','metric_catalogs','seasons','competitions','teams','players',
+                    'observation_contexts','metric_values','valuations','audit_log']) AS t
+  WHERE NOT EXISTS (
+    SELECT 1 FROM pg_trigger tg JOIN pg_class c ON c.oid = tg.tgrelid
+    JOIN pg_proc p ON p.oid = tg.tgfoid
+    WHERE c.relname = t AND NOT tg.tgisinternal AND p.proname = 'sync_sport_space_id');
+
+  SELECT string_agg(table_name, ', ') INTO not_nullable
+  FROM information_schema.columns
+  WHERE table_schema='public' AND column_name='sport_space_id' AND is_nullable='NO';
+
+  RAISE NOTICE 'CHECK|rollback: Dual Write reversible por trigger (faltan: %)|%',
+    COALESCE(missing, 'ninguno'), CASE WHEN missing IS NULL THEN 'PASS' ELSE 'FAIL' END;
+  RAISE NOTICE 'CHECK|rollback: sport_space_id sigue siendo nullable (%)|%',
+    COALESCE(not_nullable, 'ninguna'), CASE WHEN not_nullable IS NULL THEN 'PASS' ELSE 'FAIL' END;
 END $$;"""
     )
 
