@@ -107,6 +107,7 @@ describe.skipIf(!enabled)("MCP sobre datos reales", () => {
     await handler({}, toolContext());
     expect(log[0]).toMatchObject({ channel: "mcp", tool: "list_catalogs", userId: sessionUserId });
     expect(log[0].sportSpaceId).toBeTruthy();
-    expect(typeof log[0].durationMs).toBe("number");
+    expect(log[0].outcome).toBe("success");
+    expect(Number.isNaN(Date.parse(log[0].at))).toBe(false);
   });
 });
