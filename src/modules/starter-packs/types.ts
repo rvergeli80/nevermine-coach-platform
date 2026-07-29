@@ -63,6 +63,20 @@ export interface PackCompatibility {
   engine: string;
   /** Versión mínima del Engine, en formato semver. */
   minEngineVersion: string;
+  /** Versión máxima del Engine admitida (opcional). */
+  maxEngineVersion?: string | null;
+  /** Versión mínima del producto que lo instala (FEATURE-003.2). */
+  minProductVersion?: string;
+  /** Versión máxima del producto admitida (opcional). */
+  maxProductVersion?: string | null;
+}
+
+/** Dependencia declarada hacia otro pack del repositorio (FEATURE-003.2). */
+export interface PackDependency {
+  packId: string;
+  minVersion: string;
+  maxVersion?: string | null;
+  optional?: boolean;
 }
 
 export interface StarterPack {
@@ -78,12 +92,20 @@ export interface StarterPack {
   status: PackStatus;
   origin: PackOrigin;
   compatibility: PackCompatibility;
+  /** Dominio de conocimiento en el repositorio de plataforma. Por defecto "sport". */
+  domain?: string;
+  /** Categoría dentro del dominio. Por defecto, el código del deporte. */
+  category?: string;
+  tags?: string[];
+  /** Packs de los que depende la instalación. Vacío en FEATURE-003.2. */
+  dependencies?: PackDependency[];
   sport: { code: string; name: string };
   catalog: { code: string; name: string; description: string };
   groups: PackGroup[];
   metrics: PackMetric[];
   profiles: PackProfile[];
 }
+
 
 /** Resumen client-safe para listar packs sin arrastrar toda la definición. */
 export interface StarterPackSummary {
