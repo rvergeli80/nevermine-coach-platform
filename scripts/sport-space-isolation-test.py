@@ -88,6 +88,7 @@ res["A_bad_slug"] = rest(
     "POST", "sport_spaces", tokA, {"slug": "Mal Slug", "name": "Formato", "created_by": uidA}, "return=representation"
 )
 res["A_delete_own"] = rest("DELETE", f"sport_spaces?id=eq.{space_id}", tokA, None, "return=representation")
+res["A_still_exists"] = rest("GET", f"sport_spaces?select=id&id=eq.{space_id}", tokA)
 
 # Anónimo
 r = requests.get(f"{URL}/rest/v1/sport_spaces?select=id", headers={"apikey": ANON})
@@ -105,7 +106,9 @@ expected = {
     "B_impersonate_A": lambda v: v[0] in (401, 403),
     "A_duplicate_slug": lambda v: v[0] == 409,
     "A_bad_slug": lambda v: v[0] >= 400,
-    "A_delete_own": lambda v: v[0] >= 400,
+    # Sin política DELETE, RLS filtra la fila: el borrado es un no-op (0 filas).
+    "A_delete_own": lambda v: v[1] == [],
+    "A_still_exists": lambda v: v[0] == 200 and len(v[1]) == 1,
     "anon_read": lambda v: v[0] in (401, 403) or v[1] == "[]",
 }
 failures = [k for k, check in expected.items() if not check(res[k])]
