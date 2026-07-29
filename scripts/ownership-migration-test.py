@@ -119,8 +119,50 @@ BEGIN
 END $$;"""
     )
 
+    # Integridad: CHECK de sincronizacion, FK e indice por tabla de negocio.
+    for table in TABLES:
+        parts.append(
+            f"""DO $$
+DECLARE has_check boolean; has_fk boolean; has_idx boolean;
+BEGIN
+  SELECT EXISTS (SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
+    WHERE t.relname='{table}' AND c.contype='c' AND pg_get_constraintdef(c.oid) ILIKE '%sport_space_id IS NOT NULL%')
+    INTO has_check;
+  SELECT EXISTS (SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
+    WHERE t.relname='{table}' AND c.contype='f' AND pg_get_constraintdef(c.oid) ILIKE '%REFERENCES sport_spaces%')
+    INTO has_fk;
+  SELECT EXISTS (SELECT 1 FROM pg_indexes WHERE schemaname='public' AND tablename='{table}'
+    AND indexdef ILIKE '%sport_space_id%') INTO has_idx;
+  RAISE NOTICE 'CHECK|integridad en {table} (check/fk/indice)|%',
+    CASE WHEN has_check AND has_fk AND has_idx THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+        )
+
+    # Rollback: los triggers de Dual Write son reversibles y su ausencia no
+    # rompe la escritura clasica basada en owner_id.
+    parts.append(
+        """DO $$
+DECLARE u uuid; sid uuid; new_id uuid;
+BEGIN
+  SELECT user_id INTO u FROM public.sport_space_members LIMIT 1;
+  BEGIN
+    DROP TRIGGER teams_sync_sport_space ON public.teams;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'CHECK|rollback del trigger de Dual Write|FAIL';
+    RETURN;
+  END;
+  SELECT id INTO sid FROM public.sports LIMIT 1;
+  INSERT INTO public.teams (owner_id, sport_id, name)
+  VALUES (u, sid, 'Rollback test team') RETURNING id INTO new_id;
+  RAISE NOTICE 'CHECK|rollback del trigger de Dual Write|%',
+    CASE WHEN (SELECT sport_space_id FROM public.teams WHERE id = new_id) IS NULL
+      THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+    )
+
     parts.append("ROLLBACK;")
     return "\n".join(parts)
+
 
 
 def main() -> int:
