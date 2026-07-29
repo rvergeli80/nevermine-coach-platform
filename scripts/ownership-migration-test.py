@@ -2,22 +2,23 @@
 """
 FEATURE-002.3 — Pruebas de migración del modelo de propiedad (Dual Write).
 
-Valida contra la base de datos real:
+Valida contra la base de datos real (vía `psql`):
   1. Todas las tablas de negocio disponen de la columna `sport_space_id`.
   2. No existen recursos huérfanos (owner_id presente y sport_space_id nulo).
   3. Todo SportSpace tiene al menos una Membership con rol Owner.
   4. Doble escritura: un recurso insertado sólo con owner_id recibe
      automáticamente sport_space_id, coherente con el resto de sus recursos.
-  5. Idempotencia: reejecutar la lógica de migración no altera los datos.
+  5. Idempotencia: reejecutar la inicialización no altera los datos.
+
+Todas las escrituras se ejecutan dentro de una transacción que termina en
+ROLLBACK: la prueba no deja rastro en la base de datos.
 
 Uso:  SUPABASE_DB_URL=... python3 scripts/ownership-migration-test.py
 """
 
 import os
+import subprocess
 import sys
-import uuid
-
-import psycopg2
 
 TABLES = [
     "sports",
@@ -32,12 +33,90 @@ TABLES = [
     "audit_log",
 ]
 
-checks: list[tuple[str, bool, str]] = []
 
+def build_sql() -> str:
+    parts = ["BEGIN;", "SET client_min_messages = notice;"]
 
-def check(name: str, ok: bool, detail: str = "") -> None:
-    checks.append((name, ok, detail))
-    print(f"[{'PASS' if ok else 'FAIL'}] {name}{(' — ' + detail) if detail else ''}")
+    for table in TABLES:
+        parts.append(
+            f"""DO $$
+DECLARE n integer;
+BEGIN
+  SELECT count(*) INTO n FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='{table}' AND column_name='sport_space_id';
+  RAISE NOTICE 'CHECK|columna sport_space_id en {table}|%', CASE WHEN n = 1 THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+        )
+        parts.append(
+            f"""DO $$
+DECLARE n bigint;
+BEGIN
+  SELECT count(*) INTO n FROM public.{table} WHERE owner_id IS NOT NULL AND sport_space_id IS NULL;
+  RAISE NOTICE 'CHECK|sin recursos huerfanos en {table} (%)|%', n, CASE WHEN n = 0 THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+        )
+
+    parts.append(
+        """DO $$
+DECLARE n bigint;
+BEGIN
+  SELECT count(*) INTO n FROM public.sport_spaces s
+   WHERE NOT EXISTS (SELECT 1 FROM public.sport_space_members m
+                      WHERE m.sport_space_id = s.id AND m.role = 'owner');
+  RAISE NOTICE 'CHECK|todo SportSpace tiene Owner (% sin owner)|%', n, CASE WHEN n = 0 THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+    )
+
+    # Doble escritura + estabilidad ante UPDATE.
+    parts.append(
+        """DO $$
+DECLARE u uuid; assigned uuid; after_update uuid; other uuid; sid uuid;
+BEGIN
+  SELECT id INTO u FROM auth.users ORDER BY created_at LIMIT 1;
+  IF u IS NULL THEN
+    RAISE NOTICE 'CHECK|doble escritura (sin usuarios en el entorno)|FAIL';
+    RETURN;
+  END IF;
+
+  INSERT INTO public.seasons (owner_id, name) VALUES (u, '__dual-write-test')
+  RETURNING sport_space_id INTO assigned;
+  RAISE NOTICE 'CHECK|doble escritura asigna sport_space_id automaticamente|%',
+    CASE WHEN assigned IS NOT NULL THEN 'PASS' ELSE 'FAIL' END;
+
+  UPDATE public.seasons SET name = '__dual-write-test-2' WHERE name = '__dual-write-test'
+  RETURNING sport_space_id INTO after_update;
+  RAISE NOTICE 'CHECK|la actualizacion preserva sport_space_id|%',
+    CASE WHEN after_update = assigned THEN 'PASS' ELSE 'FAIL' END;
+
+  SELECT sport_space_id INTO other FROM public.teams
+   WHERE owner_id = u AND sport_space_id IS NOT NULL LIMIT 1;
+  IF other IS NOT NULL THEN
+    RAISE NOTICE 'CHECK|coherencia entre recursos del mismo propietario|%',
+      CASE WHEN other = assigned THEN 'PASS' ELSE 'FAIL' END;
+  END IF;
+
+  -- Idempotencia de la resolucion del SportSpace personal.
+  sid := public.ensure_personal_sport_space(u);
+  RAISE NOTICE 'CHECK|resolucion del SportSpace es idempotente|%',
+    CASE WHEN sid = assigned THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+    )
+
+    # Idempotencia de la inicializacion de membresias.
+    parts.append(
+        """DO $$
+DECLARE before_n bigint; after_n bigint;
+BEGIN
+  SELECT count(*) INTO before_n FROM public.sport_space_members;
+  PERFORM public.ensure_sport_space_owner(id) FROM public.sport_spaces;
+  SELECT count(*) INTO after_n FROM public.sport_space_members;
+  RAISE NOTICE 'CHECK|inicializacion de membresias idempotente (% -> %)|%',
+    before_n, after_n, CASE WHEN before_n = after_n THEN 'PASS' ELSE 'FAIL' END;
+END $$;"""
+    )
+
+    parts.append("ROLLBACK;")
+    return "\n".join(parts)
 
 
 def main() -> int:
@@ -46,86 +125,28 @@ def main() -> int:
         print("SUPABASE_DB_URL no está definida")
         return 2
 
-    conn = psycopg2.connect(dsn, client_encoding="UTF8")
-    conn.autocommit = False
-    cur = conn.cursor()
-
-    # 1. Columnas presentes
-    for table in TABLES:
-        cur.execute(
-            "SELECT count(*) FROM information_schema.columns "
-            "WHERE table_schema='public' AND table_name=%s AND column_name='sport_space_id'",
-            (table,),
-        )
-        check(f"columna sport_space_id en {table}", cur.fetchone()[0] == 1)
-
-    # 2. Sin recursos huérfanos
-    for table in TABLES:
-        cur.execute(
-            f"SELECT count(*) FROM public.{table} WHERE owner_id IS NOT NULL AND sport_space_id IS NULL"
-        )
-        orphans = cur.fetchone()[0]
-        check(f"sin huérfanos en {table}", orphans == 0, f"{orphans} filas")
-
-    # 3. Todo SportSpace con Owner
-    cur.execute(
-        "SELECT count(*) FROM public.sport_spaces s "
-        "WHERE NOT EXISTS (SELECT 1 FROM public.sport_space_members m "
-        "                  WHERE m.sport_space_id = s.id AND m.role = 'owner')"
+    proc = subprocess.run(
+        ["psql", dsn, "-v", "ON_ERROR_STOP=1", "-q", "-f", "-"],
+        input=build_sql(),
+        capture_output=True,
+        text=True,
     )
-    missing = cur.fetchone()[0]
-    check("todo SportSpace tiene Owner", missing == 0, f"{missing} sin Owner")
 
-    # 4. Doble escritura sobre una temporada de prueba (se revierte al final)
-    cur.execute("SELECT id FROM auth.users ORDER BY created_at LIMIT 1")
-    row = cur.fetchone()
-    if not row:
-        check("doble escritura", False, "no hay usuarios en el entorno")
-    else:
-        user_id = row[0]
-        name = f"__migration-test-{uuid.uuid4().hex[:8]}"
-        cur.execute(
-            "INSERT INTO public.seasons (owner_id, name) VALUES (%s, %s) RETURNING sport_space_id",
-            (user_id, name),
-        )
-        assigned = cur.fetchone()[0]
-        check("doble escritura asigna sport_space_id", assigned is not None)
+    results = []
+    for line in (proc.stderr + proc.stdout).splitlines():
+        if "CHECK|" not in line:
+            continue
+        _, name, status = line.split("CHECK|", 1)[0], *line.split("CHECK|", 1)[1].rsplit("|", 1)
+        results.append((name.strip(), status.strip()))
+        print(f"[{status.strip()}] {name.strip()}")
 
-        cur.execute(
-            "SELECT sport_space_id FROM public.teams WHERE owner_id = %s AND sport_space_id IS NOT NULL LIMIT 1",
-            (user_id,),
-        )
-        other = cur.fetchone()
-        if other:
-            check(
-                "coherencia entre recursos del mismo propietario",
-                other[0] == assigned,
-                f"{other[0]} vs {assigned}",
-            )
+    if proc.returncode != 0:
+        print(proc.stderr.strip()[-2000:])
+        return 1
 
-        # Idempotencia: un UPDATE no debe cambiar el SportSpace asignado.
-        cur.execute(
-            "UPDATE public.seasons SET name = name WHERE name = %s RETURNING sport_space_id",
-            (name,),
-        )
-        check("actualización preserva sport_space_id", cur.fetchone()[0] == assigned)
-        conn.rollback()
-
-    # 5. Idempotencia de la inicialización de membresías
-    cur.execute("SELECT count(*) FROM public.sport_space_members")
-    before = cur.fetchone()[0]
-    cur.execute("SELECT public.ensure_sport_space_owner(id) FROM public.sport_spaces")
-    cur.execute("SELECT count(*) FROM public.sport_space_members")
-    after = cur.fetchone()[0]
-    check("inicialización de membresías idempotente", before == after, f"{before} -> {after}")
-    conn.rollback()
-
-    cur.close()
-    conn.close()
-
-    failed = [c for c in checks if not c[1]]
-    print(f"\nRESULT: {'FAIL' if failed else 'PASS'} ({len(checks) - len(failed)}/{len(checks)})")
-    return 1 if failed else 0
+    failed = [r for r in results if r[1] != "PASS"]
+    print(f"\nRESULT: {'FAIL' if failed else 'PASS'} ({len(results) - len(failed)}/{len(results)})")
+    return 1 if failed or not results else 0
 
 
 if __name__ == "__main__":
