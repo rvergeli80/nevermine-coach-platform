@@ -285,7 +285,7 @@ export class KnowledgePackageRepository {
           `El paquete "${pkg.id}@${pkg.version}" está en estado "${state}" y no es distribuible: sólo se instalan paquetes publicados.`,
         ];
       }
-      const check = checkCompatibility(pkg, host);
+      const check = checkCompatibility({ ...pkg, status: state }, host);
       return check.ok ? [] : check.errors;
     });
     if (errors.length > 0) return { ok: false, errors };
