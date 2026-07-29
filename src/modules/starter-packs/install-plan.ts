@@ -1,7 +1,12 @@
 import { checkFormula, type CatalogMetricRef, type ExistingFormula } from "../config/formula-rules";
+import {
+  checkCompatibility as checkPackageCompatibility,
+  checksumOf as platformChecksumOf,
+} from "../platform/knowledge-packages";
+import { ENGINE_ID, ENGINE_VERSION } from "./engine";
+import { coachHostEnvironment, toKnowledgePackage } from "./knowledge-package";
 import { checkStarterPack } from "./rules";
 import type { StarterPack } from "./types";
-import { satisfiesMinVersion } from "./version";
 
 /**
  * FEATURE-003.1 — Plan de instalación.
@@ -12,9 +17,7 @@ import { satisfiesMinVersion } from "./version";
  * de forma transaccional; no interpreta ni decide nada del pack.
  */
 
-/** Engine actual sobre el que se instalan los packs (EPIC-002 certificado). */
-export const ENGINE_ID = "sportspace";
-export const ENGINE_VERSION = "1.0.0";
+export { ENGINE_ID, ENGINE_VERSION };
 
 export interface PlanGroup {
   code: string;
@@ -71,34 +74,23 @@ export type BuildPlanResult =
   | { ok: true; plan: StarterPackInstallPlan }
   | { ok: false; errors: string[] };
 
-/** Hash estable (FNV-1a 32 bits) del contenido canónico del pack. */
+/** Hash estable del contenido canónico del pack (implementación de plataforma). */
 export function checksumOf(value: unknown): string {
-  const json = JSON.stringify(value);
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < json.length; i += 1) {
-    hash ^= json.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193) >>> 0;
-  }
-  return hash.toString(16).padStart(8, "0");
+  return platformChecksumOf(value);
 }
 
-/** ¿El Engine actual puede instalar este pack? */
+/**
+ * ¿Puede instalarse este pack en el entorno actual?
+ * La decisión la toma el repositorio de Knowledge Packages de la plataforma:
+ * producto, versiones y Engines requeridos se evalúan en un único sitio.
+ */
 export function checkCompatibility(pack: StarterPack, engineVersion = ENGINE_VERSION): string[] {
-  const errors: string[] = [];
-  if (pack.compatibility.engine !== ENGINE_ID) {
-    errors.push(
-      `El pack requiere el engine "${pack.compatibility.engine}" y este sistema es "${ENGINE_ID}".`,
-    );
-  }
-  if (!satisfiesMinVersion(engineVersion, pack.compatibility.minEngineVersion)) {
-    errors.push(
-      `El pack requiere la versión ${pack.compatibility.minEngineVersion} o superior del engine.`,
-    );
-  }
-  if (pack.status !== "published") {
-    errors.push("El pack no está publicado y no puede instalarse.");
-  }
-  return errors;
+  const host = {
+    ...coachHostEnvironment,
+    engines: [{ engine: ENGINE_ID, version: engineVersion }],
+  };
+  const result = checkPackageCompatibility(toKnowledgePackage(pack), host);
+  return result.ok ? [] : result.errors;
 }
 
 /**

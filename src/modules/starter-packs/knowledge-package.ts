@@ -1,4 +1,4 @@
-import { ENGINE_ID, ENGINE_VERSION } from "./install-plan";
+import { ENGINE_ID, ENGINE_VERSION } from "./engine";
 import type { StarterPack } from "./types";
 import {
   UNSIGNED,
