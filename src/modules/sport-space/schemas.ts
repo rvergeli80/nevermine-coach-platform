@@ -23,7 +23,14 @@ export const sportSpaceNameSchema = z
   .min(SPORT_SPACE_NAME_MIN, "Nombre demasiado corto")
   .max(SPORT_SPACE_NAME_MAX);
 
-export const sportSpaceTypeSchema = z.enum(["club", "federation", "academy", "personal"]);
+export const sportSpaceTypeSchema = z.enum([
+  "club",
+  "academy",
+  "federation",
+  "company",
+  "personal",
+  "other",
+]);
 
 export const createSportSpaceSchema = z.object({
   slug: sportSpaceSlugSchema,
