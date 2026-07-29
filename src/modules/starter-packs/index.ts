@@ -1,25 +1,17 @@
-import type { StarterPack } from "./types";
-import { waterpoloPack } from "./waterpolo";
+/**
+ * Starter Packs de Coach (FEATURE-003.1) publicados como Knowledge Packages
+ * de la plataforma (FEATURE-003.2).
+ *
+ * El catálogo, el descubrimiento, la compatibilidad, las dependencias, la
+ * validación y los checksums viven en `modules/platform/knowledge-packages`.
+ * Aquí queda sólo lo que es propio de Coach: el contenido del pack y cómo se
+ * instala sobre un SportSpace.
+ */
 
 export * from "./types";
 export * from "./rules";
 export * from "./version";
 export * from "./install-plan";
 export * from "./installation";
-
-/**
- * Catálogo oficial de Starter Packs (FEATURE-003.1).
- * Añadir un deporte = añadir datos, no código. Los packs de comunidad,
- * enterprise o privados se incorporarán como otras fuentes del mismo catálogo
- * sin cambiar este modelo.
- */
-export const starterPacks: readonly StarterPack[] = [waterpoloPack];
-
-export function findStarterPack(id: string): StarterPack | undefined {
-  return starterPacks.find((pack) => pack.id === id);
-}
-
-/** Última versión publicada de un pack del catálogo oficial. */
-export function latestVersionOf(id: string): string | null {
-  return findStarterPack(id)?.version ?? null;
-}
+export * from "./knowledge-package";
+export * from "./repository";
