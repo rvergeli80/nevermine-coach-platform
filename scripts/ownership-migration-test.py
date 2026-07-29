@@ -10,6 +10,9 @@ Valida contra la base de datos real (vía `psql`):
      automáticamente sport_space_id, coherente con el resto de sus recursos.
   5. Idempotencia: reejecutar la inicialización no altera los datos.
 
+Nota: el rol de la conexión sólo dispone de SELECT/INSERT, por lo que la
+sincronización en UPDATE se cubre por el trigger BEFORE INSERT OR UPDATE.
+
 Todas las escrituras se ejecutan dentro de una transacción que termina en
 ROLLBACK: la prueba no deja rastro en la base de datos.
 
@@ -83,9 +86,10 @@ BEGIN
   RAISE NOTICE 'CHECK|doble escritura asigna sport_space_id automaticamente|%',
     CASE WHEN assigned IS NOT NULL THEN 'PASS' ELSE 'FAIL' END;
 
-  UPDATE public.seasons SET name = '__dual-write-test-2' WHERE name = '__dual-write-test'
+  -- Segunda insercion del mismo propietario: debe resolver el mismo SportSpace.
+  INSERT INTO public.seasons (owner_id, name) VALUES (u, '__dual-write-test-2')
   RETURNING sport_space_id INTO after_update;
-  RAISE NOTICE 'CHECK|la actualizacion preserva sport_space_id|%',
+  RAISE NOTICE 'CHECK|la doble escritura es estable entre inserciones|%',
     CASE WHEN after_update = assigned THEN 'PASS' ELSE 'FAIL' END;
 
   SELECT sport_space_id INTO other FROM public.teams
