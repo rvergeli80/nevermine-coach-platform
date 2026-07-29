@@ -1,4 +1,10 @@
-import { createKnowledgePackageRepository, type DiscoveryQuery } from "../platform/knowledge-packages";
+import {
+  createKnowledgePackageRepository,
+  type CertificationReport,
+  type DiscoveryQuery,
+  type LifecycleTransition,
+  type TransitionRequest,
+} from "../platform/knowledge-packages";
 import { coachHostEnvironment, toKnowledgePackage, type StarterPackDescriptor } from "./knowledge-package";
 import type { StarterPack } from "./types";
 import { waterpoloPack } from "./waterpolo";
@@ -17,6 +23,9 @@ export const starterPacks: readonly StarterPack[] = [waterpoloPack];
 /** Repositorio lógico con el catálogo oficial ya validado y con checksum. */
 export const knowledgePackages = createKnowledgePackageRepository(
   starterPacks.map(toKnowledgePackage),
+  // FEATURE-003.3: el catálogo oficial se certifica contra el entorno de Coach
+  // antes de admitirse como publicado.
+  { hosts: [coachHostEnvironment] },
 );
 
 export function findStarterPack(id: string, version?: string): StarterPack | undefined {
@@ -48,4 +57,37 @@ export function discoverStarterPacks(query: DiscoveryQuery = {}): StarterPackDes
  */
 export function resolveInstallOrder(id: string, version?: string) {
   return knowledgePackages.resolveInstall(id, coachHostEnvironment, version);
+}
+
+/**
+ * FEATURE-003.3 — Ciclo de vida de distribución.
+ * Coach delega en la plataforma: aquí sólo se exponen los verbos.
+ */
+
+/** Certificación automática de una versión del catálogo. */
+export function certifyStarterPack(id: string, version?: string): CertificationReport | undefined {
+  return knowledgePackages.certify(id, version);
+}
+
+/** Transición explícita de estado (draft → review → certified → published…). */
+export function transitionStarterPack(id: string, version: string, request: TransitionRequest) {
+  return knowledgePackages.transition(id, version, request);
+}
+
+/** Historial append-only de transiciones. */
+export function starterPackLifecycleHistory(
+  id?: string,
+  version?: string,
+): readonly LifecycleTransition[] {
+  return knowledgePackages.lifecycleHistory(id, version);
+}
+
+/** ¿Es instalable? Sólo lo publicado se distribuye. */
+export function isStarterPackDistributable(id: string, version?: string): boolean {
+  return knowledgePackages.isDistributable(id, version);
+}
+
+/** Estado de distribución vigente de una versión. */
+export function starterPackLifecycleState(id: string, version: string) {
+  return knowledgePackages.stateOf(id, version);
 }

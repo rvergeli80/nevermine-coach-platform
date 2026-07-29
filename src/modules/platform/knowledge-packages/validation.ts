@@ -7,6 +7,7 @@
  */
 
 import { isValidVersion } from "../semver";
+import { LIFECYCLE_STATES } from "./lifecycle";
 import { verifyIntegrity } from "./integrity";
 import type { KnowledgePackageDescriptor } from "./types";
 
@@ -16,7 +17,7 @@ const SLUG_RE = /^[a-z][a-z0-9_-]{1,63}$/;
 
 const KINDS = new Set(["starter_pack"]);
 const ORIGINS = new Set(["official", "community", "enterprise", "private", "marketplace"]);
-const STATUSES = new Set(["draft", "published", "deprecated"]);
+const STATUSES = new Set(LIFECYCLE_STATES as readonly string[]);
 const TRUSTS = new Set(["unverified", "certified", "partner"]);
 
 /** Errores de forma del descriptor (lista vacía = válido). */

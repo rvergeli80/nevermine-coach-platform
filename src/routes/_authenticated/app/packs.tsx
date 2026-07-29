@@ -93,6 +93,7 @@ function StarterPacksPage() {
                 <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-muted-foreground">
                   <Badge variant="outline">v{pack.latestVersion}</Badge>
                   <span>{pack.author}</span>
+                  <LifecycleBadge state={pack.lifecycleState} />
                   <StateBadge
                     state={pack.state}
                     installedVersion={pack.installedVersion}
@@ -106,6 +107,11 @@ function StarterPacksPage() {
                   <Stat label="Métricas primarias" value={pack.primaryCount} />
                   <Stat label="Métricas derivadas" value={pack.derivedCount} />
                 </dl>
+                {!pack.distributable && (
+                  <p className="text-xs text-muted-foreground">
+                    Este paquete todavía no está publicado, por lo que no puede instalarse.
+                  </p>
+                )}
                 <Button
                   onClick={() =>
                     mutation.mutate({
@@ -113,7 +119,7 @@ function StarterPacksPage() {
                       force: pack.state === "installed",
                     })
                   }
-                  disabled={mutation.isPending}
+                  disabled={mutation.isPending || !pack.distributable}
                   variant={pack.state === "installed" ? "outline" : "default"}
                   className="w-full"
                 >
@@ -126,12 +132,31 @@ function StarterPacksPage() {
                         ? "Reinstalar"
                         : "Instalar pack"}
                 </Button>
+
               </CardContent>
             </Card>
           ))}
         </div>
       </QueryState>
     </>
+  );
+}
+
+const LIFECYCLE_LABELS: Record<string, string> = {
+  draft: "Borrador",
+  review: "En revisión",
+  certified: "Certificado",
+  published: "Publicado",
+  deprecated: "Obsoleto",
+  archived: "Archivado",
+};
+
+/** Estado del ciclo de vida de distribución del paquete (FEATURE-003.3). */
+function LifecycleBadge({ state }: { state: string }) {
+  return (
+    <Badge variant={state === "published" ? "secondary" : "outline"}>
+      {LIFECYCLE_LABELS[state] ?? state}
+    </Badge>
   );
 }
 

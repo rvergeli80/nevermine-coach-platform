@@ -7,6 +7,8 @@
  * soportado; el modelo no menciona ningún producto ni deporte concreto.
  */
 
+import type { LifecycleState } from "./lifecycle";
+
 /** Tipo de conocimiento que transporta el paquete. */
 export type KnowledgePackageKind = "starter_pack";
 
@@ -22,8 +24,11 @@ export type KnowledgePackageOrigin =
   | "private"
   | "marketplace";
 
-/** Ciclo de vida del paquete dentro del repositorio. */
-export type KnowledgePackageStatus = "draft" | "published" | "deprecated";
+/**
+ * Ciclo de vida del paquete dentro del repositorio (FEATURE-003.3).
+ * La máquina de estados y su historial viven en `lifecycle.ts`.
+ */
+export type KnowledgePackageStatus = LifecycleState;
 
 /** Nivel de confianza declarado (la certificación llega en Features posteriores). */
 export type KnowledgePackageTrust = "unverified" | "certified" | "partner";
