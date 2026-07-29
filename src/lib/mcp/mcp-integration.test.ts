@@ -72,9 +72,8 @@ describe.skipIf(!enabled)("MCP sobre datos reales", () => {
     const viaMcp: any = await handler({}, toolContext());
 
     expect(viaMcp.isError).toBeUndefined();
-    expect(viaMcp.structuredContent ?? JSON.parse(viaMcp.content[0].text)).toEqual(
-      JSON.parse(JSON.stringify(viaWeb)),
-    );
+    const payload = viaMcp.structuredContent?.items ?? JSON.parse(viaMcp.content[0].text);
+    expect(payload).toEqual(JSON.parse(JSON.stringify(viaWeb)));
   });
 
   it("todo lo devuelto pertenece al SportSpace activo", async () => {
