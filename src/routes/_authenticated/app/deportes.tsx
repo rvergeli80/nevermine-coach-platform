@@ -47,7 +47,8 @@ type SportRow = {
   code: string;
   name: string;
   status: string;
-  owner_id: string | null;
+  owner_id: string | null; // dato histórico (persistencia); no decide permisos
+  sport_space_id: string | null;
 };
 
 function SportsPage() {
@@ -130,7 +131,7 @@ function SportsPage() {
                   <TableCell className="font-mono text-xs">{sport.code}</TableCell>
                   <TableCell>{sport.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {sport.owner_id ? "Propio" : "Global"}
+                    {sport.sport_space_id ? "Propio" : "Global"}
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={sport.status} />
@@ -139,7 +140,7 @@ function SportsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      disabled={!sport.owner_id}
+                      disabled={!sport.sport_space_id}
                       onClick={() => {
                         setEditing(sport);
                         setOpen(true);

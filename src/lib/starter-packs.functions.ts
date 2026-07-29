@@ -54,13 +54,12 @@ export const applyStarterPack = createServerFn({ method: "POST" })
         ) as { id: string }
       ).id;
 
-    // 2. Catálogo: código único por entrenador.
+    // 2. Catálogo: código único dentro del SportSpace (RLS acota la visibilidad).
     const clash = unwrap(
       await supabase
         .from("metric_catalogs")
         .select("id")
         .eq("code", pack.catalog.code)
-        .eq("owner_id", userId)
         .limit(1)
         .maybeSingle(),
     ) as { id: string } | null;

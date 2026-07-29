@@ -65,19 +65,6 @@ export function isSportSpaceOperable(space: Pick<SportSpace, "status">): boolean
 }
 
 /**
- * Acceso vigente durante FEATURE-002.3: mientras la autorización siga
- * apoyada en el modelo `owner_id`, la lectura del agregado se aísla por
- * `createdBy`. Es un mecanismo transitorio que FEATURE-002.4 sustituirá por
- * Membership + RLS.
- */
-export function canReadSportSpace(
-  space: Pick<SportSpace, "createdBy">,
-  userId: string,
-): boolean {
-  return space.createdBy === userId;
-}
-
-/**
  * Autorización de acceso al agregado (FEATURE-002.4): un usuario accede a un
  * SportSpace **si y sólo si** tiene Membership en él. `createdBy` es un dato
  * histórico y no interviene en ninguna decisión de seguridad.

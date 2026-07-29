@@ -1260,6 +1260,14 @@ export type Database = {
         Args: { _sport_space_id: string }
         Returns: boolean
       }
+      resolve_sport_space_for_user: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      sport_space_has_members: {
+        Args: { _sport_space_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "coach"

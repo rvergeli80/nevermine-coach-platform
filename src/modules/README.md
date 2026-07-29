@@ -43,15 +43,15 @@ La expresión textual de la V1 y un futuro editor visual producen el **mismo
 - Una versión publicada sólo puede retirarse; su contenido es inmutable (trigger).
 - Sólo se registran valores de métricas primarias (trigger).
 - Una valoración no se modifica: se genera otra y la anterior se marca como reemplazada (trigger).
-- Aislamiento por entrenador mediante RLS sobre `owner_id = auth.uid()`.
+- Aislamiento por SportSpace mediante RLS (`can_access_space(sport_space_id)`).
 
 ## FEATURE-002.3 — Migración del modelo de propiedad (Dual Write)
 
 Todas las tablas de negocio (`sports`, `metric_catalogs`, `seasons`,
 `competitions`, `teams`, `players`, `observation_contexts`, `metric_values`,
 `valuations`, `audit_log`) incorporan `sport_space_id`. **`owner_id` y
-`created_by` se conservan**: la autorización (RLS) sigue basándose en
-`owner_id` hasta FEATURE-002.4.
+`created_by` se conservan** como datos históricos de persistencia; desde
+FEATURE-002.4 **no intervienen en ninguna decisión de autorización**.
 
 - **Doble escritura**: trigger `<tabla>_sync_sport_space` (BEFORE INSERT OR
   UPDATE) rellena `sport_space_id` a partir de `owner_id` mediante
