@@ -14,7 +14,9 @@ import {
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { SportSpaceSwitcher } from "@/components/app/sport-space-switcher";
 import { Button } from "@/components/ui/button";
+
 
 const NAV = [
   { to: "/app", label: "Resumen", icon: LayoutGrid, exact: true },
