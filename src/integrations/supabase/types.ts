@@ -748,6 +748,41 @@ export type Database = {
         }
         Relationships: []
       }
+      sport_space_members: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["sport_space_role"]
+          sport_space_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["sport_space_role"]
+          sport_space_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["sport_space_role"]
+          sport_space_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sport_space_members_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sport_spaces: {
         Row: {
           created_at: string
@@ -1070,6 +1105,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_bootstrap_sport_space_membership: {
+        Args: { _sport_space_id: string }
+        Returns: boolean
+      }
       can_read_catalog: { Args: { _catalog_id: string }; Returns: boolean }
       can_read_metric: { Args: { _metric_id: string }; Returns: boolean }
       can_read_valuation_profile: {
@@ -1084,6 +1123,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_sport_space_member: {
+        Args: { _sport_space_id: string }
+        Returns: boolean
+      }
+      is_sport_space_owner: {
+        Args: { _sport_space_id: string }
         Returns: boolean
       }
       owns_competition: { Args: { _competition_id: string }; Returns: boolean }
@@ -1107,6 +1154,7 @@ export type Database = {
       metric_direction: "higher_is_better" | "lower_is_better" | "neutral"
       metric_nature: "primary" | "derived"
       metric_value_type: "counter" | "duration" | "boolean" | "ratio" | "scale"
+      sport_space_role: "owner" | "coach"
       sport_space_type:
         | "club"
         | "federation"
@@ -1251,6 +1299,7 @@ export const Constants = {
       metric_direction: ["higher_is_better", "lower_is_better", "neutral"],
       metric_nature: ["primary", "derived"],
       metric_value_type: ["counter", "duration", "boolean", "ratio", "scale"],
+      sport_space_role: ["owner", "coach"],
       sport_space_type: [
         "club",
         "federation",
