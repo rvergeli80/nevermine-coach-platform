@@ -52,24 +52,72 @@ export class KnowledgePackageRepository {
   /** Errores de los paquetes rechazados al registrarse (trazabilidad). */
   private readonly rejected: { id: string; version: string; errors: string[] }[] = [];
 
-  constructor(descriptors: readonly KnowledgePackageDescriptor[] = []) {
+  /**
+   * Estado de distribución vigente por versión (FEATURE-003.3). El descriptor
+   * es inmutable —su checksum lo cubre—, así que el ciclo de vida se gobierna
+   * aquí y nunca mutando el paquete.
+   */
+  private readonly states = new Map<string, LifecycleState>();
+
+  /** Historial append-only de transiciones. */
+  private readonly history = new LifecycleHistory();
+
+  /** Entornos frente a los que se certifica antes de publicar. */
+  private readonly hosts: readonly HostEnvironment[];
+
+  constructor(
+    descriptors: readonly KnowledgePackageDescriptor[] = [],
+    options: { hosts?: readonly HostEnvironment[] } = {},
+  ) {
+    this.hosts = options.hosts ?? [];
     for (const descriptor of descriptors) this.register(descriptor);
   }
 
-  /** Alta de un paquete. Un descriptor inválido nunca entra en el catálogo. */
+  /**
+   * Alta de un paquete. Un descriptor inválido nunca entra en el catálogo, y
+   * uno que se declara `certified` o `published` sólo entra si supera la
+   * certificación automática: no hay atajos hacia la distribución.
+   */
   register(descriptor: KnowledgePackageDescriptor): RegisterResult {
     const errors = checkDescriptor(descriptor);
     const versions = this.byId.get(descriptor.id) ?? [];
     if (errors.length === 0 && versions.some((v) => v.version === descriptor.version)) {
       errors.push(`[${descriptor.id}] La versión ${descriptor.version} ya está registrada.`);
     }
+
+    let report: CertificationReport | null = null;
+    if (errors.length === 0 && (descriptor.status === "certified" || descriptor.status === "published")) {
+      report = this.runCertification(descriptor);
+      if (!report.ok) {
+        errors.push(
+          ...report.errors.map((e) => `[${descriptor.id}] Certificación fallida: ${e}`),
+        );
+      }
+    }
+
     if (errors.length > 0) {
       this.rejected.push({ id: descriptor?.id ?? "?", version: descriptor?.version ?? "?", errors });
       return { ok: false, errors };
     }
+
     versions.push(descriptor);
     versions.sort((a, b) => compareVersions(a.version, b.version));
     this.byId.set(descriptor.id, versions);
+    this.states.set(keyOf(descriptor.id, descriptor.version), descriptor.status);
+
+    // El alta es en sí misma un hecho auditable del ciclo de vida.
+    this.history.append({
+      packageId: descriptor.id,
+      version: descriptor.version,
+      from: "draft",
+      to: descriptor.status,
+      actor: "registry",
+      reason: "Alta en el repositorio de conocimiento",
+      at: new Date().toISOString(),
+      checksum: descriptor.checksum,
+      evidence: report ? certificationEvidence(report) : null,
+    });
+
     return { ok: true, errors: [] };
   }
 
@@ -86,13 +134,83 @@ export class KnowledgePackageRepository {
     return [...(this.byId.get(packageId) ?? [])];
   }
 
-  /** Última versión publicada (o la mayor registrada si ninguna lo está). */
+  /** Estado de distribución vigente de una versión. */
+  stateOf(packageId: string, version: string): LifecycleState | undefined {
+    return this.states.get(keyOf(packageId, version));
+  }
+
+  /** ¿Puede instalarse esta versión? Sólo lo publicado se distribuye. */
+  isDistributable(packageId: string, version?: string): boolean {
+    const descriptor = version ? this.get(packageId, version) : this.latest(packageId);
+    if (!descriptor) return false;
+    const state = this.stateOf(descriptor.id, descriptor.version);
+    return Boolean(state && isDistributableState(state));
+  }
+
+  /** Última versión distribuible (publicada) de un paquete. */
   latest(packageId: string): KnowledgePackageDescriptor | undefined {
     const versions = this.byId.get(packageId) ?? [];
-    const published = versions.filter((v) => v.status === "published");
-    const pool = published.length > 0 ? published : versions;
-    return pool[pool.length - 1];
+    const published = versions.filter(
+      (v) => this.states.get(keyOf(v.id, v.version)) === "published",
+    );
+    return published[published.length - 1];
   }
+
+  /** Última versión registrada, esté o no publicada (catálogo, no distribución). */
+  latestAny(packageId: string): KnowledgePackageDescriptor | undefined {
+    const versions = this.byId.get(packageId) ?? [];
+    return versions[versions.length - 1];
+  }
+
+  /** Certificación automática de una versión concreta. */
+  certify(packageId: string, version?: string): CertificationReport | undefined {
+    const descriptor = version ? this.get(packageId, version) : this.latestAny(packageId);
+    return descriptor ? this.runCertification(descriptor) : undefined;
+  }
+
+  /**
+   * Transición explícita de estado. No existen transiciones implícitas: pasar
+   * a `certified` exige superar la certificación automática, y `published`
+   * sólo se alcanza desde `certified`.
+   */
+  transition(packageId: string, version: string, request: TransitionRequest): TransitionResult {
+    const descriptor = this.get(packageId, version);
+    if (!descriptor) {
+      return { ok: false, errors: [`El paquete "${packageId}@${version}" no está en el repositorio.`] };
+    }
+    const from = this.states.get(keyOf(packageId, version));
+    if (!from) {
+      return { ok: false, errors: [`El paquete "${packageId}@${version}" no tiene estado de ciclo de vida.`] };
+    }
+
+    let evidence = request.evidence ?? null;
+    const guards: string[] = [];
+    if (request.to === "certified") {
+      const report = this.runCertification(descriptor);
+      evidence = certificationEvidence(report);
+      if (!report.ok) guards.push(...report.errors.map((e) => `Certificación fallida: ${e}`));
+    }
+
+    const result = evaluateTransition(packageId, version, from, { ...request, evidence, checksum: request.checksum ?? descriptor.checksum }, guards);
+    if (!result.ok) return result;
+
+    this.states.set(keyOf(packageId, version), result.transition.to);
+    this.history.append(result.transition);
+    return result;
+  }
+
+  /** Historial append-only de transiciones (de un paquete, versión o global). */
+  lifecycleHistory(packageId?: string, version?: string): readonly LifecycleTransition[] {
+    return packageId ? this.history.of(packageId, version) : this.history.all();
+  }
+
+  private runCertification(descriptor: KnowledgePackageDescriptor): CertificationReport {
+    return certifyPackage(descriptor, {
+      hosts: this.hosts,
+      lookup: (id) => this.latestAny(id),
+    });
+  }
+
 
   /** Una versión concreta, o la última si no se indica. */
   get(packageId: string, version?: string): KnowledgePackageDescriptor | undefined {
