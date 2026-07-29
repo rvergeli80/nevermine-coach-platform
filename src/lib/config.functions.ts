@@ -34,12 +34,15 @@ import {
 /* ---------------------------------- Deportes --------------------------------- */
 
 export const listSports = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  // Los deportes de plataforma (sport_space_id NULL) son comunes; los propios
+  // se acotan al SportSpace activo mediante RLS + contexto.
+  .middleware([requireApplicationContext])
   .handler(async ({ context }) =>
     unwrap(
       await context.supabase
         .from("sports")
         .select("id, code, name, status, owner_id, sport_space_id")
+        .or(`sport_space_id.is.null,sport_space_id.eq.${context.sportSpaceId}`)
         .order("name"),
     ),
   );
