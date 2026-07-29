@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { requireApplicationContext } from "@/lib/application-context-middleware";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
 import {
@@ -23,13 +24,14 @@ export const listTeams = createServerFn({ method: "GET" })
   );
 
 export const createTeam = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => createTeamSchema.parse(data))
   .handler(async ({ data, context }) =>
     unwrap(
       await context.supabase
         .from("teams")
         .insert({
+          sport_space_id: context.sportSpaceId,
           owner_id: context.userId,
           sport_id: data.sportId,
           name: data.name,
@@ -73,13 +75,14 @@ export const listPlayers = createServerFn({ method: "GET" })
   );
 
 export const createPlayer = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => createPlayerSchema.parse(data))
   .handler(async ({ data, context }) =>
     unwrap(
       await context.supabase
         .from("players")
         .insert({
+          sport_space_id: context.sportSpaceId,
           owner_id: context.userId,
           team_id: data.teamId,
           full_name: data.fullName,

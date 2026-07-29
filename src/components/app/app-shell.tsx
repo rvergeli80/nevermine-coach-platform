@@ -14,7 +14,9 @@ import {
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { SportSpaceSwitcher } from "@/components/app/sport-space-switcher";
 import { Button } from "@/components/ui/button";
+
 
 const NAV = [
   { to: "/app", label: "Resumen", icon: LayoutGrid, exact: true },
@@ -57,6 +59,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <LogOut className="size-4" />
           </Button>
         </div>
+
+        <SportSpaceSwitcher />
+
+
 
         <nav aria-label="Navegación principal" className="px-2 pb-3">
           <ul className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
