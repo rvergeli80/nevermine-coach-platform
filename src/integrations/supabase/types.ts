@@ -748,6 +748,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sport_spaces: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          status: Database["public"]["Enums"]["entity_status"]
+          type: Database["public"]["Enums"]["sport_space_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          status?: Database["public"]["Enums"]["entity_status"]
+          type?: Database["public"]["Enums"]["sport_space_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["entity_status"]
+          type?: Database["public"]["Enums"]["sport_space_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sports: {
         Row: {
           code: string
@@ -1071,6 +1107,7 @@ export type Database = {
       metric_direction: "higher_is_better" | "lower_is_better" | "neutral"
       metric_nature: "primary" | "derived"
       metric_value_type: "counter" | "duration" | "boolean" | "ratio" | "scale"
+      sport_space_type: "club" | "federation" | "academy" | "personal"
       subject_scope: "individual" | "collective"
       subject_type: "player" | "team"
       valuation_status: "current" | "superseded"
@@ -1208,6 +1245,7 @@ export const Constants = {
       metric_direction: ["higher_is_better", "lower_is_better", "neutral"],
       metric_nature: ["primary", "derived"],
       metric_value_type: ["counter", "duration", "boolean", "ratio", "scale"],
+      sport_space_type: ["club", "federation", "academy", "personal"],
       subject_scope: ["individual", "collective"],
       subject_type: ["player", "team"],
       valuation_status: ["current", "superseded"],
