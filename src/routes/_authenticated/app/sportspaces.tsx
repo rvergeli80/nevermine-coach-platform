@@ -30,7 +30,7 @@ import {
   SPORT_SPACE_TYPE_LABELS,
   slugifySportSpaceName,
   type SportSpaceType,
-} from "@/modules/organization";
+} from "@/modules/sport-space";
 
 export const Route = createFileRoute("/_authenticated/app/sportspaces")({
   head: () => ({
