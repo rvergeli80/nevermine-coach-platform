@@ -142,6 +142,24 @@ function StarterPacksPage() {
   );
 }
 
+const LIFECYCLE_LABELS: Record<string, string> = {
+  draft: "Borrador",
+  review: "En revisión",
+  certified: "Certificado",
+  published: "Publicado",
+  deprecated: "Obsoleto",
+  archived: "Archivado",
+};
+
+/** Estado del ciclo de vida de distribución del paquete (FEATURE-003.3). */
+function LifecycleBadge({ state }: { state: string }) {
+  return (
+    <Badge variant={state === "published" ? "secondary" : "outline"}>
+      {LIFECYCLE_LABELS[state] ?? state}
+    </Badge>
+  );
+}
+
 function StateBadge({
   state,
   installedVersion,
