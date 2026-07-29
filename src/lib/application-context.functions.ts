@@ -2,11 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  loadContextCandidates,
-  readRequestedSportSpaceId,
-  writeActiveSportSpaceId,
-} from "@/lib/application-context-middleware";
+import { loadContextCandidates } from "@/lib/application-context-middleware";
 import {
   CONTEXT_FORBIDDEN_MESSAGE,
   resolveApplicationContext,
@@ -21,6 +17,9 @@ const activateSchema = z.object({ sportSpaceId: z.string().uuid() });
 export const getApplicationContext = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { readRequestedSportSpaceId, writeActiveSportSpaceId } = await import(
+      "@/lib/application-context.server"
+    );
     const { candidates, spaces } = await loadContextCandidates(
       context.supabase as never,
       context.userId,
@@ -44,6 +43,7 @@ export const setApplicationContext = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => activateSchema.parse(data))
   .handler(async ({ data, context }) => {
+    const { writeActiveSportSpaceId } = await import("@/lib/application-context.server");
     const { candidates, spaces } = await loadContextCandidates(
       context.supabase as never,
       context.userId,

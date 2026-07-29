@@ -1,6 +1,4 @@
 import { createMiddleware } from "@tanstack/react-start";
-import { getCookie, setCookie } from "@tanstack/react-start/server";
-
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   CONTEXT_EMPTY_MESSAGE,
@@ -16,8 +14,6 @@ import {
  * de sesión. El dominio consume `ApplicationContext` y nunca conoce cookies,
  * cabeceras ni JWT.
  */
-
-export const ACTIVE_SPORT_SPACE_COOKIE = "nvm_active_sport_space";
 
 type SupabaseClient = {
   from: (table: string) => any;
@@ -63,21 +59,6 @@ export async function loadContextCandidates(supabase: SupabaseClient, userId: st
   return { candidates, spaces };
 }
 
-/** Lee el SportSpace solicitado por la sesión actual (mecanismo: cookie). */
-export function readRequestedSportSpaceId(): string | null {
-  return getCookie(ACTIVE_SPORT_SPACE_COOKIE) ?? null;
-}
-
-/** Persiste el SportSpace activo durante la sesión. */
-export function writeActiveSportSpaceId(sportSpaceId: string) {
-  setCookie(ACTIVE_SPORT_SPACE_COOKIE, sportSpaceId, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: true,
-    path: "/",
-  });
-}
-
 /**
  * Middleware de contexto: exige sesión y un SportSpace activo válido.
  * Expone `sportSpaceId` a los servicios, que ya no derivan el ámbito de
@@ -86,6 +67,7 @@ export function writeActiveSportSpaceId(sportSpaceId: string) {
 export const requireApplicationContext = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
+    const { readRequestedSportSpaceId } = await import("@/lib/application-context.server");
     const { candidates } = await loadContextCandidates(
       context.supabase as unknown as SupabaseClient,
       context.userId,
