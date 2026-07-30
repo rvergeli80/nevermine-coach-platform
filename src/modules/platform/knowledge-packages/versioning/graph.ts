@@ -95,6 +95,28 @@ export class VersionGraph<TSnapshot = unknown> {
     return path;
   }
 
+  /**
+   * FEATURE-003.8 — Linaje de una versión nacida de una fusión: qué versión
+   * aportó el contenido (source), sobre cuál se fusionó (target) y el
+   * resultado. `null` si la versión no procede de un merge.
+   */
+  mergeLineageOf(versionId: string): {
+    mergeId: string;
+    source: VersionRecord<TSnapshot> | null;
+    target: VersionRecord<TSnapshot> | null;
+    merged: VersionRecord<TSnapshot>;
+  } | null {
+    const record = this.byId.get(versionId);
+    if (!record?.merge) return null;
+    const [source, target] = record.merge.mergedFrom;
+    return {
+      mergeId: record.merge.mergeId,
+      source: (source ? this.byId.get(source) : undefined) ?? null,
+      target: (target ? this.byId.get(target) : undefined) ?? null,
+      merged: record,
+    };
+  }
+
   /** Linaje completo de la configuración. */
   lineage(packageId: string): VersionLineage<TSnapshot> {
     const origin = this.origin();

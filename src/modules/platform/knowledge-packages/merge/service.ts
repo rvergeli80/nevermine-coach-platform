@@ -19,7 +19,7 @@ import type { ComparisonService } from "../comparison/service";
 import type { ComparedVersion } from "../comparison/types";
 import type { VersioningService } from "../versioning/service";
 import type { VersionRecord } from "../versioning/types";
-import { buildMergePlan, type MergePlan } from "./plan";
+import { buildMergePlan } from "./plan";
 import { buildMergeReport, explainConflicts, summarize } from "./report";
 import type {
   MergeAdapter,
@@ -274,5 +274,3 @@ export function createMergeService<TSnapshot>(
 ): MergeService<TSnapshot> {
   return new MergeService<TSnapshot>(options);
 }
-
-export type { MergePlan };
