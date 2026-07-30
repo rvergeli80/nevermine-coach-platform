@@ -138,7 +138,7 @@ describe("FEATURE-003.5 — Installation Engine", () => {
     expect(executor.reverts).toBe(1);
     expect(await store.get(SCOPE, PACK.id)).toBeNull();
     const events = service.listHistory(SCOPE, PACK.id);
-    expect(events.at(-1)?.result).toBe("failure");
+    expect(events.at(-1)?.result).toBe("failed");
   });
 
   it("sin versión anterior no hay rollback posible", async () => {
@@ -174,6 +174,6 @@ describe("FEATURE-003.5 — Installation Engine", () => {
     await service.install({ scopeId: SCOPE, packageId: PACK.id, force: true });
     const events = service.listHistory(SCOPE, PACK.id);
     expect(events.length).toBeGreaterThanOrEqual(2);
-    expect(events.map((e) => e.result)).toContain("failure");
+    expect(events.map((e) => e.result)).toContain("failed");
   });
 });
