@@ -6,6 +6,8 @@
  */
 
 export * from "./lifecycle";
+export * from "./governance";
+export * from "./publication";
 export * from "./certification";
 export * from "./types";
 export * from "./integrity";

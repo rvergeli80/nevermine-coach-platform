@@ -8,6 +8,7 @@
 
 import { isValidVersion } from "../semver";
 import { LIFECYCLE_STATES } from "./lifecycle";
+import { TRUST_LEVELS } from "./governance";
 import { verifyIntegrity } from "./integrity";
 import type { KnowledgePackageDescriptor } from "./types";
 
@@ -18,7 +19,7 @@ const SLUG_RE = /^[a-z][a-z0-9_-]{1,63}$/;
 const KINDS = new Set(["starter_pack"]);
 const ORIGINS = new Set(["official", "community", "enterprise", "private", "marketplace"]);
 const STATUSES = new Set(LIFECYCLE_STATES as readonly string[]);
-const TRUSTS = new Set(["unverified", "certified", "partner"]);
+const TRUSTS = new Set(TRUST_LEVELS as readonly string[]);
 
 /** Errores de forma del descriptor (lista vacía = válido). */
 export function checkDescriptor(descriptor: KnowledgePackageDescriptor): string[] {
@@ -34,6 +35,10 @@ export function checkDescriptor(descriptor: KnowledgePackageDescriptor): string[
   if (!ORIGINS.has(descriptor.origin)) at(`Origen no válido: "${descriptor.origin}".`);
   if (!STATUSES.has(descriptor.status)) at(`Estado no válido: "${descriptor.status}".`);
   if (!TRUSTS.has(descriptor.trust)) at(`Nivel de confianza no válido: "${descriptor.trust}".`);
+  // FEATURE-003.4 — Ownership: ningún paquete puede ser anónimo.
+  if (!ID_RE.test(descriptor.publisher ?? "")) {
+    at(`Publisher no válido o ausente: "${descriptor.publisher}". Ningún paquete puede ser anónimo.`);
+  }
   if (!isValidVersion(descriptor.version ?? "")) at(`Versión no válida: "${descriptor.version}".`);
   if (!DATE_RE.test(descriptor.publishedAt ?? "")) at("Fecha de publicación no válida.");
   if (!SLUG_RE.test(descriptor.domain ?? "")) at(`Dominio no válido: "${descriptor.domain}".`);
