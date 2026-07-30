@@ -17,6 +17,8 @@ import {
   starterPackLifecycleHistory,
   starterPackPublicationAudit,
   starterPackPublicationMetadata,
+  starterPackDistributionStatus,
+  createCoachDistributionService,
   summarizePack,
   toCatalogEntry,
   type InstallationRecord,
@@ -25,8 +27,10 @@ import {
 } from "@/modules/starter-packs";
 import type {
   DiscoveryQuery,
+  DistributionReport,
   InstallationManifest,
   InstallationService,
+  UpdateAvailability,
 } from "@/modules/platform/knowledge-packages";
 import { createCoachInstallationService } from "./pack-installation";
 
@@ -384,4 +388,69 @@ export function mergeConfiguration(input: {
   changeType?: "major" | "minor" | "patch";
 }) {
   return mergeConfigurationVersions(input);
+}
+
+/**
+ * FEATURE-003.9 — Distribución de nuevas versiones.
+ *
+ * Coach nunca busca versiones directamente en el repositorio: pregunta al
+ * DistributionService, muestra la disponibilidad y, si el usuario la acepta,
+ * el propio motor delega la ejecución en el Installation Engine. No existen
+ * actualizaciones automáticas silenciosas.
+ */
+
+/** Actualizaciones anunciadas para el SportSpace activo (sólo información). */
+export async function checkStarterPackUpdates(
+  ctx: ApplicationServiceContext,
+): Promise<UpdateAvailability[]> {
+  const distribution = createCoachDistributionService(createCoachInstallationService(ctx));
+  return distribution.discoverUpdatesForScope(ctx.sportSpaceId);
+}
+
+/** Consulta de un pack concreto: ¿hay actualización válida y en canal admitido? */
+export async function checkStarterPackUpdate(
+  ctx: ApplicationServiceContext,
+  packId: string,
+): Promise<UpdateAvailability> {
+  const engine = createCoachInstallationService(ctx);
+  const distribution = createCoachDistributionService(engine);
+  const manifest = await engine.manifestOf(ctx.sportSpaceId, packId);
+  return distribution.checkForUpdates({
+    packageId: packId,
+    installedVersion: manifest?.state === "installed" ? manifest.version : null,
+    scopeId: ctx.sportSpaceId,
+  });
+}
+
+/** Informe de distribución del SportSpace activo (reutilizable por UI, MCP y CLI). */
+export async function getDistributionReport(
+  ctx: ApplicationServiceContext,
+): Promise<DistributionReport> {
+  const distribution = createCoachDistributionService(createCoachInstallationService(ctx));
+  return distribution.reportForScope(ctx.sportSpaceId);
+}
+
+/** Estado de distribución de un pack: publicaciones activas, canales y política. */
+export function getPackDistributionStatus(packId: string) {
+  return starterPackDistributionStatus(packId);
+}
+
+/**
+ * Aceptación explícita de una actualización anunciada. El DistributionService
+ * valida el anuncio y delega la instalación en el InstallationService: aquí no
+ * se instala nada por cuenta propia.
+ */
+export async function applyAnnouncedUpdate(
+  ctx: ApplicationServiceContext,
+  input: { packId: string },
+): Promise<InstallStarterPackResult> {
+  const engine = createCoachInstallationService(ctx);
+  const distribution = createCoachDistributionService(engine);
+  const result = await distribution.requestUpdate({
+    scopeId: ctx.sportSpaceId,
+    packageId: input.packId,
+    actor: ctx.userId,
+  });
+  if (!result.ok) throw new Error(result.errors.join(" "));
+  return toInstallResult(result.outcome, input.packId, result.availability.availableVersion ?? "");
 }

@@ -19,3 +19,4 @@ export * from "./installation";
 export * from "./versioning";
 export * from "./comparison";
 export * from "./merge";
+export * from "./distribution";

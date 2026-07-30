@@ -79,6 +79,14 @@ export interface PackDependency {
   optional?: boolean;
 }
 
+/** Canal y política de actualización declarados por el pack (FEATURE-003.9). */
+export interface PackDistribution {
+  /** Canal en el que se publica: "stable" | "preview" | "internal". */
+  channel?: "stable" | "preview" | "internal";
+  /** Política de actualización: "automatic" | "notify" | "manual". */
+  updatePolicy?: "automatic" | "notify" | "manual";
+}
+
 export interface StarterPack {
   /** Identificador estable del pack (no del catálogo creado). */
   id: string;
@@ -104,6 +112,12 @@ export interface StarterPack {
   groups: PackGroup[];
   metrics: PackMetric[];
   profiles: PackProfile[];
+  /**
+   * FEATURE-003.9 — Distribución declarada por el pack: canal en el que se
+   * publica y política de actualización que Coach se limita a consultar.
+   * Es *dato*, no código: cambiar la política no cambia el motor.
+   */
+  distribution?: PackDistribution;
 }
 
 
