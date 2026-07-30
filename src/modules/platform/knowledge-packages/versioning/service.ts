@@ -161,7 +161,9 @@ export class VersioningService<TSnapshot = unknown> {
     };
 
     this.store.append(record);
-    return { ok: true, version: record };
+    // Se devuelve el registro tal y como quedó almacenado (congelado), nunca
+    // el objeto mutable con el que se construyó.
+    return { ok: true, version: this.store.get(record.versionId) ?? record };
   }
 
   /** Cambio incompatible. */
