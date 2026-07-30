@@ -8,6 +8,7 @@
  */
 
 import type { LifecycleState } from "./lifecycle";
+import type { TrustLevel } from "./governance";
 
 /** Tipo de conocimiento que transporta el paquete. */
 export type KnowledgePackageKind = "starter_pack";
@@ -30,8 +31,11 @@ export type KnowledgePackageOrigin =
  */
 export type KnowledgePackageStatus = LifecycleState;
 
-/** Nivel de confianza declarado (la certificación llega en Features posteriores). */
-export type KnowledgePackageTrust = "unverified" | "certified" | "partner";
+/**
+ * Nivel de confianza del paquete (FEATURE-003.4). Lo aporta su Publisher: el
+ * paquete nunca se autoproclama confiable.
+ */
+export type KnowledgePackageTrust = TrustLevel;
 
 /** Producto de plataforma con el que el paquete declara ser compatible. */
 export interface ProductRequirement {
@@ -94,6 +98,8 @@ export interface KnowledgePackageDescriptor<TPayload = unknown> {
   kind: KnowledgePackageKind;
   origin: KnowledgePackageOrigin;
   status: KnowledgePackageStatus;
+  /** FEATURE-003.4 — Publisher propietario. Ningún paquete es anónimo. */
+  publisher: string;
   trust: KnowledgePackageTrust;
   version: string;
   author: string;

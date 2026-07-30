@@ -1,6 +1,7 @@
 import { ENGINE_ID, ENGINE_VERSION } from "./engine";
 import type { StarterPack } from "./types";
 import {
+  NEVERMINE_OFFICIAL_PUBLISHER_ID,
   UNSIGNED,
   checksumOfDescriptor,
   type HostEnvironment,
@@ -38,7 +39,9 @@ export function toKnowledgePackage(pack: StarterPack): StarterPackDescriptor {
     kind: "starter_pack",
     origin: pack.origin,
     status: pack.status === "published" ? "published" : "deprecated",
-    trust: "unverified",
+    // FEATURE-003.4 — El catálogo oficial de Coach lo publica Nevermine Official.
+    publisher: NEVERMINE_OFFICIAL_PUBLISHER_ID,
+    trust: "official",
     version: pack.version,
     author: pack.author,
     publishedAt: pack.publishedAt,
