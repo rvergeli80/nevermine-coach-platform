@@ -211,6 +211,7 @@ describe("FEATURE-003.6 — Versioning Service", () => {
       publicationState: "unpublished" as const,
       lifecycleState: "draft" as const,
       trustLevel: "official" as const,
+      merge: null,
       snapshot: null,
     });
     expect(new VersionGraph([record("b", "missing", "1.1.0")]).validate().length).toBeGreaterThan(0);

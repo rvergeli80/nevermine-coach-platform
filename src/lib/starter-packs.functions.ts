@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -12,6 +13,8 @@ import {
   listInstallationHistory,
   listInstallationManifests,
   listStarterPackCatalog,
+  mergeConfiguration,
+  previewConfigurationMergeService,
   rollbackStarterPack as rollbackStarterPackService,
   uninstallStarterPack as uninstallStarterPackService,
   updateStarterPack as updateStarterPackService,
@@ -153,3 +156,51 @@ export const compareConfigurationVersionsFn = createServerFn({ method: "GET" })
       ? { ok: true as const, comparison: JSON.parse(JSON.stringify(result.comparison)) }
       : { ok: false as const, errors: result.errors };
   });
+
+/** FEATURE-003.8 — Vista previa de una fusión: no crea versión ni persiste nada. */
+export const previewConfigurationMergeFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth, requireApplicationContext])
+  .inputValidator((data: unknown) =>
+    z
+      .object({ packId: z.string().min(1), from: z.string().min(1), to: z.string().min(1) })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const outcome = previewConfigurationMergeService(data.packId, data.from, data.to);
+    return toMergeDto(outcome);
+  });
+
+/** FEATURE-003.8 — Ejecuta la fusión; el éxito crea una versión nueva. */
+export const mergeConfigurationVersionsFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth, requireApplicationContext])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        packId: z.string().min(1),
+        from: z.string().min(1),
+        to: z.string().min(1),
+        reason: z.string().min(1),
+        changeSummary: z.string().min(1),
+        changeType: z.enum(["major", "minor", "patch"]).optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const outcome = mergeConfiguration({
+      ...data,
+      // El autor es siempre el usuario autenticado: la fusión es un acto auditable.
+      mergeAuthor: context.userId,
+    });
+    return toMergeDto(outcome);
+  });
+
+/** DTO plano del informe de fusión: cruza la frontera RPC como datos. */
+type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+
+function toMergeDto(outcome: { ok: boolean; errors?: string[]; result?: unknown }) {
+  return {
+    ok: outcome.ok,
+    errors: outcome.errors ?? [],
+    result: outcome.result ? (JSON.parse(JSON.stringify(outcome.result)) as Json) : null,
+  };
+}
