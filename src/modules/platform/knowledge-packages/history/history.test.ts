@@ -295,6 +295,8 @@ describe("FEATURE-003.10 — Ingesta desde el resto del Engine", () => {
           actor: "nevermine",
           reason: null,
           at: "2026-01-01T11:00:00.000Z",
+          checksum: "abc",
+          evidence: null,
         },
       ],
       installations: [
