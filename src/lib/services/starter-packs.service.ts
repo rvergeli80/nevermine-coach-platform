@@ -19,8 +19,10 @@ import {
   starterPackPublicationMetadata,
   starterPackDistributionStatus,
   createCoachDistributionService,
+  createCoachHistoryService,
   summarizePack,
   toCatalogEntry,
+  type CoachInstallationEventRow,
   type InstallationRecord,
   type StarterPackCatalogEntry,
   type StarterPackDescriptor,
@@ -28,6 +30,7 @@ import {
 import type {
   DiscoveryQuery,
   DistributionReport,
+  HistoryQuery,
   InstallationManifest,
   InstallationService,
   UpdateAvailability,
