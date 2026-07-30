@@ -68,7 +68,7 @@ export interface KnowledgePackageCatalogEntry extends StarterPackCatalogEntry {
   /** FEATURE-003.4 — identidad editorial responsable del paquete. */
   publisher: { id: string; name: string; kind: string } | null;
   /** Fecha real del acto de publicación (ISO 8601), si lo hubo. */
-  publishedAt: string | null;
+  publicationDate: string | null;
 }
 
 export interface InstallStarterPackResult {
@@ -128,7 +128,7 @@ function toEntry(
     lifecycleState: starterPackLifecycleState(descriptor.id, descriptor.version) ?? descriptor.status,
     distributable: isStarterPackDistributable(descriptor.id, descriptor.version),
     publisher: metadata?.publisher ?? null,
-    publishedAt: metadata?.publishedAt ?? null,
+    publicationDate: metadata?.publishedAt ?? null,
   };
 }
 
