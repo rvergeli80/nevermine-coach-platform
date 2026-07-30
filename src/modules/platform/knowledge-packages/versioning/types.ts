@@ -9,6 +9,19 @@
 import type { TrustLevel } from "../governance";
 import type { LifecycleState } from "../lifecycle";
 
+/**
+ * FEATURE-003.8 — Procedencia de una versión nacida de una fusión. Sólo la
+ * rellena el Merge Engine; el resto de versiones la tienen a `null`.
+ */
+export interface VersionMergeProvenance {
+  mergeId: string;
+  /** Versiones fusionadas, en orden [source, target]. */
+  mergedFrom: readonly string[];
+  mergeTimestamp: string;
+  mergeAuthor: string;
+}
+
+
 /** Naturaleza del cambio; determina el salto semántico. */
 export type ChangeType = "major" | "minor" | "patch" | "initial";
 
