@@ -163,6 +163,42 @@ export async function listInstallationHistory(
 }
 
 /**
+ * FEATURE-003.5 — Toda operación de instalación pasa por el Installation
+ * Engine de la plataforma: Coach nunca instala contra el repositorio ni contra
+ * la base de datos por su cuenta. El motor valida (ciclo de vida, publicación,
+ * compatibilidad, dependencias, integridad, confianza), resuelve la versión,
+ * ejecuta de forma transaccional, restaura en caso de fallo y registra el
+ * historial append-only.
+ */
+
+function toInstallResult(
+  outcome: Awaited<ReturnType<InstallationService["install"]>>,
+  packId: string,
+  version: string,
+): InstallStarterPackResult {
+  if (!outcome.ok) throw new Error(outcome.errors.join(" "));
+  const payload = (outcome.result ?? outcome.manifest?.payload ?? {}) as Record<string, unknown>;
+  const action = outcome.operation === "noop" ? "noop" : ((payload.action as string) ?? outcome.operation);
+  return {
+    action: (action === "rollback" ? "update" : action) as InstallStarterPackResult["action"],
+    packId,
+    version: outcome.manifest?.version ?? version,
+    catalogId: (payload.catalogId as string) ?? outcome.manifest?.payload?.catalogId as string ?? null,
+    catalogVersionId:
+      (payload.catalogVersionId as string) ??
+      (outcome.manifest?.payload?.catalogVersionId as string) ??
+      null,
+    groups: Number(payload.groups ?? 0),
+    metrics: Number(payload.metrics ?? 0),
+    formulas: Number(payload.formulas ?? 0),
+    message:
+      outcome.operation === "noop"
+        ? (outcome.resolution?.reason ?? `El pack ya está instalado en la versión ${outcome.manifest?.version}.`)
+        : undefined,
+  };
+}
+
+/**
  * Instala (o reinstala/actualiza) un pack sobre el SportSpace activo.
  * Idempotente: la misma versión ya instalada no crea nada sin `force`.
  */
@@ -172,69 +208,75 @@ export async function installStarterPack(
 ): Promise<InstallStarterPackResult> {
   const descriptor = findPackageDescriptor(input.packId, input.version);
   if (!descriptor) throw new Error("Paquete no encontrado en el repositorio de conocimiento");
-  const pack = descriptor.payload;
 
-  // El repositorio valida compatibilidad y resuelve las dependencias: si algo
-  // no encaja, la instalación no empieza y la base de datos no se toca.
-  // FEATURE-003.3: sólo se distribuye lo publicado. El repositorio comprueba
-  // ciclo de vida, compatibilidad y dependencias antes de tocar la base de datos.
-  if (!isStarterPackDistributable(descriptor.id, descriptor.version)) {
-    throw new Error(
-      `El paquete "${descriptor.id}" está en estado "${
-        starterPackLifecycleState(descriptor.id, descriptor.version) ?? descriptor.status
-      }" y todavía no es distribuible.`,
-    );
-  }
-  const resolution = resolveInstallOrder(descriptor.id, descriptor.version);
-  if (!resolution.ok) throw new Error(resolution.errors.join(" "));
-
-  const built = buildInstallPlan(pack);
-  if (!built.ok) throw new Error(`El pack no es válido: ${built.errors.join(" ")}`);
-
-  const installed = await loadInstallations(ctx);
-  const current = installed.get(pack.id) ?? null;
-  const decision = decideInstallAction(pack, current, { force: input.force });
-
-  if (decision.action === "noop") {
-    return {
-      action: "noop",
-      packId: pack.id,
-      version: pack.version,
-      catalogId: current?.catalogId ?? null,
-      catalogVersionId: current?.catalogVersionId ?? null,
-      groups: 0,
-      metrics: 0,
-      formulas: 0,
-      message: decision.reason,
-    };
-  }
-
-  if (!ctx.supabase.rpc) throw new Error("El cliente de datos no permite operaciones transaccionales");
-
-  // Dependencias primero (el propio paquete es el último del orden resuelto).
-  for (const dependency of resolution.order.filter((p) => p.id !== descriptor.id)) {
-    if (installed.has(dependency.id)) continue;
-    const depPlan = buildInstallPlan((dependency as StarterPackDescriptor).payload);
-    if (!depPlan.ok) throw new Error(`Dependencia inválida "${dependency.id}": ${depPlan.errors.join(" ")}`);
-    unwrap(
-      await ctx.supabase.rpc("install_starter_pack", {
-        _sport_space_id: ctx.sportSpaceId,
-        _plan: depPlan.plan,
-        _force: false,
-      }),
-    );
-  }
-
-  const result = unwrap(
-    await ctx.supabase.rpc("install_starter_pack", {
-      _sport_space_id: ctx.sportSpaceId,
-      _plan: built.plan,
-      _force: decision.action === "reinstall",
-    }),
-  ) as InstallStarterPackResult;
-
-  return result;
+  const engine = createCoachInstallationService(ctx);
+  const outcome = await engine.install({
+    scopeId: ctx.sportSpaceId,
+    packageId: descriptor.id,
+    version: descriptor.version,
+    actor: ctx.userId,
+    force: input.force,
+  });
+  return toInstallResult(outcome, descriptor.id, descriptor.version);
 }
+
+/** Actualización explícita a una versión superior ya publicada. */
+export async function updateStarterPack(
+  ctx: ApplicationServiceContext,
+  input: { packId: string; version?: string },
+): Promise<InstallStarterPackResult> {
+  const descriptor = findPackageDescriptor(input.packId, input.version);
+  if (!descriptor) throw new Error("Paquete no encontrado en el repositorio de conocimiento");
+  const engine = createCoachInstallationService(ctx);
+  const outcome = await engine.update({
+    scopeId: ctx.sportSpaceId,
+    packageId: descriptor.id,
+    version: descriptor.version,
+    actor: ctx.userId,
+  });
+  return toInstallResult(outcome, descriptor.id, descriptor.version);
+}
+
+/** Rollback a la versión anterior (o a una versión concreta ya publicada). */
+export async function rollbackStarterPack(
+  ctx: ApplicationServiceContext,
+  input: { packId: string; toVersion?: string },
+): Promise<InstallStarterPackResult> {
+  const engine = createCoachInstallationService(ctx);
+  const outcome = await engine.rollback({
+    scopeId: ctx.sportSpaceId,
+    packageId: input.packId,
+    toVersion: input.toVersion,
+    actor: ctx.userId,
+  });
+  return toInstallResult(outcome, input.packId, input.toVersion ?? "");
+}
+
+/**
+ * Desinstalación: marca el manifiesto como desinstalado. El conocimiento ya
+ * generado (catálogos, versiones, valoraciones) es inmutable y se conserva.
+ */
+export async function uninstallStarterPack(
+  ctx: ApplicationServiceContext,
+  input: { packId: string },
+): Promise<{ packId: string; uninstalled: boolean; message?: string }> {
+  const engine = createCoachInstallationService(ctx);
+  const outcome = await engine.uninstall({
+    scopeId: ctx.sportSpaceId,
+    packageId: input.packId,
+    actor: ctx.userId,
+  });
+  if (!outcome.ok) throw new Error(outcome.errors.join(" "));
+  return { packId: input.packId, uninstalled: true };
+}
+
+/** Manifiestos de instalación del SportSpace activo (qué hay instalado hoy). */
+export async function listInstallationManifests(
+  ctx: ApplicationServiceContext,
+): Promise<InstallationManifest[]> {
+  return createCoachInstallationService(ctx).listManifests(ctx.sportSpaceId);
+}
+
 
 /** Historial append-only de transiciones de ciclo de vida (FEATURE-003.3). */
 export function listPackageLifecycleHistory(packId?: string, version?: string) {
