@@ -9,6 +9,8 @@ import {
   decideInstallAction,
   discoverStarterPacks,
   findPackageDescriptor,
+  mergeConfigurationVersions,
+  previewConfigurationMerge,
   resolveInstallOrder,
   starterPackLifecycleState,
   isStarterPackDistributable,
@@ -359,4 +361,27 @@ export function compareConfiguration(packId: string, from: string, to: string) {
 /** Comparación previa a una actualización: vigente frente a candidata. */
 export function compareConfigurationWithCurrent(packId: string, candidate: string) {
   return compareAgainstCurrent(packId, candidate);
+}
+
+/**
+ * FEATURE-003.8 — Fusión de versiones.
+ * Coach solicita preview, muestra conflictos y ejecuta la fusión. Toda la
+ * lógica (reglas, conflictos, determinismo, nueva versión) vive en el
+ * MergeService de la plataforma.
+ */
+export function previewConfigurationMergeService(packId: string, from: string, to: string) {
+  return previewConfigurationMerge(packId, from, to);
+}
+
+/** Ejecuta la fusión: el éxito crea una versión nueva con su procedencia. */
+export function mergeConfiguration(input: {
+  packId: string;
+  from: string;
+  to: string;
+  mergeAuthor: string;
+  reason: string;
+  changeSummary: string;
+  changeType?: "major" | "minor" | "patch";
+}) {
+  return mergeConfigurationVersions(input);
 }
