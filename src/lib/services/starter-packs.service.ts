@@ -9,6 +9,8 @@ import {
   starterPackLifecycleState,
   isStarterPackDistributable,
   starterPackLifecycleHistory,
+  starterPackPublicationAudit,
+  starterPackPublicationMetadata,
   summarizePack,
   toCatalogEntry,
   type InstallationRecord,
@@ -63,6 +65,10 @@ export interface KnowledgePackageCatalogEntry extends StarterPackCatalogEntry {
   lifecycleState: string;
   /** Sólo los paquetes publicados pueden instalarse. */
   distributable: boolean;
+  /** FEATURE-003.4 — identidad editorial responsable del paquete. */
+  publisher: { id: string; name: string; kind: string } | null;
+  /** Fecha real del acto de publicación (ISO 8601), si lo hubo. */
+  publishedAt: string | null;
 }
 
 export interface InstallStarterPackResult {
@@ -106,6 +112,7 @@ function toEntry(
   record: InstallationRecord | null,
 ): KnowledgePackageCatalogEntry {
   const plan = resolveInstallOrder(descriptor.id, descriptor.version);
+  const metadata = starterPackPublicationMetadata(descriptor.id, descriptor.version);
   return {
     ...toCatalogEntry(summarizePack(descriptor.payload), record),
     kind: descriptor.kind,
@@ -120,6 +127,8 @@ function toEntry(
     incompatibilityReasons: plan.ok ? [] : plan.errors,
     lifecycleState: starterPackLifecycleState(descriptor.id, descriptor.version) ?? descriptor.status,
     distributable: isStarterPackDistributable(descriptor.id, descriptor.version),
+    publisher: metadata?.publisher ?? null,
+    publishedAt: metadata?.publishedAt ?? null,
   };
 }
 
@@ -230,4 +239,9 @@ export async function installStarterPack(
 /** Historial append-only de transiciones de ciclo de vida (FEATURE-003.3). */
 export function listPackageLifecycleHistory(packId?: string, version?: string) {
   return starterPackLifecycleHistory(packId, version);
+}
+
+/** Auditoría append-only de los actos de publicación (FEATURE-003.4). */
+export function listPackagePublicationAudit(packId?: string, version?: string) {
+  return starterPackPublicationAudit(packId, version);
 }
