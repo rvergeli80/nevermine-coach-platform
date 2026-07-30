@@ -17,6 +17,7 @@ import {
   nevermineOfficialPublisher,
   type HostEnvironment,
   type KnowledgePackageDescriptor,
+  type PublicationAuditEntry,
   type Publisher,
 } from "./index";
 
@@ -283,7 +284,7 @@ describe("Auditoría append-only", () => {
     expect(() => {
       (entry as { actor: string }).actor = "otro";
     }).toThrow();
-    log.all().splice(0, 1);
+    (log.all() as PublicationAuditEntry[]).splice(0, 1);
     expect(log.size).toBe(1);
     expect(log.byPublisher(NEVERMINE_OFFICIAL_PUBLISHER_ID)).toHaveLength(1);
   });
