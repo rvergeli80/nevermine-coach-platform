@@ -8,8 +8,12 @@ import {
   installStarterPack as installStarterPackService,
   applyAnnouncedUpdate,
   checkStarterPackUpdates,
+  explainKnowledgeHistory,
   getDistributionReport,
+  getKnowledgeAuditTrail,
+  getKnowledgeTimeline,
   getPackDistributionStatus,
+  getTraceabilityReportFor,
   compareConfiguration,
   compareConfigurationWithCurrent,
   getConfigurationLineage,
@@ -19,10 +23,13 @@ import {
   listStarterPackCatalog,
   mergeConfiguration,
   previewConfigurationMergeService,
+  reconstructKnowledgeState,
   rollbackStarterPack as rollbackStarterPackService,
+  searchKnowledgeHistory,
   uninstallStarterPack as uninstallStarterPackService,
   updateStarterPack as updateStarterPackService,
 } from "@/lib/services/starter-packs.service";
+import { isHistoryEventType } from "@/modules/platform/knowledge-packages";
 
 /**
  * FEATURE-003.1 — Canal HTTP de los Starter Packs oficiales.
