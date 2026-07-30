@@ -22,6 +22,21 @@ import {
   type TransitionResult,
 } from "./lifecycle";
 import { checkDescriptor } from "./validation";
+import {
+  PublisherRegistry,
+  isAuthorizedToPublish,
+  nevermineOfficialPublisher,
+  type Publisher,
+} from "./governance";
+import {
+  PublicationAuditLog,
+  buildPublicationMetadata,
+  evaluatePublicationPolicy,
+  publicationEvidence,
+  type PublicationAuditEntry,
+  type PublicationDecision,
+  type PublicationMetadata,
+} from "./publication";
 import type {
   DiscoveryQuery,
   HostEnvironment,
@@ -65,11 +80,27 @@ export class KnowledgePackageRepository {
   /** Entornos frente a los que se certifica antes de publicar. */
   private readonly hosts: readonly HostEnvironment[];
 
+  /** FEATURE-003.4 — Directorio de identidades editoriales. */
+  private readonly publishers: PublisherRegistry;
+
+  /** Bitácora append-only de actos de gobierno. */
+  private readonly audit = new PublicationAuditLog();
+
+  /** Fecha real del acto de publicación por versión. */
+  private readonly publishedAt = new Map<string, string>();
+
   constructor(
     descriptors: readonly KnowledgePackageDescriptor[] = [],
-    options: { hosts?: readonly HostEnvironment[] } = {},
+    options: {
+      hosts?: readonly HostEnvironment[];
+      publishers?: PublisherRegistry | readonly Publisher[];
+    } = {},
   ) {
     this.hosts = options.hosts ?? [];
+    this.publishers =
+      options.publishers instanceof PublisherRegistry
+        ? options.publishers
+        : new PublisherRegistry(options.publishers ?? [nevermineOfficialPublisher]);
     for (const descriptor of descriptors) this.register(descriptor);
   }
 
@@ -85,12 +116,41 @@ export class KnowledgePackageRepository {
       errors.push(`[${descriptor.id}] La versión ${descriptor.version} ya está registrada.`);
     }
 
+    // FEATURE-003.4 — Ownership: el Publisher debe existir en el directorio.
+    const publisher = errors.length === 0 ? this.publishers.get(descriptor.publisher) : undefined;
+    if (errors.length === 0 && !publisher) {
+      errors.push(
+        `[${descriptor.id}] El Publisher "${descriptor.publisher}" no está registrado en la plataforma.`,
+      );
+    }
+    if (publisher && descriptor.trust !== publisher.trust) {
+      errors.push(
+        `[${descriptor.id}] El nivel de confianza "${descriptor.trust}" no coincide con el del Publisher "${publisher.id}" ("${publisher.trust}").`,
+      );
+    }
+
     let report: CertificationReport | null = null;
     if (errors.length === 0 && (descriptor.status === "certified" || descriptor.status === "published")) {
       report = this.runCertification(descriptor);
       if (!report.ok) {
         errors.push(
           ...report.errors.map((e) => `[${descriptor.id}] Certificación fallida: ${e}`),
+        );
+      }
+    }
+
+    // Un paquete no entra ya publicado si no supera la política de gobierno.
+    let publicationDecision: PublicationDecision | null = null;
+    if (errors.length === 0 && descriptor.status === "published" && publisher && report) {
+      publicationDecision = evaluatePublicationPolicy({
+        descriptor,
+        publisher,
+        state: "certified",
+        certification: report,
+      });
+      if (!publicationDecision.ok) {
+        errors.push(
+          ...publicationDecision.errors.map((e) => `[${descriptor.id}] Publicación rechazada: ${e}`),
         );
       }
     }
@@ -117,6 +177,23 @@ export class KnowledgePackageRepository {
       checksum: descriptor.checksum,
       evidence: report ? certificationEvidence(report) : null,
     });
+
+    if (publicationDecision && publisher) {
+      const at = new Date().toISOString();
+      this.publishedAt.set(keyOf(descriptor.id, descriptor.version), at);
+      this.audit.append({
+        packageId: descriptor.id,
+        version: descriptor.version,
+        publisherId: publisher.id,
+        action: "publish",
+        actor: "registry",
+        reason: "Alta del paquete ya publicado en el repositorio",
+        at,
+        checksum: descriptor.checksum,
+        trust: descriptor.trust,
+        evidence: publicationEvidence(publicationDecision),
+      });
+    }
 
     return { ok: true, errors: [] };
   }
@@ -191,17 +268,138 @@ export class KnowledgePackageRepository {
       if (!report.ok) guards.push(...report.errors.map((e) => `Certificación fallida: ${e}`));
     }
 
+    // FEATURE-003.4 — Publicar es un acto de gobierno, no un cambio de estado más.
+    let decision: PublicationDecision | null = null;
+    const publisher = this.publishers.get(descriptor.publisher);
+    if (request.to === "published") {
+      decision = evaluatePublicationPolicy({
+        descriptor,
+        publisher,
+        state: from,
+        certification: this.runCertification(descriptor),
+      });
+      evidence = publicationEvidence(decision);
+      if (!decision.ok) {
+        guards.push(...decision.errors);
+        this.audit.append({
+          packageId,
+          version,
+          publisherId: descriptor.publisher,
+          action: "publish_rejected",
+          actor: request.actor?.trim() || "system",
+          reason: request.reason?.trim() || null,
+          at: request.at ?? new Date().toISOString(),
+          checksum: descriptor.checksum,
+          trust: descriptor.trust,
+          evidence,
+        });
+      }
+    }
+
     const result = evaluateTransition(packageId, version, from, { ...request, evidence, checksum: request.checksum ?? descriptor.checksum }, guards);
     if (!result.ok) return result;
 
     this.states.set(keyOf(packageId, version), result.transition.to);
     this.history.append(result.transition);
+
+    const governed =
+      result.transition.to === "published"
+        ? "publish"
+        : result.transition.to === "deprecated"
+          ? "deprecate"
+          : result.transition.to === "archived"
+            ? "archive"
+            : null;
+    if (governed) {
+      if (governed === "publish") this.publishedAt.set(keyOf(packageId, version), result.transition.at);
+      this.audit.append({
+        packageId,
+        version,
+        publisherId: descriptor.publisher,
+        action: governed,
+        actor: result.transition.actor,
+        reason: result.transition.reason,
+        at: result.transition.at,
+        checksum: descriptor.checksum,
+        trust: descriptor.trust,
+        evidence: decision ? publicationEvidence(decision) : result.transition.evidence,
+      });
+    }
+
     return result;
   }
 
   /** Historial append-only de transiciones (de un paquete, versión o global). */
   lifecycleHistory(packageId?: string, version?: string): readonly LifecycleTransition[] {
     return packageId ? this.history.of(packageId, version) : this.history.all();
+  }
+
+  /** Directorio de Publishers registrados. */
+  listPublishers(): Publisher[] {
+    return this.publishers.list();
+  }
+
+  /** Publisher propietario de un paquete (la propiedad no cambia con el estado). */
+  publisherOf(packageId: string, version?: string): Publisher | undefined {
+    const descriptor = this.get(packageId, version);
+    return descriptor ? this.publishers.get(descriptor.publisher) : undefined;
+  }
+
+  /** ¿Está esta identidad autorizada a publicar hoy? */
+  canPublish(publisherId: string): boolean {
+    return isAuthorizedToPublish(this.publishers.get(publisherId));
+  }
+
+  /**
+   * Evalúa la política de publicación sin ejecutarla (dry-run de gobierno).
+   */
+  evaluatePublication(packageId: string, version: string): PublicationDecision {
+    const descriptor = this.get(packageId, version);
+    if (!descriptor) {
+      return {
+        packageId,
+        version,
+        ok: false,
+        checks: [],
+        errors: [`El paquete "${packageId}@${version}" no está en el repositorio.`],
+        evaluatedAt: new Date().toISOString(),
+      };
+    }
+    return evaluatePublicationPolicy({
+      descriptor,
+      publisher: this.publishers.get(descriptor.publisher),
+      state: this.states.get(keyOf(packageId, version)) ?? descriptor.status,
+      certification: this.runCertification(descriptor),
+    });
+  }
+
+  /** Publicación explícita: atajo gobernado de `transition(... "published")`. */
+  publish(
+    packageId: string,
+    version: string,
+    request: Omit<TransitionRequest, "to"> = {},
+  ): TransitionResult {
+    return this.transition(packageId, version, { ...request, to: "published" });
+  }
+
+  /** Metadatos públicos de una versión (Publisher, confianza, compatibilidad…). */
+  publicationMetadata(packageId: string, version?: string): PublicationMetadata | undefined {
+    const descriptor = this.get(packageId, version);
+    if (!descriptor) return undefined;
+    const publisher = this.publishers.get(descriptor.publisher);
+    if (!publisher) return undefined;
+    const key = keyOf(descriptor.id, descriptor.version);
+    return buildPublicationMetadata(
+      descriptor,
+      publisher,
+      this.states.get(key) ?? descriptor.status,
+      this.publishedAt.get(key) ?? null,
+    );
+  }
+
+  /** Auditoría append-only de los actos de gobierno. */
+  publicationAudit(packageId?: string, version?: string): readonly PublicationAuditEntry[] {
+    return packageId ? this.audit.of(packageId, version) : this.audit.all();
   }
 
   private runCertification(descriptor: KnowledgePackageDescriptor): CertificationReport {
@@ -296,7 +494,10 @@ export class KnowledgePackageRepository {
 
 export function createKnowledgePackageRepository(
   descriptors: readonly KnowledgePackageDescriptor[] = [],
-  options: { hosts?: readonly HostEnvironment[] } = {},
+  options: {
+    hosts?: readonly HostEnvironment[];
+    publishers?: PublisherRegistry | readonly Publisher[];
+  } = {},
 ): KnowledgePackageRepository {
   return new KnowledgePackageRepository(descriptors, options);
 }
