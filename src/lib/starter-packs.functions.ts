@@ -228,7 +228,7 @@ export const getPackDistributionStatusFn = createServerFn({ method: "GET" })
   .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
   .handler(async ({ data }) =>
-    JSON.parse(JSON.stringify(getPackDistributionStatus(data.packId))) as Record<string, unknown>,
+    JSON.parse(JSON.stringify(getPackDistributionStatus(data.packId))) as Json,
   );
 
 /** Informe de distribución del SportSpace activo. */
@@ -236,10 +236,7 @@ export const getDistributionReportFn = createServerFn({ method: "GET" })
   .middleware([requireApplicationContext])
   .handler(
     async ({ context }) =>
-      JSON.parse(JSON.stringify(await getDistributionReport(asServiceContext(context)))) as Record<
-        string,
-        unknown
-      >,
+      JSON.parse(JSON.stringify(await getDistributionReport(asServiceContext(context)))) as Json,
   );
 
 /** Aceptación explícita de una actualización anunciada. */
