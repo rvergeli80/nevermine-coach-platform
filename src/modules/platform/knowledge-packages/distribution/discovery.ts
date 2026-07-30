@@ -78,8 +78,9 @@ export function validateAnnouncement(
     );
   }
 
-  // 5. Compatibilidad con producto y Engines del entorno.
-  const compatibility = checkCompatibility(descriptor, context.host);
+  // 5. Compatibilidad con producto y Engines del entorno. El estado que manda
+  //    es el del ciclo de vida (FEATURE-003.3), no el sellado en el descriptor.
+  const compatibility = checkCompatibility({ ...descriptor, status: state }, context.host);
   if (!compatibility.ok) errors.push(...compatibility.errors);
 
   // 6. Dependencias resolubles y distribuibles.
