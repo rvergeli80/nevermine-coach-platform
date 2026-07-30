@@ -17,6 +17,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
+import { Route as AuthenticatedAppTrazabilidadRouteImport } from './routes/_authenticated/app/trazabilidad'
 import { Route as AuthenticatedAppTemporadasRouteImport } from './routes/_authenticated/app/temporadas'
 import { Route as AuthenticatedAppSportspacesRouteImport } from './routes/_authenticated/app/sportspaces'
 import { Route as AuthenticatedAppPacksRouteImport } from './routes/_authenticated/app/packs'
@@ -71,6 +72,12 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppTrazabilidadRoute =
+  AuthenticatedAppTrazabilidadRouteImport.update({
+    id: '/trazabilidad',
+    path: '/trazabilidad',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const AuthenticatedAppTemporadasRoute =
   AuthenticatedAppTemporadasRouteImport.update({
     id: '/temporadas',
@@ -158,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/app/packs': typeof AuthenticatedAppPacksRoute
   '/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
+  '/app/trazabilidad': typeof AuthenticatedAppTrazabilidadRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
   '/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
@@ -178,6 +186,7 @@ export interface FileRoutesByTo {
   '/app/packs': typeof AuthenticatedAppPacksRoute
   '/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
   '/app/temporadas': typeof AuthenticatedAppTemporadasRoute
+  '/app/trazabilidad': typeof AuthenticatedAppTrazabilidadRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
   '/app/catalogos': typeof AuthenticatedAppCatalogosIndexRoute
@@ -201,6 +210,7 @@ export interface FileRoutesById {
   '/_authenticated/app/packs': typeof AuthenticatedAppPacksRoute
   '/_authenticated/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
   '/_authenticated/app/temporadas': typeof AuthenticatedAppTemporadasRoute
+  '/_authenticated/app/trazabilidad': typeof AuthenticatedAppTrazabilidadRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/catalogos/$catalogId': typeof AuthenticatedAppCatalogosCatalogIdRoute
   '/_authenticated/app/catalogos/': typeof AuthenticatedAppCatalogosIndexRoute
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/app/packs'
     | '/app/sportspaces'
     | '/app/temporadas'
+    | '/app/trazabilidad'
     | '/app/'
     | '/app/catalogos/$catalogId'
     | '/app/catalogos/'
@@ -244,6 +255,7 @@ export interface FileRouteTypes {
     | '/app/packs'
     | '/app/sportspaces'
     | '/app/temporadas'
+    | '/app/trazabilidad'
     | '/app'
     | '/app/catalogos/$catalogId'
     | '/app/catalogos'
@@ -266,6 +278,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/packs'
     | '/_authenticated/app/sportspaces'
     | '/_authenticated/app/temporadas'
+    | '/_authenticated/app/trazabilidad'
     | '/_authenticated/app/'
     | '/_authenticated/app/catalogos/$catalogId'
     | '/_authenticated/app/catalogos/'
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/app/trazabilidad': {
+      id: '/_authenticated/app/trazabilidad'
+      path: '/trazabilidad'
+      fullPath: '/app/trazabilidad'
+      preLoaderRoute: typeof AuthenticatedAppTrazabilidadRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/app/temporadas': {
@@ -436,6 +456,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppPacksRoute: typeof AuthenticatedAppPacksRoute
   AuthenticatedAppSportspacesRoute: typeof AuthenticatedAppSportspacesRoute
   AuthenticatedAppTemporadasRoute: typeof AuthenticatedAppTemporadasRoute
+  AuthenticatedAppTrazabilidadRoute: typeof AuthenticatedAppTrazabilidadRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppCatalogosCatalogIdRoute: typeof AuthenticatedAppCatalogosCatalogIdRoute
   AuthenticatedAppCatalogosIndexRoute: typeof AuthenticatedAppCatalogosIndexRoute
@@ -450,6 +471,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppPacksRoute: AuthenticatedAppPacksRoute,
   AuthenticatedAppSportspacesRoute: AuthenticatedAppSportspacesRoute,
   AuthenticatedAppTemporadasRoute: AuthenticatedAppTemporadasRoute,
+  AuthenticatedAppTrazabilidadRoute: AuthenticatedAppTrazabilidadRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppCatalogosCatalogIdRoute:
     AuthenticatedAppCatalogosCatalogIdRoute,

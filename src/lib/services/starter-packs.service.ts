@@ -19,8 +19,10 @@ import {
   starterPackPublicationMetadata,
   starterPackDistributionStatus,
   createCoachDistributionService,
+  createCoachHistoryService,
   summarizePack,
   toCatalogEntry,
+  type CoachInstallationEventRow,
   type InstallationRecord,
   type StarterPackCatalogEntry,
   type StarterPackDescriptor,
@@ -28,6 +30,7 @@ import {
 import type {
   DiscoveryQuery,
   DistributionReport,
+  HistoryQuery,
   InstallationManifest,
   InstallationService,
   UpdateAvailability,
@@ -453,4 +456,70 @@ export async function applyAnnouncedUpdate(
   });
   if (!result.ok) throw new Error(result.errors.join(" "));
   return toInstallResult(result.outcome, input.packId, result.availability.availableVersion ?? "");
+}
+
+/**
+ * FEATURE-003.10 — History & Traceability.
+ *
+ * Coach consulta el historial exclusivamente a través del HistoryService de la
+ * plataforma. Nunca lee el almacén de eventos ni reconstruye estado por su
+ * cuenta: aquí sólo se aporta el ámbito activo y sus eventos persistidos.
+ */
+
+async function loadScopeHistoryService(ctx: ApplicationServiceContext) {
+  const rows = (unwrap(
+    await ctx.supabase
+      .from("starter_pack_installation_events")
+      .select("id, pack_id, action, status, from_version, to_version, created_at, actor_id, message")
+      .eq("sport_space_id", ctx.sportSpaceId)
+      .order("created_at", { ascending: true }),
+  ) ?? []) as CoachInstallationEventRow[];
+  return createCoachHistoryService({ scopeId: ctx.sportSpaceId, installationEvents: rows });
+}
+
+/** Historial completo (Search API) del ámbito activo. */
+export async function searchKnowledgeHistory(
+  ctx: ApplicationServiceContext,
+  query: HistoryQuery = {},
+) {
+  return (await loadScopeHistoryService(ctx)).getEvents(query);
+}
+
+/** Línea temporal consultable por pack, versión, actor, tipo o fecha. */
+export async function getKnowledgeTimeline(
+  ctx: ApplicationServiceContext,
+  query: HistoryQuery = {},
+) {
+  return (await loadScopeHistoryService(ctx)).getTimeline(query);
+}
+
+/** Audit Trail determinista del ámbito activo. */
+export async function getKnowledgeAuditTrail(
+  ctx: ApplicationServiceContext,
+  query: HistoryQuery = {},
+) {
+  return (await loadScopeHistoryService(ctx)).getAuditTrail(query);
+}
+
+/** Estado exacto de una configuración en un instante dado. */
+export async function reconstructKnowledgeState(
+  ctx: ApplicationServiceContext,
+  packId: string,
+  at?: string,
+) {
+  return (await loadScopeHistoryService(ctx)).reconstructState(packId, at);
+}
+
+/** Informe de trazabilidad reutilizable por UI, MCP y CLI. */
+export async function getTraceabilityReportFor(
+  ctx: ApplicationServiceContext,
+  packId: string,
+  at?: string,
+) {
+  return (await loadScopeHistoryService(ctx)).getTraceabilityReport(packId, at);
+}
+
+/** Narración en lenguaje humano del historial de un pack. */
+export async function explainKnowledgeHistory(ctx: ApplicationServiceContext, packId: string) {
+  return (await loadScopeHistoryService(ctx)).explainHistory(packId);
 }
