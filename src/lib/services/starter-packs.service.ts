@@ -2,6 +2,8 @@ import { unwrap } from "@/lib/supabase-result";
 import type { ApplicationServiceContext } from "./service-context";
 import {
   buildInstallPlan,
+  compareAgainstCurrent,
+  compareConfigurationVersions,
   configurationHistory,
   configurationLineage,
   decideInstallAction,
@@ -343,4 +345,18 @@ function toSummaryDto(version: {
     publicationState: version.publicationState,
     lifecycleState: version.lifecycleState,
   };
+}
+
+/**
+ * FEATURE-003.7 — Comparación de versiones.
+ * Coach compara exclusivamente a través del ComparisonService de la
+ * plataforma: el servicio devuelve el informe y nunca decide por el usuario.
+ */
+export function compareConfiguration(packId: string, from: string, to: string) {
+  return compareConfigurationVersions(packId, from, to);
+}
+
+/** Comparación previa a una actualización: vigente frente a candidata. */
+export function compareConfigurationWithCurrent(packId: string, candidate: string) {
+  return compareAgainstCurrent(packId, candidate);
 }
