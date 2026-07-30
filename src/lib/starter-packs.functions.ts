@@ -5,6 +5,8 @@ import { requireApplicationContext } from "@/lib/application-context-middleware"
 import type { ApplicationServiceContext } from "@/lib/services/service-context";
 import {
   installStarterPack as installStarterPackService,
+  getConfigurationLineage,
+  listConfigurationHistory,
   listInstallationHistory,
   listInstallationManifests,
   listStarterPackCatalog,
@@ -115,3 +117,15 @@ export const listStarterPackManifests = createServerFn({ method: "GET" })
       payload: JSON.parse(JSON.stringify(m.payload ?? {})) as Record<string, string | null>,
     }));
   });
+
+/** FEATURE-003.6 — Historial de versiones de una configuración. */
+export const listConfigurationVersions = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
+  .handler(async ({ data }) => listConfigurationHistory(data.packId).map((v) => ({ ...v })));
+
+/** Linaje completo de una configuración: origen, actual y cadena. */
+export const getConfigurationVersionLineage = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
+  .handler(async ({ data }) => getConfigurationLineage(data.packId));

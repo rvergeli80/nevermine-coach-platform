@@ -58,3 +58,11 @@ export function satisfiesRange(
 ): boolean {
   return satisfiesMinVersion(version, range.minVersion) && satisfiesMaxVersion(version, range.maxVersion);
 }
+
+/** FEATURE-003.6 — Salto semántico según la naturaleza del cambio. */
+export function bumpVersion(version: string, change: "major" | "minor" | "patch"): string {
+  const { major, minor, patch } = parseVersion(version);
+  if (change === "major") return `${major + 1}.0.0`;
+  if (change === "minor") return `${major}.${minor + 1}.0`;
+  return `${major}.${minor}.${patch + 1}`;
+}

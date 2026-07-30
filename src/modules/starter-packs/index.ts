@@ -15,3 +15,4 @@ export * from "./install-plan";
 export * from "./installation";
 export * from "./knowledge-package";
 export * from "./repository";
+export * from "./versioning";

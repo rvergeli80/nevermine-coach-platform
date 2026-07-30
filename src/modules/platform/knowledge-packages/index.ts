@@ -16,3 +16,4 @@ export * from "./compatibility";
 export * from "./dependencies";
 export * from "./repository";
 export * from "./installation";
+export * from "./versioning";
