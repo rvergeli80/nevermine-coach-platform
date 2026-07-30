@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   ComparisonService,
-  InMemoryVersionStore,
-  VersioningService,
   compareKnowledgeEntities,
   createComparisonService,
   diffFields,
@@ -10,6 +8,7 @@ import {
   type ComparisonProjector,
   type KnowledgeEntity,
 } from "./index";
+import { InMemoryVersionStore, VersioningService } from "../versioning";
 
 /** Snapshot mínimo de prueba: parámetros + entidades con identidad lógica. */
 interface Snapshot {
