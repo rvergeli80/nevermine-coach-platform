@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  History,
   LogOut,
   Trophy,
   CalendarDays,
@@ -27,6 +28,7 @@ const NAV = [
   { to: "/app/jugadores", label: "Jugadores", icon: UserRound, exact: false },
   { to: "/app/catalogos", label: "Catálogos", icon: Library, exact: false },
   { to: "/app/packs", label: "Starter Packs", icon: Package, exact: false },
+  { to: "/app/trazabilidad", label: "Trazabilidad", icon: History, exact: false },
 ] as const;
 
 
