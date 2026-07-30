@@ -175,12 +175,16 @@ describe("Publication Policy", () => {
   });
 
   it("rechaza publicar con integridad rota", () => {
-    const descriptor = { ...pkg(), checksum: "0000000000000000" };
-    const r = repo([descriptor]);
-    r.transition(descriptor.id, descriptor.version, { to: "review" });
-    // Ni siquiera llega a certificarse: el checksum no reproduce el contenido.
-    expect(r.transition(descriptor.id, descriptor.version, { to: "certified" }).ok).toBe(false);
-    const decision = r.evaluatePublication(descriptor.id, descriptor.version);
+    // Un descriptor manipulado ni siquiera entra en el repositorio…
+    const tampered = { ...pkg(), checksum: "0000000000000000" };
+    expect(repo().register(tampered).ok).toBe(false);
+    // …y si se evalúa la política directamente, el control de integridad falla.
+    const decision = evaluatePublicationPolicy({
+      descriptor: tampered,
+      publisher: nevermineOfficialPublisher,
+      state: "certified",
+      certification: certifyPackage(tampered, { hosts: [host] }),
+    });
     expect(decision.ok).toBe(false);
     expect(decision.checks.find((c) => c.id === "integrity")?.ok).toBe(false);
   });
