@@ -97,4 +97,21 @@ export const uninstallStarterPackFn = createServerFn({ method: "POST" })
 /** Manifiestos de instalación vigentes del SportSpace activo. */
 export const listStarterPackManifests = createServerFn({ method: "GET" })
   .middleware([requireApplicationContext])
-  .handler(async ({ context }) => listInstallationManifests(asServiceContext(context)));
+  .handler(async ({ context }) => {
+    const manifests = await listInstallationManifests(asServiceContext(context));
+    // DTO plano: el manifiesto cruza la frontera RPC como datos, no como objeto de dominio.
+    return manifests.map((m) => ({
+      installationId: m.installationId,
+      packageId: m.packageId,
+      version: m.version,
+      publisher: m.publisher,
+      trustLevel: m.trustLevel,
+      lifecycleState: m.lifecycleState,
+      checksum: m.checksum,
+      installedAt: m.installedAt,
+      updatedAt: m.updatedAt,
+      previousVersion: m.previousVersion,
+      state: m.state,
+      payload: JSON.parse(JSON.stringify(m.payload ?? {})) as Record<string, string | null>,
+    }));
+  });
