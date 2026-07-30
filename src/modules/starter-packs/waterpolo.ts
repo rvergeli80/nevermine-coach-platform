@@ -17,6 +17,8 @@ export const waterpoloPack: StarterPack = {
   origin: "official",
   compatibility: { engine: "sportspace", minEngineVersion: "1.0.0" },
   sport: { code: "waterpolo", name: "Waterpolo" },
+  // FEATURE-003.9 — Canal oficial y actualización anunciada, nunca silenciosa.
+  distribution: { channel: "stable", updatePolicy: "notify" },
 
   catalog: {
     code: "waterpolo_base",
