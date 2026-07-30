@@ -5,6 +5,8 @@ import { requireApplicationContext } from "@/lib/application-context-middleware"
 import type { ApplicationServiceContext } from "@/lib/services/service-context";
 import {
   installStarterPack as installStarterPackService,
+  compareConfiguration,
+  compareConfigurationWithCurrent,
   getConfigurationLineage,
   listConfigurationHistory,
   listInstallationHistory,
@@ -129,3 +131,25 @@ export const getConfigurationVersionLineage = createServerFn({ method: "GET" })
   .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
   .handler(async ({ data }) => getConfigurationLineage(data.packId));
+
+/** FEATURE-003.7 — Informe de diferencias entre dos versiones de una configuración. */
+export const compareConfigurationVersionsFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        packId: z.string().min(1),
+        from: z.string().min(1).optional(),
+        to: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    // Sólo lectura: comparar nunca modifica una versión ni instala nada.
+    const result = data.from
+      ? compareConfiguration(data.packId, data.from, data.to)
+      : compareConfigurationWithCurrent(data.packId, data.to);
+    return result.ok
+      ? { ok: true as const, comparison: JSON.parse(JSON.stringify(result.comparison)) }
+      : { ok: false as const, errors: result.errors };
+  });
