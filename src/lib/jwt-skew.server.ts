@@ -9,12 +9,13 @@ export function isClockSkewError(message: string | null | undefined): boolean {
   return typeof message === "string" && SKEW_PATTERN.test(message);
 }
 
-export async function withClockSkewRetry<T>(
-  run: () => Promise<{ data: T; error: { message: string } | null }>,
+export async function withClockSkewRetry<T extends { error: { message: string } | null }>(
+  run: () => PromiseLike<T>,
   delayMs = 1200,
-): Promise<{ data: T; error: { message: string } | null }> {
+): Promise<T> {
   const first = await run();
   if (!first.error || !isClockSkewError(first.error.message)) return first;
   await new Promise((resolve) => setTimeout(resolve, delayMs));
   return run();
 }
+
