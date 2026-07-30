@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { withClockSkewRetry } from "@/lib/jwt-skew.server";
 import type { AppRole, CurrentUser } from "@/modules/identity/types";
 
 /**
@@ -14,15 +15,18 @@ export const getCurrentUser = createServerFn({ method: "GET" })
 
     const [{ data: profile, error: profileError }, { data: roles, error: rolesError }] =
       await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, email, full_name, locale")
-          .eq("id", userId)
-          .maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", userId),
+        withClockSkewRetry(() =>
+          supabase
+            .from("profiles")
+            .select("id, email, full_name, locale")
+            .eq("id", userId)
+            .maybeSingle(),
+        ),
+        withClockSkewRetry(() => supabase.from("user_roles").select("role").eq("user_id", userId)),
       ]);
 
     if (profileError) throw new Error(profileError.message);
+
     if (rolesError) throw new Error(rolesError.message);
 
     return {
