@@ -17,7 +17,12 @@ import {
   type StarterPackCatalogEntry,
   type StarterPackDescriptor,
 } from "@/modules/starter-packs";
-import type { DiscoveryQuery } from "@/modules/platform/knowledge-packages";
+import type {
+  DiscoveryQuery,
+  InstallationManifest,
+  InstallationService,
+} from "@/modules/platform/knowledge-packages";
+import { createCoachInstallationService } from "./pack-installation";
 
 /**
  * FEATURE-003.1 — Application Service de Starter Packs.
