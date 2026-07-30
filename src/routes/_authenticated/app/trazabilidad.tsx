@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { History } from "lucide-react";
 
 import { getTraceabilityReportFn, listStarterPacks } from "@/lib/starter-packs.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
@@ -58,10 +57,14 @@ function TraceabilityPage() {
       <PageHeader
         title="Trazabilidad"
         description="Historial completo e inmutable de cada paquete de conocimiento. Sólo lectura: aquí nada se modifica."
-        icon={History}
       />
 
-      <QueryState query={packs} emptyLabel="No hay paquetes en el catálogo.">
+      <QueryState
+        isLoading={packs.isPending}
+        error={packs.error}
+        isEmpty={(packs.data ?? []).length === 0}
+        emptyText="No hay paquetes en el catálogo."
+      >
         <div className="flex flex-wrap gap-2">
           {(packs.data ?? []).map((pack) => (
             <Button
