@@ -19,8 +19,10 @@ export function reconstructState(
   packageId: string,
   timestamp?: string,
 ): ReconstructedState {
-  const at = timestamp ?? new Date(8640000000000000).toISOString();
-  const applicable = searchEvents(events, { packageId, to: at });
+  // Sin instante explícito se reconstruye "ahora": todos los eventos del paquete.
+  const applicable = searchEvents(events, { packageId, to: timestamp });
+  const at =
+    timestamp ?? applicable[applicable.length - 1]?.timestamp ?? new Date(0).toISOString();
 
   const versions: string[] = [];
   const published = new Set<string>();
