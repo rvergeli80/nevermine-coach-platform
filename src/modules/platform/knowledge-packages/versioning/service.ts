@@ -25,6 +25,7 @@ import {
   type VersionMetadata,
   type VersionPublicationState,
   type VersionRecord,
+  type VersionMergeProvenance,
   type VersionStore,
   type VersionSummary,
 } from "./types";
@@ -41,6 +42,8 @@ export interface CreateVersionInput<TSnapshot> extends VersionMetadata {
   publicationState?: VersionPublicationState;
   lifecycleState?: LifecycleState;
   trustLevel?: TrustLevel;
+  /** FEATURE-003.8 — Sólo lo aporta el Merge Engine. */
+  merge?: VersionMergeProvenance | null;
 }
 
 export type CreateVersionResult<TSnapshot> =
@@ -157,6 +160,7 @@ export class VersioningService<TSnapshot = unknown> {
       publicationState: input.publicationState ?? "unpublished",
       lifecycleState: input.lifecycleState ?? "draft",
       trustLevel: input.trustLevel ?? "official",
+      merge: input.merge ?? null,
       snapshot: input.snapshot,
     };
 

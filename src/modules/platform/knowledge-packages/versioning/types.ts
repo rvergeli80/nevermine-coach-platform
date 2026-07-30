@@ -66,6 +66,8 @@ export interface VersionRecord<TSnapshot = unknown> {
   publicationState: VersionPublicationState;
   lifecycleState: LifecycleState;
   trustLevel: TrustLevel;
+  /** Procedencia de fusión, si esta versión nació de un merge. */
+  merge: VersionMergeProvenance | null;
   snapshot: TSnapshot;
 }
 
