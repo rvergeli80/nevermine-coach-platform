@@ -998,11 +998,15 @@ export type Database = {
           id: string
           installed_at: string
           installed_by: string | null
+          lifecycle_state: string | null
           pack_checksum: string
           pack_id: string
           pack_version: string
+          previous_version: string | null
+          publisher: string | null
           sport_space_id: string
           status: Database["public"]["Enums"]["starter_pack_installation_status"]
+          trust_level: string | null
           updated_at: string
         }
         Insert: {
@@ -1011,11 +1015,15 @@ export type Database = {
           id?: string
           installed_at?: string
           installed_by?: string | null
+          lifecycle_state?: string | null
           pack_checksum: string
           pack_id: string
           pack_version: string
+          previous_version?: string | null
+          publisher?: string | null
           sport_space_id: string
           status?: Database["public"]["Enums"]["starter_pack_installation_status"]
+          trust_level?: string | null
           updated_at?: string
         }
         Update: {
@@ -1024,11 +1032,15 @@ export type Database = {
           id?: string
           installed_at?: string
           installed_by?: string | null
+          lifecycle_state?: string | null
           pack_checksum?: string
           pack_id?: string
           pack_version?: string
+          previous_version?: string | null
+          publisher?: string | null
           sport_space_id?: string
           status?: Database["public"]["Enums"]["starter_pack_installation_status"]
+          trust_level?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1413,8 +1425,13 @@ export type Database = {
         | "personal"
         | "company"
         | "other"
-      starter_pack_installation_action: "install" | "reinstall" | "update"
-      starter_pack_installation_status: "installed" | "failed"
+      starter_pack_installation_action:
+        | "install"
+        | "reinstall"
+        | "update"
+        | "uninstall"
+        | "rollback"
+      starter_pack_installation_status: "installed" | "failed" | "uninstalled"
       subject_scope: "individual" | "collective"
       subject_type: "player" | "team"
       valuation_status: "current" | "superseded"
@@ -1561,8 +1578,14 @@ export const Constants = {
         "company",
         "other",
       ],
-      starter_pack_installation_action: ["install", "reinstall", "update"],
-      starter_pack_installation_status: ["installed", "failed"],
+      starter_pack_installation_action: [
+        "install",
+        "reinstall",
+        "update",
+        "uninstall",
+        "rollback",
+      ],
+      starter_pack_installation_status: ["installed", "failed", "uninstalled"],
       subject_scope: ["individual", "collective"],
       subject_type: ["player", "team"],
       valuation_status: ["current", "superseded"],

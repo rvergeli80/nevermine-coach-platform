@@ -15,3 +15,4 @@ export * from "./validation";
 export * from "./compatibility";
 export * from "./dependencies";
 export * from "./repository";
+export * from "./installation";
