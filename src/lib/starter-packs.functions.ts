@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -158,7 +159,7 @@ export const compareConfigurationVersionsFn = createServerFn({ method: "GET" })
 
 /** FEATURE-003.8 — Vista previa de una fusión: no crea versión ni persiste nada. */
 export const previewConfigurationMergeFn = createServerFn({ method: "GET" })
-  .middleware([requireApplicationContext])
+  .middleware([requireSupabaseAuth, requireApplicationContext])
   .inputValidator((data: unknown) =>
     z
       .object({ packId: z.string().min(1), from: z.string().min(1), to: z.string().min(1) })
@@ -171,7 +172,7 @@ export const previewConfigurationMergeFn = createServerFn({ method: "GET" })
 
 /** FEATURE-003.8 — Ejecuta la fusión; el éxito crea una versión nueva. */
 export const mergeConfigurationVersionsFn = createServerFn({ method: "POST" })
-  .middleware([requireApplicationContext])
+  .middleware([requireSupabaseAuth, requireApplicationContext])
   .inputValidator((data: unknown) =>
     z
       .object({
@@ -194,14 +195,12 @@ export const mergeConfigurationVersionsFn = createServerFn({ method: "POST" })
   });
 
 /** DTO plano del informe de fusión: cruza la frontera RPC como datos. */
-function toMergeDto(outcome: {
-  ok: boolean;
-  errors?: string[];
-  result?: unknown;
-}) {
+type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+
+function toMergeDto(outcome: { ok: boolean; errors?: string[]; result?: unknown }) {
   return {
     ok: outcome.ok,
     errors: outcome.errors ?? [],
-    result: outcome.result ? (JSON.parse(JSON.stringify(outcome.result)) as Record<string, unknown>) : null,
+    result: outcome.result ? (JSON.parse(JSON.stringify(outcome.result)) as Json) : null,
   };
 }
