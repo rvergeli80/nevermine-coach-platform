@@ -246,3 +246,103 @@ export const applyAnnouncedUpdateFn = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) =>
     applyAnnouncedUpdate(asServiceContext(context), data),
   );
+
+/**
+ * FEATURE-003.10 — Canal HTTP del History Engine.
+ * Sólo lectura: consultar historial, timeline, auditoría, reconstrucción e
+ * informe de trazabilidad. Ninguna de estas operaciones altera el Engine.
+ */
+
+const historyQuerySchema = z.object({
+  packId: z.string().min(1).optional(),
+  version: z.string().min(1).optional(),
+  mergeId: z.string().min(1).optional(),
+  actor: z.string().min(1).optional(),
+  eventType: z.string().min(1).optional(),
+  correlationId: z.string().min(1).optional(),
+  from: z.string().min(1).optional(),
+  to: z.string().min(1).optional(),
+  order: z.enum(["asc", "desc"]).optional(),
+  limit: z.number().int().positive().max(500).optional(),
+});
+
+type HistoryQueryInput = z.infer<typeof historyQuerySchema>;
+
+const toHistoryQuery = (input: HistoryQueryInput) => ({
+  packageId: input.packId,
+  version: input.version,
+  mergeId: input.mergeId,
+  actor: input.actor,
+  eventType: isHistoryEventType(input.eventType) ? input.eventType : undefined,
+  correlationId: input.correlationId,
+  from: input.from,
+  to: input.to,
+  order: input.order,
+  limit: input.limit,
+});
+
+/** Search API del historial del ámbito activo. */
+export const searchKnowledgeHistoryFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => historyQuerySchema.parse(data ?? {}))
+  .handler(async ({ data, context }) =>
+    JSON.parse(
+      JSON.stringify(await searchKnowledgeHistory(asServiceContext(context), toHistoryQuery(data))),
+    ) as Json,
+  );
+
+/** Línea temporal del conocimiento distribuido. */
+export const getKnowledgeTimelineFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => historyQuerySchema.parse(data ?? {}))
+  .handler(async ({ data, context }) =>
+    JSON.parse(
+      JSON.stringify(await getKnowledgeTimeline(asServiceContext(context), toHistoryQuery(data))),
+    ) as Json,
+  );
+
+/** Audit Trail: quién, cuándo, desde dónde, resultado, motivo y correlación. */
+export const getKnowledgeAuditTrailFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => historyQuerySchema.parse(data ?? {}))
+  .handler(async ({ data, context }) =>
+    JSON.parse(
+      JSON.stringify(await getKnowledgeAuditTrail(asServiceContext(context), toHistoryQuery(data))),
+    ) as Json,
+  );
+
+/** Reconstrucción del estado de una configuración en un instante dado. */
+export const reconstructKnowledgeStateFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) =>
+    z.object({ packId: z.string().min(1), at: z.string().min(1).optional() }).parse(data),
+  )
+  .handler(async ({ data, context }) =>
+    JSON.parse(
+      JSON.stringify(
+        await reconstructKnowledgeState(asServiceContext(context), data.packId, data.at),
+      ),
+    ) as Json,
+  );
+
+/** Informe de trazabilidad completo de un pack. */
+export const getTraceabilityReportFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) =>
+    z.object({ packId: z.string().min(1), at: z.string().min(1).optional() }).parse(data),
+  )
+  .handler(async ({ data, context }) =>
+    JSON.parse(
+      JSON.stringify(
+        await getTraceabilityReportFor(asServiceContext(context), data.packId, data.at),
+      ),
+    ) as Json,
+  );
+
+/** Narración del historial en lenguaje humano. */
+export const explainKnowledgeHistoryFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
+  .handler(async ({ data, context }) =>
+    explainKnowledgeHistory(asServiceContext(context), data.packId),
+  );
