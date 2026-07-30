@@ -17,3 +17,4 @@ export * from "./dependencies";
 export * from "./repository";
 export * from "./installation";
 export * from "./versioning";
+export * from "./comparison";

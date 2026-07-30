@@ -16,3 +16,4 @@ export * from "./installation";
 export * from "./knowledge-package";
 export * from "./repository";
 export * from "./versioning";
+export * from "./comparison";
