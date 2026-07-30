@@ -18,3 +18,4 @@ export * from "./repository";
 export * from "./versioning";
 export * from "./comparison";
 export * from "./merge";
+export * from "./distribution";
