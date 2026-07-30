@@ -6,7 +6,11 @@ import type { ApplicationServiceContext } from "@/lib/services/service-context";
 import {
   installStarterPack as installStarterPackService,
   listInstallationHistory,
+  listInstallationManifests,
   listStarterPackCatalog,
+  rollbackStarterPack as rollbackStarterPackService,
+  uninstallStarterPack as uninstallStarterPackService,
+  updateStarterPack as updateStarterPackService,
 } from "@/lib/services/starter-packs.service";
 
 /**
@@ -61,3 +65,36 @@ export const applyStarterPack = createServerFn({ method: "POST" })
       force: data.force,
     }),
   );
+
+/** FEATURE-003.5 — Actualiza un pack instalado a una versión publicada superior. */
+export const updateStarterPackFn = createServerFn({ method: "POST" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) =>
+    z.object({ packId: z.string().min(1), version: z.string().min(1).optional() }).parse(data),
+  )
+  .handler(async ({ data, context }) =>
+    updateStarterPackService(asServiceContext(context), data),
+  );
+
+/** Revierte un pack a su versión anterior (o a una versión publicada concreta). */
+export const rollbackStarterPackFn = createServerFn({ method: "POST" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) =>
+    z.object({ packId: z.string().min(1), toVersion: z.string().min(1).optional() }).parse(data),
+  )
+  .handler(async ({ data, context }) =>
+    rollbackStarterPackService(asServiceContext(context), data),
+  );
+
+/** Desinstala un pack: el conocimiento ya generado se conserva. */
+export const uninstallStarterPackFn = createServerFn({ method: "POST" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
+  .handler(async ({ data, context }) =>
+    uninstallStarterPackService(asServiceContext(context), data),
+  );
+
+/** Manifiestos de instalación vigentes del SportSpace activo. */
+export const listStarterPackManifests = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .handler(async ({ context }) => listInstallationManifests(asServiceContext(context)));
