@@ -132,9 +132,12 @@ export interface DistributionReport {
   installations: DistributionReportRow[];
   pendingUpdates: DistributionReportRow[];
   incompatibilities: DistributionReportRow[];
+  /** Instalaciones sin ninguna versión publicada en los canales admitidos. */
+  unknown: DistributionReportRow[];
   summary: {
     installations: number;
     upToDate: number;
+    unknown: number;
     pendingUpdates: number;
     incompatibilities: number;
     activePublications: number;

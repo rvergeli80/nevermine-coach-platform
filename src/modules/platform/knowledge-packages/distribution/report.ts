@@ -25,7 +25,12 @@ export function buildDistributionReport(input: {
   const installations = input.availabilities.map(toReportRow);
   const pendingUpdates = installations.filter((r) => r.updateAvailable && r.compatible);
   const incompatibilities = installations.filter((r) => !r.compatible);
-  const upToDate = installations.filter((r) => r.compatible && !r.updateAvailable);
+  // Una instalación sin ninguna versión publicada en los canales admitidos no
+  // está "al día": simplemente no se distribuye. Se cuenta aparte.
+  const unknown = installations.filter((r) => r.compatible && r.availableVersion === null);
+  const upToDate = installations.filter(
+    (r) => r.compatible && !r.updateAvailable && r.availableVersion !== null,
+  );
 
   return {
     generatedAt: input.generatedAt,
@@ -33,9 +38,11 @@ export function buildDistributionReport(input: {
     installations,
     pendingUpdates,
     incompatibilities,
+    unknown,
     summary: {
       installations: installations.length,
       upToDate: upToDate.length,
+      unknown: unknown.length,
       pendingUpdates: pendingUpdates.length,
       incompatibilities: incompatibilities.length,
       activePublications: input.activePublications.length,

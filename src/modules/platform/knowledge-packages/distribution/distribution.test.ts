@@ -244,7 +244,7 @@ describe("FEATURE-003.9 — Update Discovery", () => {
     const distribution = makeDistribution(makeRepository(descriptorOf("1.0.0")));
     const availability = distribution.checkForUpdates({ packageId: waterpoloPack.id, installedVersion: "1.0.0" });
     expect(availability.updateAvailable).toBe(false);
-    expect(availability.reasons.join(" ")).toContain("no está publicada".slice(0, 6));
+    expect(availability.reasons.join(" ")).toContain("No hay ninguna versión publicada");
   });
 
   it("descubre actualizaciones para un conjunto de instalaciones", () => {
@@ -279,6 +279,7 @@ describe("FEATURE-003.9 — Distribution Report", () => {
       installations: 3,
       pendingUpdates: 1,
       upToDate: 1,
+      unknown: 1,
       activePublications: 2,
     });
     expect(report.pendingUpdates[0].scopeId).toBe(SCOPE);
