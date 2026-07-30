@@ -6,6 +6,10 @@ import { requireApplicationContext } from "@/lib/application-context-middleware"
 import type { ApplicationServiceContext } from "@/lib/services/service-context";
 import {
   installStarterPack as installStarterPackService,
+  applyAnnouncedUpdate,
+  checkStarterPackUpdates,
+  getDistributionReport,
+  getPackDistributionStatus,
   compareConfiguration,
   compareConfigurationWithCurrent,
   getConfigurationLineage,
@@ -204,3 +208,44 @@ function toMergeDto(outcome: { ok: boolean; errors?: string[]; result?: unknown 
     result: outcome.result ? (JSON.parse(JSON.stringify(outcome.result)) as Json) : null,
   };
 }
+
+/**
+ * FEATURE-003.9 — Canal HTTP de la distribución.
+ * Coach consulta actualizaciones y solicita su aplicación; la ejecución la
+ * realiza siempre el Installation Engine por delegación del motor de
+ * distribución.
+ */
+
+/** Actualizaciones anunciadas para el SportSpace activo (sólo lectura). */
+export const checkStarterPackUpdatesFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .handler(async ({ context }) =>
+    (await checkStarterPackUpdates(asServiceContext(context))).map((u) => ({ ...u, reasons: [...u.reasons] })),
+  );
+
+/** Estado de distribución de un pack: canales, publicaciones activas y política. */
+export const getPackDistributionStatusFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
+  .handler(async ({ data }) =>
+    JSON.parse(JSON.stringify(getPackDistributionStatus(data.packId))) as Record<string, unknown>,
+  );
+
+/** Informe de distribución del SportSpace activo. */
+export const getDistributionReportFn = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .handler(
+    async ({ context }) =>
+      JSON.parse(JSON.stringify(await getDistributionReport(asServiceContext(context)))) as Record<
+        string,
+        unknown
+      >,
+  );
+
+/** Aceptación explícita de una actualización anunciada. */
+export const applyAnnouncedUpdateFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth, requireApplicationContext])
+  .inputValidator((data: unknown) => z.object({ packId: z.string().min(1) }).parse(data))
+  .handler(async ({ data, context }) =>
+    applyAnnouncedUpdate(asServiceContext(context), data),
+  );
