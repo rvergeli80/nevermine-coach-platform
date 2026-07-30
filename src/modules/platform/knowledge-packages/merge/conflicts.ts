@@ -103,12 +103,13 @@ export function detectDependencyConflict(
   const targetMin = String(targetFields.minVersion ?? "");
   if (!sourceMin || !targetMin) return null;
 
-  const sourceMax = (targetFields.maxVersion ?? null) as string | null;
-  const targetMax = (sourceFields.maxVersion ?? null) as string | null;
+  const sourceMax = (sourceFields.maxVersion ?? null) as string | null;
+  const targetMax = (targetFields.maxVersion ?? null) as string | null;
 
-  // Los rangos se solapan si cada mínimo cabe en el rango contrario.
+  // Los rangos se solapan si algún mínimo cabe en el rango contrario.
   const overlaps =
-    satisfiesRange(sourceMin, targetMin, sourceMax) || satisfiesRange(targetMin, sourceMin, targetMax);
+    satisfiesRange(sourceMin, { minVersion: targetMin, maxVersion: targetMax }) ||
+    satisfiesRange(targetMin, { minVersion: sourceMin, maxVersion: sourceMax });
   if (overlaps) return null;
 
   return {
