@@ -2,6 +2,8 @@ import { unwrap } from "@/lib/supabase-result";
 import type { ApplicationServiceContext } from "./service-context";
 import {
   buildInstallPlan,
+  configurationHistory,
+  configurationLineage,
   decideInstallAction,
   discoverStarterPacks,
   findPackageDescriptor,
@@ -291,4 +293,54 @@ export function listPackageLifecycleHistory(packId?: string, version?: string) {
 /** Auditoría append-only de los actos de publicación (FEATURE-003.4). */
 export function listPackagePublicationAudit(packId?: string, version?: string) {
   return starterPackPublicationAudit(packId, version);
+}
+
+/**
+ * FEATURE-003.6 — Versionado de configuraciones.
+ * Coach consulta y evoluciona sus configuraciones exclusivamente a través del
+ * VersioningService de la plataforma: nunca modifica versiones ni manifiestos.
+ */
+
+/** Historial cronológico de versiones de una configuración. */
+export function listConfigurationHistory(packId: string) {
+  return configurationHistory(packId);
+}
+
+/** Linaje: origen, versión actual y cadena completa. */
+export function getConfigurationLineage(packId: string) {
+  const lineage = configurationLineage(packId);
+  return {
+    packageId: lineage.packageId,
+    origin: lineage.origin ? toSummaryDto(lineage.origin) : null,
+    current: lineage.current ? toSummaryDto(lineage.current) : null,
+    chain: lineage.chain.map(toSummaryDto),
+  };
+}
+
+function toSummaryDto(version: {
+  versionId: string;
+  semanticVersion: string;
+  parentVersionId: string | null;
+  createdAt: string;
+  createdBy: string;
+  changeType: string;
+  changeSummary: string;
+  reason: string;
+  checksum: string;
+  publicationState: string;
+  lifecycleState: string;
+}) {
+  return {
+    versionId: version.versionId,
+    semanticVersion: version.semanticVersion,
+    parentVersionId: version.parentVersionId,
+    createdAt: version.createdAt,
+    createdBy: version.createdBy,
+    changeType: version.changeType,
+    changeSummary: version.changeSummary,
+    reason: version.reason,
+    checksum: version.checksum,
+    publicationState: version.publicationState,
+    lifecycleState: version.lifecycleState,
+  };
 }
