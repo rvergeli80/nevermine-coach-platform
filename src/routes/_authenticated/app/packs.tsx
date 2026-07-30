@@ -1,10 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Package, Sparkles } from "lucide-react";
+import { BellRing, Package, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-import { applyStarterPack, listStarterPacks } from "@/lib/starter-packs.functions";
+import {
+  applyAnnouncedUpdateFn,
+  applyStarterPack,
+  checkStarterPackUpdatesFn,
+  listStarterPacks,
+} from "@/lib/starter-packs.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +44,30 @@ function StarterPacksPage() {
 
   const packs = useQuery({ queryKey: ["starter-packs"], queryFn: () => fetchPacks({ data: {} }) });
 
+  // FEATURE-003.9 — Las actualizaciones se anuncian, nunca se aplican solas.
+  const checkUpdates = useServerFn(checkStarterPackUpdatesFn);
+  const updates = useQuery({
+    queryKey: ["pack-updates"],
+    queryFn: () => checkUpdates({ data: undefined }),
+  });
+
+  const applyUpdate = useServerFn(applyAnnouncedUpdateFn);
+  const updateMutation = useMutation({
+    mutationFn: (input: { packId: string }) => applyUpdate({ data: input }),
+    onSuccess: async (result) => {
+      await queryClient.invalidateQueries({ queryKey: ["pack-updates"] });
+      await queryClient.invalidateQueries({ queryKey: ["starter-packs"] });
+      await queryClient.invalidateQueries({ queryKey: ["catalogs"] });
+      toast.success("Actualización aplicada", {
+        description: `${result.metrics} métricas y ${result.formulas} fórmulas en un borrador listo para revisar.`,
+      });
+    },
+    onError: (error: unknown) =>
+      toast.error(error instanceof Error ? error.message : "No se ha podido actualizar el pack"),
+  });
+
+  const announced = (updates.data ?? []).filter((u) => u.updateAvailable);
+
   const mutation = useMutation({
     mutationFn: (input: { packId: string; force?: boolean }) => apply({ data: input }),
     onSuccess: async (result) => {
@@ -71,6 +100,46 @@ function StarterPacksPage() {
         title="Starter Packs"
         description="Catálogo oficial de configuración por deporte: grupos, métricas, fórmulas y pesos. Todo se instala en borrador para que lo revises antes de publicar."
       />
+
+      {announced.length > 0 && (
+        <Card className="mb-4 border-primary/40">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <BellRing className="size-4 text-primary" aria-hidden />
+              <CardTitle className="text-base">Actualizaciones disponibles</CardTitle>
+            </div>
+            <CardDescription>
+              Publicadas en el canal oficial. Nada se instala sin que lo confirmes.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {announced.map((update) => (
+              <div
+                key={update.packageId}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border px-3 py-2"
+              >
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">{update.packageId}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline">
+                      v{update.installedVersion} → v{update.availableVersion}
+                    </Badge>
+                    <Badge variant="secondary">{UPDATE_KIND_LABELS[update.updateKind]}</Badge>
+                    <span>canal {update.channel}</span>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  disabled={updateMutation.isPending}
+                  onClick={() => updateMutation.mutate({ packId: update.packageId })}
+                >
+                  {updateMutation.isPending ? "Actualizando…" : "Actualizar"}
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <QueryState
         isLoading={packs.isLoading}
@@ -142,6 +211,13 @@ function StarterPacksPage() {
     </>
   );
 }
+
+const UPDATE_KIND_LABELS: Record<string, string> = {
+  major: "Cambio mayor",
+  minor: "Mejora",
+  patch: "Corrección",
+  none: "Sin cambios",
+};
 
 const LIFECYCLE_LABELS: Record<string, string> = {
   draft: "Borrador",
