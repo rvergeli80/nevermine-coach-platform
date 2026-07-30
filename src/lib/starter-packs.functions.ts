@@ -30,6 +30,13 @@ import {
   updateStarterPack as updateStarterPackService,
 } from "@/lib/services/starter-packs.service";
 import { isHistoryEventType } from "@/modules/platform/knowledge-packages";
+import type {
+  AuditEntry,
+  HistoryEvent,
+  ReconstructedState,
+  TimelineEntry,
+  TraceabilityReport,
+} from "@/modules/platform/knowledge-packages";
 
 /**
  * FEATURE-003.1 — Canal HTTP de los Starter Packs oficiales.
@@ -295,7 +302,7 @@ export const searchKnowledgeHistoryFn = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) =>
     JSON.parse(
       JSON.stringify(await searchKnowledgeHistory(asServiceContext(context), toHistoryQuery(data))),
-    ) as Json,
+    ) as HistoryEvent[],
   );
 
 /** Línea temporal del conocimiento distribuido. */
@@ -305,7 +312,7 @@ export const getKnowledgeTimelineFn = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) =>
     JSON.parse(
       JSON.stringify(await getKnowledgeTimeline(asServiceContext(context), toHistoryQuery(data))),
-    ) as Json,
+    ) as TimelineEntry[],
   );
 
 /** Audit Trail: quién, cuándo, desde dónde, resultado, motivo y correlación. */
@@ -315,7 +322,7 @@ export const getKnowledgeAuditTrailFn = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) =>
     JSON.parse(
       JSON.stringify(await getKnowledgeAuditTrail(asServiceContext(context), toHistoryQuery(data))),
-    ) as Json,
+    ) as AuditEntry[],
   );
 
 /** Reconstrucción del estado de una configuración en un instante dado. */
@@ -329,7 +336,7 @@ export const reconstructKnowledgeStateFn = createServerFn({ method: "GET" })
       JSON.stringify(
         await reconstructKnowledgeState(asServiceContext(context), data.packId, data.at),
       ),
-    ) as Json,
+    ) as ReconstructedState,
   );
 
 /** Informe de trazabilidad completo de un pack. */
@@ -343,7 +350,7 @@ export const getTraceabilityReportFn = createServerFn({ method: "GET" })
       JSON.stringify(
         await getTraceabilityReportFor(asServiceContext(context), data.packId, data.at),
       ),
-    ) as Json,
+    ) as TraceabilityReport,
   );
 
 /** Narración del historial en lenguaje humano. */
