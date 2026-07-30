@@ -3,6 +3,10 @@ import {
   type CertificationReport,
   type DiscoveryQuery,
   type LifecycleTransition,
+  type PublicationAuditEntry,
+  type PublicationDecision,
+  type PublicationMetadata,
+  type Publisher,
   type TransitionRequest,
 } from "../platform/knowledge-packages";
 import { coachHostEnvironment, toKnowledgePackage, type StarterPackDescriptor } from "./knowledge-package";
@@ -90,4 +94,44 @@ export function isStarterPackDistributable(id: string, version?: string): boolea
 /** Estado de distribución vigente de una versión. */
 export function starterPackLifecycleState(id: string, version: string) {
   return knowledgePackages.stateOf(id, version);
+}
+
+/**
+ * FEATURE-003.4 — Gobierno de publicación.
+ * Coach consume el modelo de la plataforma; no define identidades ni políticas.
+ */
+
+/** Publisher propietario de un pack (nunca anónimo). */
+export function starterPackPublisher(id: string, version?: string): Publisher | undefined {
+  return knowledgePackages.publisherOf(id, version);
+}
+
+/** Metadatos públicos de publicación de una versión. */
+export function starterPackPublicationMetadata(
+  id: string,
+  version?: string,
+): PublicationMetadata | undefined {
+  return knowledgePackages.publicationMetadata(id, version);
+}
+
+/** Evaluación de la política de publicación sin ejecutarla. */
+export function evaluateStarterPackPublication(id: string, version: string): PublicationDecision {
+  return knowledgePackages.evaluatePublication(id, version);
+}
+
+/** Publicación gobernada de una versión certificada. */
+export function publishStarterPack(
+  id: string,
+  version: string,
+  request: Omit<TransitionRequest, "to"> = {},
+) {
+  return knowledgePackages.publish(id, version, request);
+}
+
+/** Auditoría append-only de los actos de gobierno. */
+export function starterPackPublicationAudit(
+  id?: string,
+  version?: string,
+): readonly PublicationAuditEntry[] {
+  return knowledgePackages.publicationAudit(id, version);
 }
