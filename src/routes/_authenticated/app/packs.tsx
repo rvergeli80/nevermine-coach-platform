@@ -92,7 +92,8 @@ function StarterPacksPage() {
                 <CardDescription>{pack.summary}</CardDescription>
                 <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-muted-foreground">
                   <Badge variant="outline">v{pack.latestVersion}</Badge>
-                  <span>{pack.author}</span>
+                  <span>{pack.publisher?.name ?? pack.author}</span>
+                  {pack.trust === "official" && <Badge variant="outline">Oficial</Badge>}
                   <LifecycleBadge state={pack.lifecycleState} />
                   <StateBadge
                     state={pack.state}
