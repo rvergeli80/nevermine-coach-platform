@@ -4,6 +4,7 @@ import {
   History,
   LogOut,
   Trophy,
+  Network,
   CalendarDays,
   Medal,
   Library,
