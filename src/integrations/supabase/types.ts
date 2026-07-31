@@ -170,8 +170,10 @@ export type Database = {
           name: string
           owner_id: string
           season_id: string | null
+          sport_id: string | null
           sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
+          type: Database["public"]["Enums"]["competition_type"]
         }
         Insert: {
           created_at?: string
@@ -179,8 +181,10 @@ export type Database = {
           name: string
           owner_id: string
           season_id?: string | null
+          sport_id?: string | null
           sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
+          type?: Database["public"]["Enums"]["competition_type"]
         }
         Update: {
           created_at?: string
@@ -188,8 +192,10 @@ export type Database = {
           name?: string
           owner_id?: string
           season_id?: string | null
+          sport_id?: string | null
           sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
+          type?: Database["public"]["Enums"]["competition_type"]
         }
         Relationships: [
           {
@@ -197,6 +203,13 @@ export type Database = {
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitions_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
             referencedColumns: ["id"]
           },
           {
@@ -782,8 +795,10 @@ export type Database = {
           id: string
           name: string
           owner_id: string
+          sport_id: string | null
           sport_space_id: string | null
           starts_on: string | null
+          state: Database["public"]["Enums"]["season_state"]
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
         }
@@ -793,8 +808,10 @@ export type Database = {
           id?: string
           name: string
           owner_id: string
+          sport_id?: string | null
           sport_space_id?: string | null
           starts_on?: string | null
+          state?: Database["public"]["Enums"]["season_state"]
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
@@ -804,14 +821,80 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string
+          sport_id?: string | null
           sport_space_id?: string | null
           starts_on?: string | null
+          state?: Database["public"]["Enums"]["season_state"]
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
         Relationships: [
           {
+            foreignKeyName: "seasons_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "seasons_sport_space_id_fkey"
+            columns: ["sport_space_id"]
+            isOneToOne: false
+            referencedRelation: "sport_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sport_categories: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+          sport_id: string
+          sport_space_id: string
+          status: Database["public"]["Enums"]["entity_status"]
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          sport_id: string
+          sport_space_id: string
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          sport_id?: string
+          sport_space_id?: string
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sport_categories_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sport_categories_sport_space_id_fkey"
             columns: ["sport_space_id"]
             isOneToOne: false
             referencedRelation: "sport_spaces"
@@ -894,6 +977,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          description: string | null
           id: string
           name: string
           owner_id: string | null
@@ -904,6 +988,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
+          description?: string | null
           id?: string
           name: string
           owner_id?: string | null
@@ -914,6 +999,7 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
           owner_id?: string | null
@@ -1070,10 +1156,12 @@ export type Database = {
       teams: {
         Row: {
           category: string | null
+          category_id: string | null
           created_at: string
           id: string
           name: string
           owner_id: string
+          season_id: string | null
           sport_id: string
           sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
@@ -1081,10 +1169,12 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          category_id?: string | null
           created_at?: string
           id?: string
           name: string
           owner_id: string
+          season_id?: string | null
           sport_id: string
           sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
@@ -1092,16 +1182,32 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          category_id?: string | null
           created_at?: string
           id?: string
           name?: string
           owner_id?: string
+          season_id?: string | null
           sport_id?: string
           sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "teams_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "sport_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "teams_sport_id_fkey"
             columns: ["sport_id"]
@@ -1343,6 +1449,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_category: { Args: { _category_id: string }; Returns: boolean }
       can_access_competition: {
         Args: { _competition_id: string }
         Returns: boolean
@@ -1412,11 +1519,18 @@ export type Database = {
     Enums: {
       app_role: "admin" | "coach"
       catalog_version_status: "draft" | "published" | "retired"
+      competition_type:
+        | "league"
+        | "cup"
+        | "tournament"
+        | "internal_league"
+        | "friendly"
       data_source: "manual" | "imported" | "ai"
       entity_status: "active" | "inactive" | "archived"
       metric_direction: "higher_is_better" | "lower_is_better" | "neutral"
       metric_nature: "primary" | "derived"
       metric_value_type: "counter" | "duration" | "boolean" | "ratio" | "scale"
+      season_state: "draft" | "active" | "closed" | "archived"
       sport_space_role: "owner" | "coach"
       sport_space_type:
         | "club"
@@ -1564,11 +1678,19 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "coach"],
       catalog_version_status: ["draft", "published", "retired"],
+      competition_type: [
+        "league",
+        "cup",
+        "tournament",
+        "internal_league",
+        "friendly",
+      ],
       data_source: ["manual", "imported", "ai"],
       entity_status: ["active", "inactive", "archived"],
       metric_direction: ["higher_is_better", "lower_is_better", "neutral"],
       metric_nature: ["primary", "derived"],
       metric_value_type: ["counter", "duration", "boolean", "ratio", "scale"],
+      season_state: ["draft", "active", "closed", "archived"],
       sport_space_role: ["owner", "coach"],
       sport_space_type: [
         "club",

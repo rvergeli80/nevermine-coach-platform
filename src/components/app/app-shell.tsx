@@ -4,6 +4,7 @@ import {
   History,
   LogOut,
   Trophy,
+  Network,
   CalendarDays,
   Medal,
   Library,
@@ -22,6 +23,7 @@ import { Button } from "@/components/ui/button";
 const NAV = [
   { to: "/app", label: "Resumen", icon: LayoutGrid, exact: true },
   { to: "/app/deportes", label: "Deportes", icon: Trophy, exact: false },
+  { to: "/app/organizacion", label: "Organización", icon: Network, exact: false },
   { to: "/app/temporadas", label: "Temporadas", icon: CalendarDays, exact: false },
   { to: "/app/competiciones", label: "Competiciones", icon: Medal, exact: false },
   { to: "/app/equipos", label: "Equipos", icon: Users, exact: false },
