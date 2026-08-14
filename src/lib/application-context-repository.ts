@@ -26,7 +26,10 @@ export interface AvailableSportSpace {
 /** Memberships válidas del usuario, base de todo contexto posible. */
 export async function loadContextCandidates(supabase: DataClient, userId: string) {
   const { withClockSkewRetry } = await import("@/lib/jwt-skew.server");
-  const { data, error } = await withClockSkewRetry(() =>
+  const { data, error } = await withClockSkewRetry<{
+    data: unknown;
+    error: { message: string } | null;
+  }>(() =>
     supabase
       .from("sport_space_members")
       .select("sport_space_id, role, created_at, sport_spaces(name, slug, type, status)")
