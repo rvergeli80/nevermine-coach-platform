@@ -30,7 +30,7 @@ export interface CaptureMetric {
 export interface CaptureRule {
   metricId: string;
   ruleType: string;
-  params: Record<string, unknown>;
+  params: Record<string, number | string | boolean | null>;
   message: string | null;
 }
 

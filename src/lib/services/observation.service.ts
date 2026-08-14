@@ -55,8 +55,8 @@ export interface ValuationRow {
   subject_id: string;
   context_id: string | null;
   season_id: string | null;
-  breakdown: unknown;
-  weights_snapshot: unknown;
+  breakdown: { metricCode: string; value: number; weight: number; sign: number; contribution: number }[];
+  weights_snapshot: Record<string, { weight: number; sign: number }>;
   superseded_by: string | null;
 }
 
@@ -230,13 +230,15 @@ async function loadConfiguration(
         .select("metric_id, is_enabled")
         .eq("version_id", version.id),
     ),
-    unwrap<{ metric_id: string; rule_type: string; params: unknown; message: string | null }[]>(
+    unwrap<
+      { metric_id: string; rule_type: string; params: Record<string, never>; message: string | null }[]
+    >(
       await ctx.supabase
         .from("validation_rules")
         .select("metric_id, rule_type, params, message")
         .eq("version_id", version.id),
     ),
-    unwrap<{ metric_id: string; ast: unknown; null_policy: string }[]>(
+    unwrap<{ metric_id: string; ast: FormulaNode; null_policy: string }[]>(
       await ctx.supabase
         .from("metric_formulas")
         .select("metric_id, ast, null_policy")
@@ -294,12 +296,12 @@ async function loadConfiguration(
     rules: rules.map((rule) => ({
       metricId: rule.metric_id,
       ruleType: rule.rule_type,
-      params: (rule.params ?? {}) as Record<string, unknown>,
+      params: (rule.params ?? {}) as CaptureRule["params"],
       message: rule.message,
     })),
     derived: formulas.map((formula) => ({
       metricCode: codeById.get(formula.metric_id) ?? "",
-      ast: formula.ast as FormulaNode,
+      ast: formula.ast,
       nullPolicy: formula.null_policy === "propagate" ? "propagate" : "zero",
     })),
     weights: weightRows
