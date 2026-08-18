@@ -63,8 +63,6 @@ type TeamRow = {
 type SeasonOption = { id: string; name: string; sport_id: string | null; state: string };
 type CategoryOption = { id: string; name: string; sport_id: string; status: string };
 
-const NO_CATEGORY = "none";
-
 function TeamsPage() {
   const queryClient = useQueryClient();
   const fetchTeams = useServerFn(listTeams);
@@ -76,7 +74,7 @@ function TeamsPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<TeamRow | null>(null);
   const [seasonId, setSeasonId] = useState("");
-  const [categoryId, setCategoryId] = useState(NO_CATEGORY);
+  const [categoryId, setCategoryId] = useState("");
 
   const teams = useQuery({ queryKey: ["teams"], queryFn: () => fetchTeams({}) });
   const seasons = useQuery({ queryKey: ["seasons"], queryFn: () => fetchSeasons({}) });
@@ -100,7 +98,8 @@ function TeamsPage() {
   const mutation = useMutation({
     mutationFn: async (form: FormData) => {
       const name = String(form.get("name") ?? "");
-      const category = categoryId === NO_CATEGORY ? null : categoryId;
+      const category = categoryId;
+      if (!category) throw new Error("Selecciona una categoría");
       if (editing) {
         return update({
           data: {
@@ -129,7 +128,7 @@ function TeamsPage() {
   function openDialog(row: TeamRow | null) {
     setEditing(row);
     setSeasonId(row?.season_id ?? seasonOptions[0]?.id ?? "");
-    setCategoryId(row?.category_id ?? NO_CATEGORY);
+    setCategoryId(row?.category_id ?? "");
     setOpen(true);
   }
 
@@ -225,7 +224,7 @@ function TeamsPage() {
               value={seasonId}
               onValueChange={(value) => {
                 setSeasonId(value);
-                setCategoryId(NO_CATEGORY);
+                setCategoryId("");
               }}
             >
               <SelectTrigger id="seasonId">
@@ -244,10 +243,9 @@ function TeamsPage() {
         <Field label="Categoría" htmlFor="categoryId">
           <Select value={categoryId} onValueChange={setCategoryId}>
             <SelectTrigger id="categoryId">
-              <SelectValue placeholder="Sin categoría" />
+              <SelectValue placeholder="Selecciona una categoría" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={NO_CATEGORY}>Sin categoría</SelectItem>
               {categoryOptions.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}

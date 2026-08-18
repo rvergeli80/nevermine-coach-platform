@@ -90,9 +90,7 @@ const TEAM_FIELDS =
 
 /* ---------------------------------- Lecturas --------------------------------- */
 
-export async function listOrgSportsService(
-  ctx: ApplicationServiceContext,
-): Promise<SportOrgRow[]> {
+export async function listOrgSportsService(ctx: ApplicationServiceContext): Promise<SportOrgRow[]> {
   await assertAuthority(ctx, "organization:read");
   return unwrap<SportOrgRow[]>(
     await ctx.supabase
@@ -145,10 +143,7 @@ export async function listOrgTeamsService(
   ctx: ApplicationServiceContext,
   input: { seasonId?: string | null } = {},
 ): Promise<OrgTeamRow[]> {
-  let query = ctx.supabase
-    .from("teams")
-    .select(TEAM_FIELDS)
-    .eq("sport_space_id", ctx.sportSpaceId);
+  let query = ctx.supabase.from("teams").select(TEAM_FIELDS).eq("sport_space_id", ctx.sportSpaceId);
   if (input.seasonId) query = query.eq("season_id", input.seasonId);
   return unwrap<OrgTeamRow[]>(await query.order("name"));
 }
@@ -249,7 +244,13 @@ export async function createCategoryService(
 
 export async function updateCategoryService(
   ctx: ApplicationServiceContext,
-  input: { id: string; name: string; description: string | null; sortOrder: number; status: EntityStatus },
+  input: {
+    id: string;
+    name: string;
+    description: string | null;
+    sortOrder: number;
+    status: EntityStatus;
+  },
 ): Promise<CategoryRow> {
   await assertAuthority(ctx, "category:write");
   return unwrap<CategoryRow>(
@@ -359,7 +360,7 @@ export async function createOrgTeamService(
   assertSeasonAcceptsStructure({ state: season.state, name: season.name });
   if (!season.sport_id) fail("La temporada no tiene deporte asignado.");
 
-  if (input.categoryId) {
+  {
     const categories = await listCategoriesService(ctx, { sportId: season.sport_id });
     const category = categories.find((c) => c.id === input.categoryId);
     if (!category) fail("La categoría no existe en este SportSpace.");
@@ -489,7 +490,7 @@ export async function updateOrgCompetitionService(
 
 export async function updateOrgTeamService(
   ctx: ApplicationServiceContext,
-  input: { id: string; name: string; categoryId: string | null; status: EntityStatus },
+  input: { id: string; name: string; categoryId: string; status: EntityStatus },
 ): Promise<OrgTeamRow> {
   await assertAuthority(ctx, "team:write");
   const current = unwrap<OrgTeamRow | null>(
@@ -502,7 +503,7 @@ export async function updateOrgTeamService(
   );
   if (!current) fail("El equipo no existe en este SportSpace.");
 
-  if (input.categoryId) {
+  {
     const categories = await listCategoriesService(ctx, { sportId: current.sport_id });
     const category = categories.find((c) => c.id === input.categoryId);
     if (!category) fail("La categoría no existe en este SportSpace.");
