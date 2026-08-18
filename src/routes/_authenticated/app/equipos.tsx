@@ -128,7 +128,7 @@ function TeamsPage() {
   function openDialog(row: TeamRow | null) {
     setEditing(row);
     setSeasonId(row?.season_id ?? seasonOptions[0]?.id ?? "");
-    setCategoryId(row?.category_id ?? NO_CATEGORY);
+    setCategoryId(row?.category_id ?? "");
     setOpen(true);
   }
 
@@ -224,7 +224,7 @@ function TeamsPage() {
               value={seasonId}
               onValueChange={(value) => {
                 setSeasonId(value);
-                setCategoryId(NO_CATEGORY);
+                setCategoryId("");
               }}
             >
               <SelectTrigger id="seasonId">
