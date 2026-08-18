@@ -1,0 +1,323 @@
+{
+  "stamp": "1787069749",
+  "startedAt": "2026-08-18T16:15:49.607Z",
+  "spaces": {
+    "A": {
+      "spaceId": "63fe7ce7-cb34-412e-91d1-0a87b3579b92",
+      "userId": "33402b78-b00a-435a-a30c-9d3b2858e227",
+      "email": "val005-a-1787069749@example.com",
+      "seasonId": "6242ab88-1512-49b6-bc22-73e2f6e14222",
+      "teamId": "3fe79e1e-a1cb-404d-8d3f-5a70f4363e2f",
+      "playerId": "b708f029-af01-40f8-beda-7749fdbd0edd",
+      "versionId": "e63c1a15-927d-43cc-bb54-611b6670d56e"
+    },
+    "B": {
+      "spaceId": "f203d9cf-f7de-4908-b1de-142f7c96ad97",
+      "userId": "f997bc05-575b-4a74-b690-fdb8090167f8",
+      "email": "val005-b-1787069749@example.com",
+      "seasonId": "736e7762-f04c-45f9-a523-6428b2a4aa37",
+      "teamId": "bc758b3a-6014-4b70-88ef-d32f1db4060d",
+      "playerId": "d534be88-8aeb-41ab-bc38-b66357977791",
+      "versionId": "7c383c81-669c-429e-9089-0311536bc69a"
+    }
+  },
+  "valuation_1": {
+    "input": {
+      "goals": 4,
+      "shots": 10,
+      "losses": 3
+    },
+    "expected": {
+      "eff": 0.4,
+      "score": 0.8
+    },
+    "engine": {
+      "contextId": "56d4a14f-3379-4d85-b3bd-6bb4de4212a7",
+      "saved": 3,
+      "valuation": {
+        "status": "computed",
+        "id": "b53c8dc0-9925-4846-bb6b-19f02fe21176",
+        "score": 0.8,
+        "supersededId": null
+      },
+      "derivedValues": {
+        "VAL005_GOALS": 4,
+        "VAL005_SHOTS": 10,
+        "VAL005_LOSSES": 3,
+        "VAL005_EFF": 0.4
+      }
+    }
+  },
+  "negatives": {
+    "F4.1": "La métrica no pertenece a la configuración vigente de este contexto.",
+    "F4.2": "VAL005_GOALS: debe ser un número entero mayor o igual que 0.",
+    "F4.3": "VAL005_GOALS: el valor máximo permitido es 20.",
+    "F4.4": "El sujeto seleccionado no pertenece al SportSpace activo.",
+    "F4.5": "La temporada no pertenece al SportSpace activo."
+  },
+  "valuation_2": {
+    "input": {
+      "goals": 6,
+      "shots": 10,
+      "losses": 1
+    },
+    "expected": {
+      "eff": 0.6,
+      "score": 1.9
+    },
+    "engine": {
+      "contextId": "56d4a14f-3379-4d85-b3bd-6bb4de4212a7",
+      "saved": 3,
+      "valuation": {
+        "status": "computed",
+        "id": "58e0cc26-773d-4931-b955-c277390d639b",
+        "score": 1.9,
+        "supersededId": "b53c8dc0-9925-4846-bb6b-19f02fe21176"
+      },
+      "derivedValues": {
+        "VAL005_GOALS": 6,
+        "VAL005_SHOTS": 10,
+        "VAL005_LOSSES": 1,
+        "VAL005_EFF": 0.6
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "58e0cc26-773d-4931-b955-c277390d639b",
+      "score": 1.9,
+      "status": "current",
+      "algorithm": "weighted_sum_v1",
+      "calculated_at": "2026-08-18T16:15:55.809488+00:00",
+      "subject_type": "player",
+      "subject_id": "b708f029-af01-40f8-beda-7749fdbd0edd",
+      "context_id": "56d4a14f-3379-4d85-b3bd-6bb4de4212a7",
+      "season_id": "6242ab88-1512-49b6-bc22-73e2f6e14222",
+      "breakdown": [
+        {
+          "sign": 1,
+          "value": 6,
+          "weight": 3,
+          "metricCode": "VAL005_GOALS",
+          "contribution": 18
+        },
+        {
+          "sign": -1,
+          "value": 1,
+          "weight": 2,
+          "metricCode": "VAL005_LOSSES",
+          "contribution": -2
+        },
+        {
+          "sign": 1,
+          "value": 0.6,
+          "weight": 5,
+          "metricCode": "VAL005_EFF",
+          "contribution": 3
+        }
+      ],
+      "weights_snapshot": {
+        "VAL005_EFF": {
+          "sign": 1,
+          "weight": 5
+        },
+        "VAL005_GOALS": {
+          "sign": 1,
+          "weight": 3
+        },
+        "VAL005_LOSSES": {
+          "sign": -1,
+          "weight": 2
+        }
+      },
+      "superseded_by": null
+    },
+    {
+      "id": "b53c8dc0-9925-4846-bb6b-19f02fe21176",
+      "score": 0.8,
+      "status": "superseded",
+      "algorithm": "weighted_sum_v1",
+      "calculated_at": "2026-08-18T16:15:54.166184+00:00",
+      "subject_type": "player",
+      "subject_id": "b708f029-af01-40f8-beda-7749fdbd0edd",
+      "context_id": "56d4a14f-3379-4d85-b3bd-6bb4de4212a7",
+      "season_id": "6242ab88-1512-49b6-bc22-73e2f6e14222",
+      "breakdown": [
+        {
+          "sign": 1,
+          "value": 4,
+          "weight": 3,
+          "metricCode": "VAL005_GOALS",
+          "contribution": 12
+        },
+        {
+          "sign": -1,
+          "value": 3,
+          "weight": 2,
+          "metricCode": "VAL005_LOSSES",
+          "contribution": -6
+        },
+        {
+          "sign": 1,
+          "value": 0.4,
+          "weight": 5,
+          "metricCode": "VAL005_EFF",
+          "contribution": 2
+        }
+      ],
+      "weights_snapshot": {
+        "VAL005_EFF": {
+          "sign": 1,
+          "weight": 5
+        },
+        "VAL005_GOALS": {
+          "sign": 1,
+          "weight": 3
+        },
+        "VAL005_LOSSES": {
+          "sign": -1,
+          "weight": 2
+        }
+      },
+      "superseded_by": "58e0cc26-773d-4931-b955-c277390d639b"
+    }
+  ],
+  "immutability": {
+    "update": "Una valoración es inmutable: genere una nueva y marque la anterior como reemplazada",
+    "delete": [],
+    "dbTrigger": "Una valoración es inmutable: genere una nueva y marque la anterior como reemplazada"
+  },
+  "results": [
+    {
+      "id": "F1.1",
+      "name": "Dataset VAL005 creado en dos SportSpaces aislados",
+      "status": "PASS"
+    },
+    {
+      "id": "F2.1",
+      "name": "Setup de observación sólo ofrece recursos del SportSpace activo",
+      "status": "PASS"
+    },
+    {
+      "id": "F2.2",
+      "name": "Contexto de observación creado",
+      "status": "PASS"
+    },
+    {
+      "id": "F2.3",
+      "name": "La captura sólo expone métricas primarias",
+      "status": "PASS"
+    },
+    {
+      "id": "F2.4",
+      "name": "La versión aporta perfil y pesos",
+      "status": "PASS"
+    },
+    {
+      "id": "F3.1",
+      "name": "Valoración generada al guardar la observación",
+      "status": "PASS"
+    },
+    {
+      "id": "F3.2",
+      "name": "Score coincide con el oráculo independiente (0.800000)",
+      "status": "PASS"
+    },
+    {
+      "id": "F3.3",
+      "name": "Métrica derivada calculada por fórmula, no registrada",
+      "status": "PASS"
+    },
+    {
+      "id": "F3.4",
+      "name": "Sólo se persisten valores primarios (3 filas, ninguna derivada)",
+      "status": "PASS"
+    },
+    {
+      "id": "F4.1",
+      "name": "Rechaza registrar una métrica derivada",
+      "status": "PASS"
+    },
+    {
+      "id": "F4.2",
+      "name": "Rechaza un contador negativo",
+      "status": "PASS"
+    },
+    {
+      "id": "F4.3",
+      "name": "Aplica la regla declarativa max=20",
+      "status": "PASS"
+    },
+    {
+      "id": "F4.4",
+      "name": "Rechaza un sujeto de otro SportSpace",
+      "status": "PASS"
+    },
+    {
+      "id": "F4.5",
+      "name": "Rechaza una temporada de otro SportSpace",
+      "status": "PASS"
+    },
+    {
+      "id": "F5.1",
+      "name": "La corrección genera una nueva valoración",
+      "status": "PASS"
+    },
+    {
+      "id": "F5.2",
+      "name": "Nuevo score coincide con el oráculo (1.900000)",
+      "status": "PASS"
+    },
+    {
+      "id": "F5.3",
+      "name": "Histórico: una valoración vigente y la anterior marcada como reemplazada",
+      "status": "PASS"
+    },
+    {
+      "id": "F6.1",
+      "name": "No se puede modificar el score de una valoración",
+      "status": "PASS"
+    },
+    {
+      "id": "F6.2",
+      "name": "No se puede borrar una valoración",
+      "status": "PASS"
+    },
+    {
+      "id": "F6.3",
+      "name": "La inmutabilidad se aplica en base de datos (trigger), no sólo en RLS",
+      "status": "PASS"
+    },
+    {
+      "id": "F7.1",
+      "name": "El SportSpace B no ve observaciones de A",
+      "status": "PASS"
+    },
+    {
+      "id": "F7.2",
+      "name": "El SportSpace B no ve valoraciones de A",
+      "status": "PASS"
+    },
+    {
+      "id": "F7.3",
+      "name": "RLS impide leer los valores de A desde B",
+      "status": "PASS"
+    },
+    {
+      "id": "F7.4",
+      "name": "El Application Service rechaza operar sobre el contexto de otro SportSpace",
+      "status": "PASS"
+    },
+    {
+      "id": "F8.1",
+      "name": "La valoración congela la versión de catálogo y el snapshot de pesos",
+      "status": "PASS"
+    },
+    {
+      "id": "F8.2",
+      "name": "Las operaciones rechazadas no dejan valores huérfanos",
+      "status": "PASS"
+    }
+  ],
+  "finishedAt": "2026-08-18T16:15:56.305Z"
+}
