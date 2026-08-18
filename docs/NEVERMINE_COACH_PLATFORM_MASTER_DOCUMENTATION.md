@@ -367,3 +367,26 @@ Para reconstruir la plataforma desde cero:
 7. Construir la UI consumiendo exclusivamente server functions vía TanStack Query.
 8. Validar el aislamiento con los scripts Python multi-usuario antes de dar por buena cualquier
    política RLS.
+
+---
+
+## 12. Current Implementation Status (18 Ago 2026)
+
+| Área | Estado |
+| --- | --- |
+| Sports Organization (Sport, Category, Season, Competition, Team) | **IMPLEMENTED — CONSOLIDATED** |
+| Línea autoritativa | **SINGLE** (`UI → src/lib/sports-organization.functions.ts → Application Service → Dominio → Persistencia`) |
+| Datos legacy organizativos incompatibles | **REMOVED** (Fase C, migración `20260818151253`) |
+| Campos organizativos obligatorios (`seasons.sport_id`, `teams.season_id`, `teams.category_id`) | **ENFORCED** (NOT NULL + validación de aplicación) |
+| Autorización de producto | **ENFORCED** — Authority por rol (`ORG_POLICY`) resuelta desde `sport_space_members`; RLS como segunda barrera |
+| Aislamiento SportSpace | ENFORCED (RLS + `requireApplicationContext`) |
+| Canal MCP | ALINEADO con la misma línea autoritativa |
+| Players | OPERATIVO (`players.service.ts`) |
+| Observation / Valuation | Sin cambios de madurez en esta remediación; sin regresión detectada |
+| Deploy / publicación | **PENDIENTE** (no ejecutado) |
+
+### Deuda registrada
+
+- Columnas legacy `seasons.status` y `teams.category`: pendientes de retirada.
+- Histórico de plantilla Player ↔ Season: inexistente.
+- Ruido de formato (`prettier/prettier`) preexistente en todo el repositorio.
