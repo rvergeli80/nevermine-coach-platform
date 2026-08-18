@@ -113,3 +113,46 @@ regresión (sólo se preservó integridad referencial).
 - Columnas legacy `seasons.status` y `teams.category` pendientes de retirada.
 - Punto de no retorno: la purga sólo es reversible desde los CSV del inventario.
 - Merge y deploy **siguen pendientes**.
+
+## Integración canónica (18 Ago 2026)
+
+### Source of Truth
+
+- **Repositorio canónico**: repositorio Git interno de Lovable del proyecto
+  `5e850720-ef85-48bf-a4cf-06ec8a1ae55f` (remoto `origin`; espejo `secondary` en S3).
+- **Repositorio GitHub conectado**: **ninguno** (no hay remoto GitHub configurado).
+- **Rama canónica**: `main`. **Rama de trabajo**: `edit/edt-b2acdacc-…`, apuntando al mismo commit.
+- **SHA anterior**: `22a448c98b32b8a468e4dba68a44b32f21d5bdc4`.
+- **SHA integrado (Fase C)**: `4f7d777` — `main` == `origin/main` == HEAD, working tree limpio.
+  No hubo divergencia, por lo que no fue necesario merge ni PR; el cambio ya está en la rama canónica.
+
+### Diff integrado
+
+`docs/REMEDIATION-004-cierre.md`, `docs/remediation-004/inventory-*.csv` (5),
+`src/integrations/supabase/types.ts`, `src/lib/services/sports-organization.service.ts`,
+`src/modules/sports-organization/schemas.ts`, `src/routes/_authenticated/app/equipos.tsx`,
+`src/routes/_authenticated/app/organizacion.tsx`,
+`supabase/migrations/20260818151253_d7120fd2-ff4c-4acd-84df-7592df4532e2.sql`.
+Sin cambios ajenos al alcance. Los CSV contienen sólo IDs y columnas de negocio (sin secretos).
+
+### Migración
+
+`20260818151253` figura **aplicada** en `supabase_migrations.schema_migrations`. Transaccional,
+idempotente y dirigida por IDs explícitos con preconditions: no se reejecutó ninguna purga.
+
+### Validaciones (ejecutadas sobre la rama canónica)
+
+- Typecheck (`tsgo --noEmit`): limpio.
+- Tests: **286/286** en 27 ficheros.
+- Build (`vite build`): correcto, artefactos Nitro generados.
+- Lint: 1.672 errores, **1.654 de `prettier/prettier`** más 18 `no-explicit-any`,
+  6 `react-refresh` y 4 `exhaustive-deps`: ruido preexistente, ningún error nuevo.
+- Base de datos: 0 temporadas sin `sport_id`, 0 equipos sin `season_id`/`category_id`,
+  0 contextos huérfanos, 0 valores de métrica huérfanos.
+- Línea autoritativa única: `src/lib/org.functions.ts` inexistente; `config.functions.ts` sin
+  escrituras organizativas.
+- `/app` responde 200.
+
+### Estado
+
+Merge/PR: no aplicable (ya integrado en `main`). **Deploy: no ejecutado.**
