@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
 import { getCurrentUser } from "@/lib/identity.functions";
-import { listCatalogs, listSeasons, listSports } from "@/lib/config.functions";
+import { listCatalogs } from "@/lib/config.functions";
+import { listSeasons, listSports } from "@/lib/sports-organization.functions";
 import { PageHeader } from "@/components/app/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 

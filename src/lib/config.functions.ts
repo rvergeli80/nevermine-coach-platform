@@ -3,151 +3,25 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireApplicationContext } from "@/lib/application-context-middleware";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { unwrap } from "@/lib/supabase-result";
-import {
-  createSeasonService,
-  listCatalogsService,
-  listCompetitionsService,
-  listMetricsService,
-  listSeasonsService,
-} from "@/lib/services/config.service";
+import { listCatalogsService, listMetricsService } from "@/lib/services/config.service";
 import { checkVersionFormulas } from "@/modules/config/formula-rules";
 import { checkVersionWeights } from "@/modules/config/weight-rules";
 import type { FormulaNode } from "@/modules/metrics/domain";
 import {
   catalogIdSchema,
   createCatalogSchema,
-  createCompetitionSchema,
   createGroupSchema,
   createMetricSchema,
-  createSeasonSchema,
-  createSportSchema,
   createVersionSchema,
   updateCatalogSchema,
-  updateCompetitionSchema,
   updateGroupSchema,
   updateMetricSchema,
-  updateSeasonSchema,
-  updateSportSchema,
   versionIdSchema,
 } from "@/modules/config/schemas";
 
-/* ---------------------------------- Deportes --------------------------------- */
-
-export const listSports = createServerFn({ method: "GET" })
-  // Los deportes de plataforma (sport_space_id NULL) son comunes; los propios
-  // se acotan al SportSpace activo mediante RLS + contexto.
-  .middleware([requireApplicationContext])
-  .handler(async ({ context }) =>
-    unwrap(
-      await context.supabase
-        .from("sports")
-        .select("id, code, name, status, owner_id, sport_space_id")
-        .or(`sport_space_id.is.null,sport_space_id.eq.${context.sportSpaceId}`)
-        .order("name"),
-    ),
-  );
-
-export const createSport = createServerFn({ method: "POST" })
-  .middleware([requireApplicationContext])
-  .inputValidator((data: unknown) => createSportSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("sports")
-        .insert({
-          code: data.code,
-          name: data.name,
-          // Ámbito resuelto por el contexto activo (nunca desde owner_id).
-          sport_space_id: context.sportSpaceId,
-          owner_id: context.userId, // metadato de trazabilidad
-        })
-        .select("id")
-        .single(),
-    ),
-  );
-
-
-export const updateSport = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => updateSportSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("sports")
-        .update({ name: data.name, status: data.status })
-        .eq("id", data.id)
-        .select("id")
-        .single(),
-    ),
-  );
-
-/* --------------------------------- Temporadas -------------------------------- */
-
-export const listSeasons = createServerFn({ method: "GET" })
-  .middleware([requireApplicationContext])
-  .handler(async ({ context }) => listSeasonsService(context));
-
-export const createSeason = createServerFn({ method: "POST" })
-  .middleware([requireApplicationContext])
-  .inputValidator((data: unknown) => createSeasonSchema.parse(data))
-  .handler(async ({ data, context }) => createSeasonService(context, data));
-
-export const updateSeason = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => updateSeasonSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("seasons")
-        .update({
-          name: data.name,
-          starts_on: data.startsOn ?? null,
-          ends_on: data.endsOn ?? null,
-          status: data.status,
-        })
-        .eq("id", data.id)
-        .select("id")
-        .single(),
-    ),
-  );
-
-/* -------------------------------- Competiciones ------------------------------- */
-
-export const listCompetitions = createServerFn({ method: "GET" })
-  .middleware([requireApplicationContext])
-  .handler(async ({ context }) => listCompetitionsService(context));
-
-export const createCompetition = createServerFn({ method: "POST" })
-  .middleware([requireApplicationContext])
-  .inputValidator((data: unknown) => createCompetitionSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("competitions")
-        .insert({
-          sport_space_id: context.sportSpaceId,
-          owner_id: context.userId,
-          name: data.name,
-          season_id: data.seasonId,
-        })
-        .select("id")
-        .single(),
-    ),
-  );
-
-export const updateCompetition = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => updateCompetitionSchema.parse(data))
-  .handler(async ({ data, context }) =>
-    unwrap(
-      await context.supabase
-        .from("competitions")
-        .update({ name: data.name, season_id: data.seasonId, status: data.status })
-        .eq("id", data.id)
-        .select("id")
-        .single(),
-    ),
-  );
+/* Deportes, temporadas y competiciones viven ahora en la única línea
+   autoritativa del modelo organizativo: src/lib/sports-organization.functions.ts
+   (REMEDIATION-004). Este módulo conserva sólo catálogos, versiones y métricas. */
 
 /* ---------------------------------- Catálogos --------------------------------- */
 

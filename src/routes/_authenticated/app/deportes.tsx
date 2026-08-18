@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { createSport, listSports, updateSport } from "@/lib/config.functions";
+import { createSport, listSports, updateSport } from "@/lib/sports-organization.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
 import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
 import { Button } from "@/components/ui/button";

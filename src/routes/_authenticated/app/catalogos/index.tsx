@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { createCatalog, listCatalogs, listSports } from "@/lib/config.functions";
+import { createCatalog, listCatalogs } from "@/lib/config.functions";
+import { listSports } from "@/lib/sports-organization.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
 import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
 import { Button } from "@/components/ui/button";

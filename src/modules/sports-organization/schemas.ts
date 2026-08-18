@@ -35,6 +35,19 @@ export const orgEntityStatusSchema = z.enum(["active", "inactive", "archived"]);
 
 export const sportIdSchema = z.object({ sportId: z.string().uuid() });
 
+/* Deportes */
+export const createOrgSportSchema = z.object({
+  code: codeSchema,
+  name: nameSchema,
+  description: optionalText(300),
+});
+export const updateOrgSportSchema = z.object({
+  id: z.string().uuid(),
+  name: nameSchema,
+  description: optionalText(300),
+  status: orgEntityStatusSchema,
+});
+
 /* Categorías */
 export const createCategorySchema = z.object({
   sportId: z.string().uuid(),
@@ -58,6 +71,12 @@ export const createOrgSeasonSchema = z.object({
   startsOn: optionalDate,
   endsOn: optionalDate,
 });
+export const updateOrgSeasonSchema = z.object({
+  id: z.string().uuid(),
+  name: nameSchema,
+  startsOn: optionalDate,
+  endsOn: optionalDate,
+});
 export const changeSeasonStateSchema = z.object({
   id: z.string().uuid(),
   state: seasonStateSchema,
@@ -68,6 +87,12 @@ export const createOrgCompetitionSchema = z.object({
   seasonId: z.string().uuid(),
   name: nameSchema,
   type: competitionTypeSchema.default("league"),
+});
+export const updateOrgCompetitionSchema = z.object({
+  id: z.string().uuid(),
+  name: nameSchema,
+  type: competitionTypeSchema,
+  status: orgEntityStatusSchema,
 });
 
 /* Equipos */
@@ -81,8 +106,38 @@ export const createOrgTeamSchema = z.object({
     .transform((v) => v ?? null),
   name: nameSchema,
 });
+export const updateOrgTeamSchema = z.object({
+  id: z.string().uuid(),
+  name: nameSchema,
+  categoryId: z
+    .string()
+    .uuid()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? null),
+  status: orgEntityStatusSchema,
+});
+
+/* Jugadores (Coach Product, fuera del agregado organizativo) */
+export const createOrgPlayerSchema = z.object({
+  teamId: z
+    .string()
+    .uuid()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? null),
+  fullName: nameSchema,
+  birthDate: optionalDate,
+});
+export const updateOrgPlayerSchema = createOrgPlayerSchema.extend({
+  id: z.string().uuid(),
+  status: orgEntityStatusSchema,
+});
 
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type CreateOrgSeasonInput = z.infer<typeof createOrgSeasonSchema>;
 export type CreateOrgCompetitionInput = z.infer<typeof createOrgCompetitionSchema>;
 export type CreateOrgTeamInput = z.infer<typeof createOrgTeamSchema>;
+export type CreateOrgSportInput = z.infer<typeof createOrgSportSchema>;
+export type CreateOrgPlayerInput = z.infer<typeof createOrgPlayerSchema>;
+export type UpdateOrgPlayerInput = z.infer<typeof updateOrgPlayerSchema>;

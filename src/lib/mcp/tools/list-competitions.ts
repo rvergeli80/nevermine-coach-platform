@@ -1,6 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 
-import { listCompetitionsService } from "@/lib/services/config.service";
+import { listOrgCompetitionsService } from "@/lib/services/sports-organization.service";
 import { contextualTool } from "../application-context";
 
 export default defineTool({
@@ -10,6 +10,6 @@ export default defineTool({
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: contextualTool("list_competitions", (_input, context) =>
-    listCompetitionsService(context),
+    listOrgCompetitionsService(context),
   ),
 });
