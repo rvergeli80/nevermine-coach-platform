@@ -5,11 +5,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import {
-  createCompetition,
+  createOrganizationCompetition,
   listCompetitions,
   listSeasons,
-  updateCompetition,
-} from "@/lib/config.functions";
+  updateOrganizationCompetition,
+} from "@/lib/sports-organization.functions";
+import { COMPETITION_TYPE_LABELS, COMPETITION_TYPES, type CompetitionType } from "@/modules/sports-organization";
 import { PageHeader, QueryState } from "@/components/app/page-header";
 import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
 import { Button } from "@/components/ui/button";
@@ -51,18 +52,19 @@ type CompetitionRow = {
   id: string;
   name: string;
   status: string;
+  type: CompetitionType;
   season_id: string | null;
-  seasons: { name: string } | null;
+  seasons?: { name: string; state: string } | null;
 };
 
-type SeasonOption = { id: string; name: string };
+type SeasonOption = { id: string; name: string; state: string };
 
 function CompetitionsPage() {
   const queryClient = useQueryClient();
   const fetchCompetitions = useServerFn(listCompetitions);
   const fetchSeasons = useServerFn(listSeasons);
-  const create = useServerFn(createCompetition);
-  const update = useServerFn(updateCompetition);
+  const create = useServerFn(createOrganizationCompetition);
+  const update = useServerFn(updateOrganizationCompetition);
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CompetitionRow | null>(null);
@@ -73,29 +75,33 @@ function CompetitionsPage() {
     queryFn: () => fetchCompetitions({}),
   });
   const seasons = useQuery({ queryKey: ["seasons"], queryFn: () => fetchSeasons({}) });
-  const seasonOptions = (seasons.data ?? []) as SeasonOption[];
+  const seasonOptions = ((seasons.data ?? []) as SeasonOption[]).filter(
+    (season) => season.state === "draft" || season.state === "active",
+  );
 
   const mutation = useMutation({
     mutationFn: async (form: FormData) => {
       const name = String(form.get("name") ?? "");
-      if (!seasonId) throw new Error("Selecciona una temporada");
+      const type = String(form.get("type") ?? "league") as CompetitionType;
       if (editing) {
         return update({
           data: {
             id: editing.id,
             name,
-            seasonId,
+            type,
             status: String(form.get("status") ?? "active") as "active" | "inactive" | "archived",
           },
         });
       }
-      return create({ data: { name, seasonId } });
+      if (!seasonId) throw new Error("Selecciona una temporada");
+      return create({ data: { name, seasonId, type } });
     },
     onSuccess: () => {
       toast.success(editing ? "Competición actualizada" : "Competición creada");
       setOpen(false);
       setEditing(null);
       queryClient.invalidateQueries({ queryKey: ["competitions"] });
+      queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -138,6 +144,7 @@ function CompetitionsPage() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Temporada</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -147,7 +154,10 @@ function CompetitionsPage() {
                 <TableRow key={row.id}>
                   <TableCell>{row.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {row.seasons?.name ?? "—"}
+                    {row.seasons?.name ?? "Sin temporada"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {COMPETITION_TYPE_LABELS[row.type] ?? row.type}
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={row.status} />
@@ -186,15 +196,31 @@ function CompetitionsPage() {
             placeholder="Liga regular"
           />
         </Field>
-        <Field label="Temporada" htmlFor="seasonId">
-          <Select value={seasonId} onValueChange={setSeasonId}>
-            <SelectTrigger id="seasonId">
-              <SelectValue placeholder="Selecciona una temporada" />
+        {editing ? null : (
+          <Field label="Temporada" htmlFor="seasonId">
+            <Select value={seasonId} onValueChange={setSeasonId}>
+              <SelectTrigger id="seasonId">
+                <SelectValue placeholder="Selecciona una temporada" />
+              </SelectTrigger>
+              <SelectContent>
+                {seasonOptions.map((season) => (
+                  <SelectItem key={season.id} value={season.id}>
+                    {season.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
+        <Field label="Tipo" htmlFor="type">
+          <Select name="type" defaultValue={editing?.type ?? "league"}>
+            <SelectTrigger id="type">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {seasonOptions.map((season) => (
-                <SelectItem key={season.id} value={season.id}>
-                  {season.name}
+              {COMPETITION_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {COMPETITION_TYPE_LABELS[type]}
                 </SelectItem>
               ))}
             </SelectContent>
