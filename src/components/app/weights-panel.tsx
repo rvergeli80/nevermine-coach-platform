@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { listCompetitions, listSeasons } from "@/lib/config.functions";
+import { listCompetitions, listSeasons } from "@/lib/sports-organization.functions";
 import { listCatalogMetricRefs } from "@/lib/formulas.functions";
 import {
   createValuationProfile,

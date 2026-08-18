@@ -4,9 +4,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { createSeason, listSeasons, updateSeason } from "@/lib/config.functions";
+import {
+  changeSeasonState,
+  createOrganizationSeason,
+  listSeasons,
+  listSports,
+  updateOrganizationSeason,
+} from "@/lib/sports-organization.functions";
+import { SEASON_STATE_LABELS, SEASON_TRANSITIONS, type SeasonState } from "@/modules/sports-organization";
 import { PageHeader, QueryState } from "@/components/app/page-header";
-import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
+import { Field, FormDialog } from "@/components/app/form-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,22 +52,33 @@ export const Route = createFileRoute("/_authenticated/app/temporadas")({
 
 type SeasonRow = {
   id: string;
+  sport_id: string | null;
   name: string;
   starts_on: string | null;
   ends_on: string | null;
-  status: string;
+  state: SeasonState;
 };
+
+type SportRow = { id: string; name: string };
 
 function SeasonsPage() {
   const queryClient = useQueryClient();
   const fetchSeasons = useServerFn(listSeasons);
-  const create = useServerFn(createSeason);
-  const update = useServerFn(updateSeason);
+  const fetchSports = useServerFn(listSports);
+  const create = useServerFn(createOrganizationSeason);
+  const update = useServerFn(updateOrganizationSeason);
+  const transition = useServerFn(changeSeasonState);
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<SeasonRow | null>(null);
 
   const seasons = useQuery({ queryKey: ["seasons"], queryFn: () => fetchSeasons({}) });
+  const sports = useQuery({ queryKey: ["sports"], queryFn: () => fetchSports({}) });
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["seasons"] });
+    queryClient.invalidateQueries({ queryKey: ["organization"] });
+  };
 
   const mutation = useMutation({
     mutationFn: async (form: FormData) => {
@@ -68,27 +87,31 @@ function SeasonsPage() {
         startsOn: (form.get("startsOn") as string) || null,
         endsOn: (form.get("endsOn") as string) || null,
       };
-      if (editing) {
-        return update({
-          data: {
-            ...base,
-            id: editing.id,
-            status: String(form.get("status") ?? "active") as "active" | "inactive" | "archived",
-          },
-        });
-      }
-      return create({ data: base });
+      if (editing) return update({ data: { ...base, id: editing.id } });
+      return create({ data: { ...base, sportId: String(form.get("sportId") ?? "") } });
     },
     onSuccess: () => {
       toast.success(editing ? "Temporada actualizada" : "Temporada creada");
       setOpen(false);
       setEditing(null);
-      queryClient.invalidateQueries({ queryKey: ["seasons"] });
+      invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const stateMutation = useMutation({
+    mutationFn: (input: { id: string; state: SeasonState }) => transition({ data: input }),
+    onSuccess: () => {
+      toast.success("Estado de la temporada actualizado");
+      invalidate();
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
   const rows = (seasons.data ?? []) as SeasonRow[];
+  const sportRows = (sports.data ?? []) as SportRow[];
+  const sportName = (id: string | null) =>
+    sportRows.find((s) => s.id === id)?.name ?? "Sin deporte";
 
   return (
     <>
@@ -97,6 +120,7 @@ function SeasonsPage() {
         description="Marco temporal de competiciones, pesos y valoraciones."
         action={
           <Button
+            disabled={sportRows.length === 0}
             onClick={() => {
               setEditing(null);
               setOpen(true);
@@ -118,6 +142,7 @@ function SeasonsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
+                <TableHead>Deporte</TableHead>
                 <TableHead>Inicio</TableHead>
                 <TableHead>Fin</TableHead>
                 <TableHead>Estado</TableHead>
@@ -129,18 +154,35 @@ function SeasonsPage() {
                 <TableRow key={season.id}>
                   <TableCell>{season.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
+                    {sportName(season.sport_id)}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
                     {season.starts_on ?? "—"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {season.ends_on ?? "—"}
                   </TableCell>
                   <TableCell>
-                    <StatusBadge status={season.status} />
+                    <Badge variant={season.state === "active" ? "default" : "secondary"}>
+                      {SEASON_STATE_LABELS[season.state]}
+                    </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="space-x-1 text-right">
+                    {SEASON_TRANSITIONS[season.state].map((next) => (
+                      <Button
+                        key={next}
+                        variant="ghost"
+                        size="sm"
+                        disabled={stateMutation.isPending}
+                        onClick={() => stateMutation.mutate({ id: season.id, state: next })}
+                      >
+                        {SEASON_STATE_LABELS[next]}
+                      </Button>
+                    ))}
                     <Button
                       variant="ghost"
                       size="sm"
+                      disabled={season.state === "archived"}
                       onClick={() => {
                         setEditing(season);
                         setOpen(true);
@@ -169,6 +211,22 @@ function SeasonsPage() {
           mutation.mutate(new FormData(event.currentTarget));
         }}
       >
+        {editing ? null : (
+          <Field label="Deporte" htmlFor="sportId">
+            <Select name="sportId" defaultValue={sportRows[0]?.id}>
+              <SelectTrigger id="sportId">
+                <SelectValue placeholder="Selecciona un deporte" />
+              </SelectTrigger>
+              <SelectContent>
+                {sportRows.map((sport) => (
+                  <SelectItem key={sport.id} value={sport.id}>
+                    {sport.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
         <Field label="Nombre" htmlFor="name">
           <Input id="name" name="name" required defaultValue={editing?.name} placeholder="2026/27" />
         </Field>
@@ -185,20 +243,6 @@ function SeasonsPage() {
             <Input id="endsOn" name="endsOn" type="date" defaultValue={editing?.ends_on ?? ""} />
           </Field>
         </div>
-        {editing ? (
-          <Field label="Estado" htmlFor="status">
-            <Select name="status" defaultValue={editing.status}>
-              <SelectTrigger id="status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Activa</SelectItem>
-                <SelectItem value="inactive">Inactiva</SelectItem>
-                <SelectItem value="archived">Archivada</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-        ) : null}
       </FormDialog>
     </>
   );

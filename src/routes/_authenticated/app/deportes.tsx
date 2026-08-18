@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { createSport, listSports, updateSport } from "@/lib/config.functions";
+import { createSport, listSports, updateSport } from "@/lib/sports-organization.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
 import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
 import { Button } from "@/components/ui/button";
@@ -46,8 +46,8 @@ type SportRow = {
   id: string;
   code: string;
   name: string;
+  description: string | null;
   status: string;
-  owner_id: string | null; // dato histórico (persistencia); no decide permisos
   sport_space_id: string | null;
 };
 
@@ -69,6 +69,7 @@ function SportsPage() {
           data: {
             id: editing.id,
             name: String(form.get("name") ?? ""),
+            description: (form.get("description") as string) || null,
             status: String(form.get("status") ?? "active") as "active" | "inactive" | "archived",
           },
         });
@@ -77,6 +78,7 @@ function SportsPage() {
         data: {
           code: String(form.get("code") ?? ""),
           name: String(form.get("name") ?? ""),
+          description: (form.get("description") as string) || null,
         },
       });
     },

@@ -1,11 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { listSports } from "@/lib/config.functions";
-import { createTeam, listTeams, updateTeam } from "@/lib/org.functions";
+import {
+  createOrganizationTeam,
+  listCategories,
+  listSeasons,
+  listTeams,
+  updateOrganizationTeam,
+} from "@/lib/sports-organization.functions";
 import { PageHeader, QueryState } from "@/components/app/page-header";
 import { Field, FormDialog, StatusBadge } from "@/components/app/form-dialog";
 import { Button } from "@/components/ui/button";
@@ -32,10 +37,10 @@ export const Route = createFileRoute("/_authenticated/app/equipos")({
       { title: "Equipos | Nevermine Coach" },
       {
         name: "description",
-        content: "Equipos del entrenador, su deporte y su categoría dentro de Nevermine Coach.",
+        content: "Equipos de cada temporada, su categoría y su plantilla en Nevermine Coach.",
       },
       { property: "og:title", content: "Equipos | Nevermine Coach" },
-      { property: "og:description", content: "Gestiona los equipos y su categoría." },
+      { property: "og:description", content: "Gestiona los equipos de cada temporada." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -46,55 +51,75 @@ export const Route = createFileRoute("/_authenticated/app/equipos")({
 type TeamRow = {
   id: string;
   name: string;
-  category: string | null;
   status: string;
   sport_id: string;
-  sports: { name: string } | null;
-  players: { count: number }[];
+  season_id: string | null;
+  category_id: string | null;
+  seasons?: { name: string; state: string } | null;
+  sport_categories?: { name: string } | null;
+  players?: { count: number }[];
 };
 
-type SportOption = { id: string; name: string; status: string };
+type SeasonOption = { id: string; name: string; sport_id: string | null; state: string };
+type CategoryOption = { id: string; name: string; sport_id: string; status: string };
+
+const NO_CATEGORY = "none";
 
 function TeamsPage() {
   const queryClient = useQueryClient();
   const fetchTeams = useServerFn(listTeams);
-  const fetchSports = useServerFn(listSports);
-  const create = useServerFn(createTeam);
-  const update = useServerFn(updateTeam);
+  const fetchSeasons = useServerFn(listSeasons);
+  const fetchCategories = useServerFn(listCategories);
+  const create = useServerFn(createOrganizationTeam);
+  const update = useServerFn(updateOrganizationTeam);
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<TeamRow | null>(null);
-  const [sportId, setSportId] = useState("");
+  const [seasonId, setSeasonId] = useState("");
+  const [categoryId, setCategoryId] = useState(NO_CATEGORY);
 
   const teams = useQuery({ queryKey: ["teams"], queryFn: () => fetchTeams({}) });
-  const sports = useQuery({ queryKey: ["sports"], queryFn: () => fetchSports({}) });
-  const sportOptions = ((sports.data ?? []) as SportOption[]).filter(
-    (sport) => sport.status === "active",
+  const seasons = useQuery({ queryKey: ["seasons"], queryFn: () => fetchSeasons({}) });
+  const categories = useQuery({ queryKey: ["categories"], queryFn: () => fetchCategories({}) });
+
+  const seasonOptions = ((seasons.data ?? []) as SeasonOption[]).filter(
+    (season) => season.state === "draft" || season.state === "active",
+  );
+
+  const selectedSeason = seasonOptions.find((s) => s.id === seasonId) ?? null;
+  const sportIdForForm = editing?.sport_id ?? selectedSeason?.sport_id ?? null;
+
+  const categoryOptions = useMemo(
+    () =>
+      ((categories.data ?? []) as CategoryOption[]).filter(
+        (c) => c.status === "active" && (!sportIdForForm || c.sport_id === sportIdForForm),
+      ),
+    [categories.data, sportIdForForm],
   );
 
   const mutation = useMutation({
     mutationFn: async (form: FormData) => {
       const name = String(form.get("name") ?? "");
-      const category = String(form.get("category") ?? "").trim() || null;
-      if (!sportId) throw new Error("Selecciona un deporte");
+      const category = categoryId === NO_CATEGORY ? null : categoryId;
       if (editing) {
         return update({
           data: {
             id: editing.id,
-            sportId,
             name,
-            category,
+            categoryId: category,
             status: String(form.get("status") ?? "active") as "active" | "inactive" | "archived",
           },
         });
       }
-      return create({ data: { sportId, name, category } });
+      if (!seasonId) throw new Error("Selecciona una temporada");
+      return create({ data: { seasonId, name, categoryId: category } });
     },
     onSuccess: () => {
       toast.success(editing ? "Equipo actualizado" : "Equipo creado");
       setOpen(false);
       setEditing(null);
       queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -103,7 +128,8 @@ function TeamsPage() {
 
   function openDialog(row: TeamRow | null) {
     setEditing(row);
-    setSportId(row?.sport_id ?? "");
+    setSeasonId(row?.season_id ?? seasonOptions[0]?.id ?? "");
+    setCategoryId(row?.category_id ?? NO_CATEGORY);
     setOpen(true);
   }
 
@@ -111,17 +137,17 @@ function TeamsPage() {
     <>
       <PageHeader
         title="Equipos"
-        description="Cada equipo pertenece a un deporte y agrupa a sus jugadores."
+        description="Cada equipo pertenece a una temporada y, opcionalmente, a una categoría."
         action={
-          <Button onClick={() => openDialog(null)} disabled={sportOptions.length === 0}>
+          <Button onClick={() => openDialog(null)} disabled={seasonOptions.length === 0}>
             Nuevo equipo
           </Button>
         }
       />
 
-      {sportOptions.length === 0 && !sports.isLoading ? (
+      {seasonOptions.length === 0 && !seasons.isLoading ? (
         <p className="mb-4 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-          Crea primero un deporte activo para poder añadir equipos.
+          Crea primero una temporada en borrador o activa para poder añadir equipos.
         </p>
       ) : null}
 
@@ -136,7 +162,7 @@ function TeamsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
-                <TableHead>Deporte</TableHead>
+                <TableHead>Temporada</TableHead>
                 <TableHead>Categoría</TableHead>
                 <TableHead>Jugadores</TableHead>
                 <TableHead>Estado</TableHead>
@@ -148,10 +174,10 @@ function TeamsPage() {
                 <TableRow key={row.id}>
                   <TableCell>{row.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {row.sports?.name ?? "—"}
+                    {row.seasons?.name ?? "Sin temporada"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {row.category ?? "—"}
+                    {row.sport_categories?.name ?? "—"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {row.players?.[0]?.count ?? 0}
@@ -193,27 +219,42 @@ function TeamsPage() {
             placeholder="Primer equipo"
           />
         </Field>
-        <Field label="Deporte" htmlFor="sportId">
-          <Select value={sportId} onValueChange={setSportId}>
-            <SelectTrigger id="sportId">
-              <SelectValue placeholder="Selecciona un deporte" />
+        {editing ? null : (
+          <Field label="Temporada" htmlFor="seasonId">
+            <Select
+              value={seasonId}
+              onValueChange={(value) => {
+                setSeasonId(value);
+                setCategoryId(NO_CATEGORY);
+              }}
+            >
+              <SelectTrigger id="seasonId">
+                <SelectValue placeholder="Selecciona una temporada" />
+              </SelectTrigger>
+              <SelectContent>
+                {seasonOptions.map((season) => (
+                  <SelectItem key={season.id} value={season.id}>
+                    {season.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
+        <Field label="Categoría" htmlFor="categoryId">
+          <Select value={categoryId} onValueChange={setCategoryId}>
+            <SelectTrigger id="categoryId">
+              <SelectValue placeholder="Sin categoría" />
             </SelectTrigger>
             <SelectContent>
-              {sportOptions.map((sport) => (
-                <SelectItem key={sport.id} value={sport.id}>
-                  {sport.name}
+              <SelectItem value={NO_CATEGORY}>Sin categoría</SelectItem>
+              {categoryOptions.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </Field>
-        <Field label="Categoría" htmlFor="category">
-          <Input
-            id="category"
-            name="category"
-            defaultValue={editing?.category ?? ""}
-            placeholder="Absoluto, Juvenil…"
-          />
         </Field>
         {editing ? (
           <Field label="Estado" htmlFor="status">
