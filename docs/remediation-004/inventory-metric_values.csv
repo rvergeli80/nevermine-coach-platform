@@ -1,0 +1,3 @@
+id,owner_id,context_id,metric_id,subject_type,subject_id,numeric_value,bool_value,recorded_by,recorded_at,source,sport_space_id
+47ee6ef8-2a7c-41b9-9faa-11544bdb96e1,600fdac1-7349-4999-9b66-ab52b8027067,bc9ffd5a-2130-44b7-b48a-505b6c967cbd,bac5b9b7-114c-4b9a-8bf8-0c87d8dafa8b,player,c799a116-c60b-4cd9-b7d5-eca19f6c6946,3,,,2026-07-28 19:17:49.214359+00,manual,0676f8f1-bf1e-43ac-927d-d488bd2f3e87
+a56abd9d-c944-4ae8-b5fd-821e74ecb4fe,336fcc38-cb14-4050-9a09-76c5dfff3485,99aa0949-6d4e-4d6d-8cb4-4e41ed4b68b0,2567ba64-ce75-46d1-8203-088b6e078abc,player,5054e099-e05d-48ba-908e-2eda87bc04da,3,,,2026-07-29 13:31:27.250956+00,manual,e1db391e-05e8-481e-9c56-e173e4afd444
