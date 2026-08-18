@@ -98,23 +98,13 @@ export const updateOrgCompetitionSchema = z.object({
 /* Equipos */
 export const createOrgTeamSchema = z.object({
   seasonId: z.string().uuid(),
-  categoryId: z
-    .string()
-    .uuid()
-    .optional()
-    .nullable()
-    .transform((v) => v ?? null),
+  categoryId: z.string().uuid({ message: "Selecciona una categoría" }),
   name: nameSchema,
 });
 export const updateOrgTeamSchema = z.object({
   id: z.string().uuid(),
   name: nameSchema,
-  categoryId: z
-    .string()
-    .uuid()
-    .optional()
-    .nullable()
-    .transform((v) => v ?? null),
+  categoryId: z.string().uuid({ message: "Selecciona una categoría" }),
   status: orgEntityStatusSchema,
 });
 
