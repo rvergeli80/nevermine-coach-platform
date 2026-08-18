@@ -90,9 +90,7 @@ const TEAM_FIELDS =
 
 /* ---------------------------------- Lecturas --------------------------------- */
 
-export async function listOrgSportsService(
-  ctx: ApplicationServiceContext,
-): Promise<SportOrgRow[]> {
+export async function listOrgSportsService(ctx: ApplicationServiceContext): Promise<SportOrgRow[]> {
   await assertAuthority(ctx, "organization:read");
   return unwrap<SportOrgRow[]>(
     await ctx.supabase
@@ -145,10 +143,7 @@ export async function listOrgTeamsService(
   ctx: ApplicationServiceContext,
   input: { seasonId?: string | null } = {},
 ): Promise<OrgTeamRow[]> {
-  let query = ctx.supabase
-    .from("teams")
-    .select(TEAM_FIELDS)
-    .eq("sport_space_id", ctx.sportSpaceId);
+  let query = ctx.supabase.from("teams").select(TEAM_FIELDS).eq("sport_space_id", ctx.sportSpaceId);
   if (input.seasonId) query = query.eq("season_id", input.seasonId);
   return unwrap<OrgTeamRow[]>(await query.order("name"));
 }
@@ -249,7 +244,13 @@ export async function createCategoryService(
 
 export async function updateCategoryService(
   ctx: ApplicationServiceContext,
-  input: { id: string; name: string; description: string | null; sortOrder: number; status: EntityStatus },
+  input: {
+    id: string;
+    name: string;
+    description: string | null;
+    sortOrder: number;
+    status: EntityStatus;
+  },
 ): Promise<CategoryRow> {
   await assertAuthority(ctx, "category:write");
   return unwrap<CategoryRow>(
