@@ -359,7 +359,7 @@ export async function createOrgTeamService(
   assertSeasonAcceptsStructure({ state: season.state, name: season.name });
   if (!season.sport_id) fail("La temporada no tiene deporte asignado.");
 
-  if (input.categoryId) {
+  {
     const categories = await listCategoriesService(ctx, { sportId: season.sport_id });
     const category = categories.find((c) => c.id === input.categoryId);
     if (!category) fail("La categoría no existe en este SportSpace.");
@@ -489,7 +489,7 @@ export async function updateOrgCompetitionService(
 
 export async function updateOrgTeamService(
   ctx: ApplicationServiceContext,
-  input: { id: string; name: string; categoryId: string | null; status: EntityStatus },
+  input: { id: string; name: string; categoryId: string; status: EntityStatus },
 ): Promise<OrgTeamRow> {
   await assertAuthority(ctx, "team:write");
   const current = unwrap<OrgTeamRow | null>(
@@ -502,7 +502,7 @@ export async function updateOrgTeamService(
   );
   if (!current) fail("El equipo no existe en este SportSpace.");
 
-  if (input.categoryId) {
+  {
     const categories = await listCategoriesService(ctx, { sportId: current.sport_id });
     const category = categories.find((c) => c.id === input.categoryId);
     if (!category) fail("La categoría no existe en este SportSpace.");

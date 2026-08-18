@@ -141,7 +141,7 @@ function OrganizationPage() {
         data: {
           seasonId: season!.id,
           name: String(form.get("name") ?? ""),
-          categoryId: String(form.get("categoryId") ?? "") || null,
+          categoryId: String(form.get("categoryId") ?? ""),
         },
       }),
     onSuccess: () => refresh("Equipo creado"),
@@ -461,9 +461,9 @@ function OrganizationPage() {
           <Input id="team-name" name="name" required placeholder="Absoluto masculino" />
         </Field>
         <Field label="Categoría" htmlFor="categoryId">
-          <Select name="categoryId">
+          <Select name="categoryId" required>
             <SelectTrigger id="categoryId">
-              <SelectValue placeholder="Sin categoría" />
+              <SelectValue placeholder="Selecciona una categoría" />
             </SelectTrigger>
             <SelectContent>
               {categories.map((category) => (
