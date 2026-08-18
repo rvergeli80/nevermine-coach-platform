@@ -795,7 +795,7 @@ export type Database = {
           id: string
           name: string
           owner_id: string
-          sport_id: string | null
+          sport_id: string
           sport_space_id: string | null
           starts_on: string | null
           state: Database["public"]["Enums"]["season_state"]
@@ -808,7 +808,7 @@ export type Database = {
           id?: string
           name: string
           owner_id: string
-          sport_id?: string | null
+          sport_id: string
           sport_space_id?: string | null
           starts_on?: string | null
           state?: Database["public"]["Enums"]["season_state"]
@@ -821,7 +821,7 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string
-          sport_id?: string | null
+          sport_id?: string
           sport_space_id?: string | null
           starts_on?: string | null
           state?: Database["public"]["Enums"]["season_state"]
@@ -1156,12 +1156,12 @@ export type Database = {
       teams: {
         Row: {
           category: string | null
-          category_id: string | null
+          category_id: string
           created_at: string
           id: string
           name: string
           owner_id: string
-          season_id: string | null
+          season_id: string
           sport_id: string
           sport_space_id: string | null
           status: Database["public"]["Enums"]["entity_status"]
@@ -1169,12 +1169,12 @@ export type Database = {
         }
         Insert: {
           category?: string | null
-          category_id?: string | null
+          category_id: string
           created_at?: string
           id?: string
           name: string
           owner_id: string
-          season_id?: string | null
+          season_id: string
           sport_id: string
           sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
@@ -1182,12 +1182,12 @@ export type Database = {
         }
         Update: {
           category?: string | null
-          category_id?: string | null
+          category_id?: string
           created_at?: string
           id?: string
           name?: string
           owner_id?: string
-          season_id?: string | null
+          season_id?: string
           sport_id?: string
           sport_space_id?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
