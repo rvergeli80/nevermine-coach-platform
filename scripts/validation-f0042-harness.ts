@@ -124,6 +124,15 @@ async function buildSpace(tag: string): Promise<Fixture> {
     description: null,
     sortOrder: 0,
   });
+  // Una sola temporada activa por deporte: se cierra la histórica antes de abrir la vigente.
+  const closedSeason = await createOrgSeasonService(ctx, {
+    sportId: sport.id,
+    name: `F0042_SEASON_CLOSED_${tag}`,
+    startsOn: null,
+    endsOn: null,
+  });
+  await changeSeasonStateService(ctx, { id: closedSeason.id, state: "active" });
+  await changeSeasonStateService(ctx, { id: closedSeason.id, state: "closed" });
   const season = await createOrgSeasonService(ctx, {
     sportId: sport.id,
     name: `F0042_SEASON_${tag}`,
@@ -131,13 +140,6 @@ async function buildSpace(tag: string): Promise<Fixture> {
     endsOn: null,
   });
   await changeSeasonStateService(ctx, { id: season.id, state: "active" });
-  const closedSeason = await createOrgSeasonService(ctx, {
-    sportId: sport.id,
-    name: `F0042_SEASON_CLOSED_${tag}`,
-    startsOn: null,
-    endsOn: null,
-  });
-  await changeSeasonStateService(ctx, { id: closedSeason.id, state: "closed" });
 
   const competition = await createOrgCompetitionService(ctx, {
     seasonId: season.id,
