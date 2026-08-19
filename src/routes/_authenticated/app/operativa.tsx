@@ -29,6 +29,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SESSION_SCHEDULE_LABELS, sessionSchedule } from "@/modules/operations";
+
+type ScheduleFilter = "all" | "planned" | "played";
+
+const SCHEDULE_FILTER_LABEL: Record<ScheduleFilter, string> = {
+  all: "Todas",
+  planned: "Programadas",
+  played: "Realizadas",
+};
 
 export const Route = createFileRoute("/_authenticated/app/operativa")({
   head: () => ({
@@ -75,6 +84,7 @@ function OperationsPage() {
   const [seasonId, setSeasonId] = useState<string>("");
   const [teamId, setTeamId] = useState<string>("");
   const [kind, setKind] = useState<Kind>("match");
+  const [schedule, setSchedule] = useState<ScheduleFilter>("all");
   const [sessionId, setSessionId] = useState<string>("");
   const [playerId, setPlayerId] = useState<string>("");
   const [open, setOpen] = useState(false);
