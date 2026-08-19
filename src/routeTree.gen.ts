@@ -23,6 +23,7 @@ import { Route as AuthenticatedAppTemporadasRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppSportspacesRouteImport } from './routes/_authenticated/app/sportspaces'
 import { Route as AuthenticatedAppPacksRouteImport } from './routes/_authenticated/app/packs'
 import { Route as AuthenticatedAppOrganizacionRouteImport } from './routes/_authenticated/app/organizacion'
+import { Route as AuthenticatedAppOperativaRouteImport } from './routes/_authenticated/app/operativa'
 import { Route as AuthenticatedAppObservacionesRouteImport } from './routes/_authenticated/app/observaciones'
 import { Route as AuthenticatedAppMiembrosRouteImport } from './routes/_authenticated/app/miembros'
 import { Route as AuthenticatedAppJugadoresRouteImport } from './routes/_authenticated/app/jugadores'
@@ -110,6 +111,12 @@ const AuthenticatedAppOrganizacionRoute =
     path: '/organizacion',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppOperativaRoute =
+  AuthenticatedAppOperativaRouteImport.update({
+    id: '/operativa',
+    path: '/operativa',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const AuthenticatedAppObservacionesRoute =
   AuthenticatedAppObservacionesRouteImport.update({
     id: '/observaciones',
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/app/jugadores': typeof AuthenticatedAppJugadoresRoute
   '/app/miembros': typeof AuthenticatedAppMiembrosRoute
   '/app/observaciones': typeof AuthenticatedAppObservacionesRoute
+  '/app/operativa': typeof AuthenticatedAppOperativaRoute
   '/app/organizacion': typeof AuthenticatedAppOrganizacionRoute
   '/app/packs': typeof AuthenticatedAppPacksRoute
   '/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
@@ -208,6 +216,7 @@ export interface FileRoutesByTo {
   '/app/jugadores': typeof AuthenticatedAppJugadoresRoute
   '/app/miembros': typeof AuthenticatedAppMiembrosRoute
   '/app/observaciones': typeof AuthenticatedAppObservacionesRoute
+  '/app/operativa': typeof AuthenticatedAppOperativaRoute
   '/app/organizacion': typeof AuthenticatedAppOrganizacionRoute
   '/app/packs': typeof AuthenticatedAppPacksRoute
   '/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
@@ -235,6 +244,7 @@ export interface FileRoutesById {
   '/_authenticated/app/jugadores': typeof AuthenticatedAppJugadoresRoute
   '/_authenticated/app/miembros': typeof AuthenticatedAppMiembrosRoute
   '/_authenticated/app/observaciones': typeof AuthenticatedAppObservacionesRoute
+  '/_authenticated/app/operativa': typeof AuthenticatedAppOperativaRoute
   '/_authenticated/app/organizacion': typeof AuthenticatedAppOrganizacionRoute
   '/_authenticated/app/packs': typeof AuthenticatedAppPacksRoute
   '/_authenticated/app/sportspaces': typeof AuthenticatedAppSportspacesRoute
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/app/jugadores'
     | '/app/miembros'
     | '/app/observaciones'
+    | '/app/operativa'
     | '/app/organizacion'
     | '/app/packs'
     | '/app/sportspaces'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/app/jugadores'
     | '/app/miembros'
     | '/app/observaciones'
+    | '/app/operativa'
     | '/app/organizacion'
     | '/app/packs'
     | '/app/sportspaces'
@@ -312,6 +324,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/jugadores'
     | '/_authenticated/app/miembros'
     | '/_authenticated/app/observaciones'
+    | '/_authenticated/app/operativa'
     | '/_authenticated/app/organizacion'
     | '/_authenticated/app/packs'
     | '/_authenticated/app/sportspaces'
@@ -434,6 +447,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOrganizacionRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/operativa': {
+      id: '/_authenticated/app/operativa'
+      path: '/operativa'
+      fullPath: '/app/operativa'
+      preLoaderRoute: typeof AuthenticatedAppOperativaRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/app/observaciones': {
       id: '/_authenticated/app/observaciones'
       path: '/observaciones'
@@ -514,6 +534,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppJugadoresRoute: typeof AuthenticatedAppJugadoresRoute
   AuthenticatedAppMiembrosRoute: typeof AuthenticatedAppMiembrosRoute
   AuthenticatedAppObservacionesRoute: typeof AuthenticatedAppObservacionesRoute
+  AuthenticatedAppOperativaRoute: typeof AuthenticatedAppOperativaRoute
   AuthenticatedAppOrganizacionRoute: typeof AuthenticatedAppOrganizacionRoute
   AuthenticatedAppPacksRoute: typeof AuthenticatedAppPacksRoute
   AuthenticatedAppSportspacesRoute: typeof AuthenticatedAppSportspacesRoute
@@ -532,6 +553,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppJugadoresRoute: AuthenticatedAppJugadoresRoute,
   AuthenticatedAppMiembrosRoute: AuthenticatedAppMiembrosRoute,
   AuthenticatedAppObservacionesRoute: AuthenticatedAppObservacionesRoute,
+  AuthenticatedAppOperativaRoute: AuthenticatedAppOperativaRoute,
   AuthenticatedAppOrganizacionRoute: AuthenticatedAppOrganizacionRoute,
   AuthenticatedAppPacksRoute: AuthenticatedAppPacksRoute,
   AuthenticatedAppSportspacesRoute: AuthenticatedAppSportspacesRoute,
