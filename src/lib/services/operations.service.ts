@@ -575,22 +575,29 @@ export async function createSessionService(
     notes: input.notes ?? null,
   });
 
+  const session = await requireSession(ctx, created.id);
+
   await recordAudit(ctx, {
     entityType: "observation_context",
     entityId: created.id,
     action: `session.create.${input.kind}`,
     catalogVersionId,
     after: {
+      sportSpaceId: ctx.sportSpaceId,
       kind: input.kind,
+      sessionId: session.id,
+      sessionLabel: session.label ?? session.event_type_name,
       seasonId: input.seasonId,
+      seasonName: session.season_name,
       teamId: input.teamId,
+      teamName: session.team_name,
       competitionId: input.competitionId ?? null,
       occurredAt: created.occurred_at,
-      label: created.label,
+      schedule: sessionSchedule(created.occurred_at),
     },
   });
 
-  return requireSession(ctx, created.id);
+  return session;
 }
 
 /**
