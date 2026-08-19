@@ -1,0 +1,779 @@
+{
+  "stamp": "1787135556",
+  "startedAt": "2026-08-19T10:32:36.163Z",
+  "spaces": {
+    "A": {
+      "spaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922",
+      "userId": "820aa9e8-cbff-4682-99ea-e97d3824f8ed",
+      "email": "f0042-a-1787135556@example.com",
+      "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+      "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+      "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+      "versionId": "1ce3b435-2b2c-402c-be58-9f7142dc7369"
+    },
+    "B": {
+      "spaceId": "3cde696d-55a7-4a46-9d97-8e5063070d8b",
+      "userId": "a1134ed8-55eb-4711-904d-cd73e54bd8dc",
+      "email": "f0042-b-1787135556@example.com",
+      "seasonId": "9ff0a024-3974-4bdb-a4e0-f0c367b4f2de",
+      "teamId": "7dcd94d4-4875-4150-94be-32e139cb067a",
+      "playerId": "01dea7b5-4df7-4c01-93f8-5fa04f6f3d48"
+    }
+  },
+  "match": {
+    "session": {
+      "id": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+      "label": "F0042_MATCH_1",
+      "notes": "FEATURE-004.2 validation",
+      "occurred_at": "2026-08-18T10:32:43.117+00:00",
+      "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+      "team_id": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+      "competition_id": "9cb8cb54-8c53-4d3e-bd66-892672d17af2",
+      "catalog_version_id": "1ce3b435-2b2c-402c-be58-9f7142dc7369",
+      "kind": "match",
+      "event_type_name": "Partido",
+      "season_name": "F0042_SEASON_A",
+      "team_name": "F0042_TEAM_A",
+      "competition_name": "F0042_COMPETITION_A"
+    },
+    "input": {
+      "goals": 4,
+      "shots": 10,
+      "losses": 3
+    },
+    "expected": {
+      "eff": 0.4,
+      "score": 0.8
+    },
+    "engine": {
+      "contextId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+      "saved": 3,
+      "valuation": {
+        "status": "computed",
+        "id": "22468055-1b61-4c56-ac1d-0e1c2a94d4ff",
+        "score": 0.8,
+        "supersededId": null
+      },
+      "derivedValues": {
+        "F0042_GOALS": 4,
+        "F0042_SHOTS": 10,
+        "F0042_LOSSES": 3,
+        "F0042_EFF": 0.4
+      },
+      "session": {
+        "id": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+        "label": "F0042_MATCH_1",
+        "notes": "FEATURE-004.2 validation",
+        "occurred_at": "2026-08-18T10:32:43.117+00:00",
+        "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+        "team_id": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+        "competition_id": "9cb8cb54-8c53-4d3e-bd66-892672d17af2",
+        "catalog_version_id": "1ce3b435-2b2c-402c-be58-9f7142dc7369",
+        "kind": "match",
+        "event_type_name": "Partido",
+        "season_name": "F0042_SEASON_A",
+        "team_name": "F0042_TEAM_A",
+        "competition_name": "F0042_COMPETITION_A"
+      },
+      "player": {
+        "id": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+        "fullName": "F0042_PLAYER_A"
+      }
+    }
+  },
+  "training": {
+    "session": {
+      "id": "a59c3242-46c3-4469-bf92-12152f8b4020",
+      "label": "F0042_TRAINING_PLANNED",
+      "notes": null,
+      "occurred_at": "2026-08-26T10:32:45.79+00:00",
+      "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+      "team_id": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+      "competition_id": null,
+      "catalog_version_id": "1ce3b435-2b2c-402c-be58-9f7142dc7369",
+      "kind": "training",
+      "event_type_name": "Entrenamiento",
+      "season_name": "F0042_SEASON_A",
+      "team_name": "F0042_TEAM_A",
+      "competition_name": null
+    },
+    "engine": {
+      "contextId": "a59c3242-46c3-4469-bf92-12152f8b4020",
+      "saved": 3,
+      "valuation": {
+        "status": "computed",
+        "id": "2c0faba5-6b37-4997-ab59-d584e6791365",
+        "score": 0.525,
+        "supersededId": null
+      },
+      "derivedValues": {
+        "F0042_GOALS": 2,
+        "F0042_SHOTS": 8,
+        "F0042_LOSSES": 1,
+        "F0042_EFF": 0.25
+      },
+      "session": {
+        "id": "a59c3242-46c3-4469-bf92-12152f8b4020",
+        "label": "F0042_TRAINING_PLANNED",
+        "notes": null,
+        "occurred_at": "2026-08-26T10:32:45.79+00:00",
+        "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+        "team_id": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+        "competition_id": null,
+        "catalog_version_id": "1ce3b435-2b2c-402c-be58-9f7142dc7369",
+        "kind": "training",
+        "event_type_name": "Entrenamiento",
+        "season_name": "F0042_SEASON_A",
+        "team_name": "F0042_TEAM_A",
+        "competition_name": null
+      },
+      "player": {
+        "id": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+        "fullName": "F0042_PLAYER_A"
+      }
+    },
+    "expected": {
+      "eff": 0.25,
+      "score": 0.525
+    }
+  },
+  "correction": {
+    "input": {
+      "goals": 6,
+      "shots": 10,
+      "losses": 1
+    },
+    "expected": {
+      "eff": 0.6,
+      "score": 1.9
+    },
+    "engine": {
+      "contextId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+      "saved": 3,
+      "valuation": {
+        "status": "computed",
+        "id": "7548f9bf-1d2f-495d-9cb2-95cb13cf3535",
+        "score": 1.9,
+        "supersededId": "22468055-1b61-4c56-ac1d-0e1c2a94d4ff"
+      },
+      "derivedValues": {
+        "F0042_GOALS": 6,
+        "F0042_SHOTS": 10,
+        "F0042_LOSSES": 1,
+        "F0042_EFF": 0.6
+      },
+      "session": {
+        "id": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+        "label": "F0042_MATCH_1",
+        "notes": "FEATURE-004.2 validation",
+        "occurred_at": "2026-08-18T10:32:43.117+00:00",
+        "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+        "team_id": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+        "competition_id": "9cb8cb54-8c53-4d3e-bd66-892672d17af2",
+        "catalog_version_id": "1ce3b435-2b2c-402c-be58-9f7142dc7369",
+        "kind": "match",
+        "event_type_name": "Partido",
+        "season_name": "F0042_SEASON_A",
+        "team_name": "F0042_TEAM_A",
+        "competition_name": "F0042_COMPETITION_A"
+      },
+      "player": {
+        "id": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+        "fullName": "F0042_PLAYER_A"
+      }
+    },
+    "history": [
+      {
+        "id": "7548f9bf-1d2f-495d-9cb2-95cb13cf3535",
+        "score": 1.9,
+        "status": "current",
+        "algorithm": "weighted_sum_v1",
+        "calculated_at": "2026-08-19T10:32:48.583275+00:00",
+        "subject_type": "player",
+        "subject_id": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+        "context_id": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+        "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+        "breakdown": [
+          {
+            "sign": 1,
+            "value": 6,
+            "weight": 3,
+            "metricCode": "F0042_GOALS",
+            "contribution": 18
+          },
+          {
+            "sign": -1,
+            "value": 1,
+            "weight": 2,
+            "metricCode": "F0042_LOSSES",
+            "contribution": -2
+          },
+          {
+            "sign": 1,
+            "value": 0.6,
+            "weight": 5,
+            "metricCode": "F0042_EFF",
+            "contribution": 3
+          }
+        ],
+        "weights_snapshot": {
+          "F0042_EFF": {
+            "sign": 1,
+            "weight": 5
+          },
+          "F0042_GOALS": {
+            "sign": 1,
+            "weight": 3
+          },
+          "F0042_LOSSES": {
+            "sign": -1,
+            "weight": 2
+          }
+        },
+        "superseded_by": null,
+        "session": {
+          "id": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+          "label": "F0042_MATCH_1",
+          "notes": "FEATURE-004.2 validation",
+          "occurred_at": "2026-08-18T10:32:43.117+00:00",
+          "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "team_id": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "competition_id": "9cb8cb54-8c53-4d3e-bd66-892672d17af2",
+          "catalog_version_id": "1ce3b435-2b2c-402c-be58-9f7142dc7369",
+          "kind": "match",
+          "event_type_name": "Partido",
+          "season_name": "F0042_SEASON_A",
+          "team_name": "F0042_TEAM_A",
+          "competition_name": "F0042_COMPETITION_A"
+        }
+      },
+      {
+        "id": "22468055-1b61-4c56-ac1d-0e1c2a94d4ff",
+        "score": 0.8,
+        "status": "superseded",
+        "algorithm": "weighted_sum_v1",
+        "calculated_at": "2026-08-19T10:32:45.622001+00:00",
+        "subject_type": "player",
+        "subject_id": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+        "context_id": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+        "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+        "breakdown": [
+          {
+            "sign": 1,
+            "value": 4,
+            "weight": 3,
+            "metricCode": "F0042_GOALS",
+            "contribution": 12
+          },
+          {
+            "sign": -1,
+            "value": 3,
+            "weight": 2,
+            "metricCode": "F0042_LOSSES",
+            "contribution": -6
+          },
+          {
+            "sign": 1,
+            "value": 0.4,
+            "weight": 5,
+            "metricCode": "F0042_EFF",
+            "contribution": 2
+          }
+        ],
+        "weights_snapshot": {
+          "F0042_EFF": {
+            "sign": 1,
+            "weight": 5
+          },
+          "F0042_GOALS": {
+            "sign": 1,
+            "weight": 3
+          },
+          "F0042_LOSSES": {
+            "sign": -1,
+            "weight": 2
+          }
+        },
+        "superseded_by": "7548f9bf-1d2f-495d-9cb2-95cb13cf3535",
+        "session": {
+          "id": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+          "label": "F0042_MATCH_1",
+          "notes": "FEATURE-004.2 validation",
+          "occurred_at": "2026-08-18T10:32:43.117+00:00",
+          "season_id": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "team_id": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "competition_id": "9cb8cb54-8c53-4d3e-bd66-892672d17af2",
+          "catalog_version_id": "1ce3b435-2b2c-402c-be58-9f7142dc7369",
+          "kind": "match",
+          "event_type_name": "Partido",
+          "season_name": "F0042_SEASON_A",
+          "team_name": "F0042_TEAM_A",
+          "competition_name": "F0042_COMPETITION_A"
+        }
+      }
+    ]
+  },
+  "audit": {
+    "total": 17,
+    "sample": [
+      {
+        "id": "6e9ebb3e-8b60-44ca-8eff-bd51eb803829",
+        "entityType": "observation",
+        "entityId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+        "action": "observation.correct",
+        "reason": "F0042 corrección de acta",
+        "createdAt": "2026-08-19T10:32:48.773092+00:00",
+        "sessionLabel": "F0042_MATCH_1",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "metrics": [
+            {
+              "code": "F0042_GOALS",
+              "value": 6,
+              "metricId": "c14ac58e-8c89-4308-8c4d-6acd3445e1b9"
+            },
+            {
+              "code": "F0042_SHOTS",
+              "value": 10,
+              "metricId": "163ec779-93c6-4585-9921-d1b2c46daca8"
+            },
+            {
+              "code": "F0042_LOSSES",
+              "value": 1,
+              "metricId": "0375d2a6-7ccc-411e-b519-21b922d911e0"
+            }
+          ],
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "match",
+          "sessionLabel": "F0042_MATCH_1",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922"
+        }
+      },
+      {
+        "id": "1938e562-926f-40df-98a3-927e62391076",
+        "entityType": "valuation",
+        "entityId": "7548f9bf-1d2f-495d-9cb2-95cb13cf3535",
+        "action": "valuation.replace",
+        "reason": "F0042 corrección de acta",
+        "createdAt": "2026-08-19T10:32:48.773092+00:00",
+        "sessionLabel": "F0042_MATCH_1",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "score": 1.9,
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "match",
+          "valuationId": "7548f9bf-1d2f-495d-9cb2-95cb13cf3535",
+          "sessionLabel": "F0042_MATCH_1",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922",
+          "supersededId": "22468055-1b61-4c56-ac1d-0e1c2a94d4ff"
+        }
+      },
+      {
+        "id": "e680bb1d-bc5e-46fc-bd75-f1826ffca134",
+        "entityType": "metric_value",
+        "entityId": "0375d2a6-7ccc-411e-b519-21b922d911e0",
+        "action": "metric.correct",
+        "reason": "F0042 corrección de acta",
+        "createdAt": "2026-08-19T10:32:48.773092+00:00",
+        "sessionLabel": "F0042_MATCH_1",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "unit": null,
+          "value": 1,
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "metricId": "0375d2a6-7ccc-411e-b519-21b922d911e0",
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+          "metricCode": "F0042_LOSSES",
+          "metricName": "F0042 Pérdidas",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "match",
+          "sessionLabel": "F0042_MATCH_1",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922"
+        }
+      },
+      {
+        "id": "4810fc56-bac5-4d7c-96c8-289bffd3a604",
+        "entityType": "metric_value",
+        "entityId": "163ec779-93c6-4585-9921-d1b2c46daca8",
+        "action": "metric.correct",
+        "reason": "F0042 corrección de acta",
+        "createdAt": "2026-08-19T10:32:48.773092+00:00",
+        "sessionLabel": "F0042_MATCH_1",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "unit": null,
+          "value": 10,
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "metricId": "163ec779-93c6-4585-9921-d1b2c46daca8",
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+          "metricCode": "F0042_SHOTS",
+          "metricName": "F0042 Lanzamientos",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "match",
+          "sessionLabel": "F0042_MATCH_1",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922"
+        }
+      },
+      {
+        "id": "fa2c9cf7-2674-4023-b641-9c4b7be6e661",
+        "entityType": "metric_value",
+        "entityId": "c14ac58e-8c89-4308-8c4d-6acd3445e1b9",
+        "action": "metric.correct",
+        "reason": "F0042 corrección de acta",
+        "createdAt": "2026-08-19T10:32:48.773092+00:00",
+        "sessionLabel": "F0042_MATCH_1",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "unit": null,
+          "value": 6,
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "metricId": "c14ac58e-8c89-4308-8c4d-6acd3445e1b9",
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "9d2939fe-c3bd-41ec-9d58-0d8504a6db2c",
+          "metricCode": "F0042_GOALS",
+          "metricName": "F0042 Goles",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "match",
+          "sessionLabel": "F0042_MATCH_1",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922"
+        }
+      },
+      {
+        "id": "c45b98b8-8b76-46a2-9234-1ae0e177d0ac",
+        "entityType": "metric_value",
+        "entityId": "c14ac58e-8c89-4308-8c4d-6acd3445e1b9",
+        "action": "metric.record",
+        "reason": null,
+        "createdAt": "2026-08-19T10:32:47.740789+00:00",
+        "sessionLabel": "F0042_TRAINING_PLANNED",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "unit": null,
+          "value": 2,
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "metricId": "c14ac58e-8c89-4308-8c4d-6acd3445e1b9",
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "a59c3242-46c3-4469-bf92-12152f8b4020",
+          "metricCode": "F0042_GOALS",
+          "metricName": "F0042 Goles",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "training",
+          "sessionLabel": "F0042_TRAINING_PLANNED",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922"
+        }
+      },
+      {
+        "id": "072d99e9-d2ca-47b0-826b-88cfaf3eada5",
+        "entityType": "observation",
+        "entityId": "a59c3242-46c3-4469-bf92-12152f8b4020",
+        "action": "observation.record",
+        "reason": null,
+        "createdAt": "2026-08-19T10:32:47.740789+00:00",
+        "sessionLabel": "F0042_TRAINING_PLANNED",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "metrics": [
+            {
+              "code": "F0042_GOALS",
+              "value": 2,
+              "metricId": "c14ac58e-8c89-4308-8c4d-6acd3445e1b9"
+            },
+            {
+              "code": "F0042_SHOTS",
+              "value": 8,
+              "metricId": "163ec779-93c6-4585-9921-d1b2c46daca8"
+            },
+            {
+              "code": "F0042_LOSSES",
+              "value": 1,
+              "metricId": "0375d2a6-7ccc-411e-b519-21b922d911e0"
+            }
+          ],
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "a59c3242-46c3-4469-bf92-12152f8b4020",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "training",
+          "sessionLabel": "F0042_TRAINING_PLANNED",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922"
+        }
+      },
+      {
+        "id": "451c1542-4128-443e-935d-438d6d4c75c2",
+        "entityType": "metric_value",
+        "entityId": "163ec779-93c6-4585-9921-d1b2c46daca8",
+        "action": "metric.record",
+        "reason": null,
+        "createdAt": "2026-08-19T10:32:47.740789+00:00",
+        "sessionLabel": "F0042_TRAINING_PLANNED",
+        "teamName": "F0042_TEAM_A",
+        "playerName": "F0042_PLAYER_A",
+        "detail": {
+          "unit": null,
+          "value": 8,
+          "teamId": "90ce0a14-a00e-4f83-8a83-9315c46f5fb7",
+          "metricId": "163ec779-93c6-4585-9921-d1b2c46daca8",
+          "playerId": "35a9a2b8-b663-4c96-9157-390af43fea1a",
+          "seasonId": "ffed9c08-184d-4a6f-b1b1-9aca62fa4d9a",
+          "teamName": "F0042_TEAM_A",
+          "sessionId": "a59c3242-46c3-4469-bf92-12152f8b4020",
+          "metricCode": "F0042_SHOTS",
+          "metricName": "F0042 Lanzamientos",
+          "playerName": "F0042_PLAYER_A",
+          "seasonName": "F0042_SEASON_A",
+          "sessionKind": "training",
+          "sessionLabel": "F0042_TRAINING_PLANNED",
+          "sportSpaceId": "aae0e5ac-b0dc-4a3f-b6a3-34bb87d53922"
+        }
+      }
+    ]
+  },
+  "negatives": {
+    "V7.1": "Un entrenamiento no se disputa dentro de una competición.",
+    "V7.2": "La temporada está cerrada: no admite nuevos partidos ni entrenamientos.",
+    "V7.3": "El equipo no pertenece al SportSpace activo.",
+    "V7.4": "El jugador seleccionado no pertenece al equipo de esta sesión.",
+    "V7.5": "La métrica no pertenece a la configuración vigente de este contexto.",
+    "V7.6": "F0042_GOALS: el valor máximo permitido es 20.",
+    "V7.7": "La sesión no existe en el SportSpace activo."
+  },
+  "results": [
+    {
+      "id": "V1.1",
+      "name": "Fixtures F0042 creados en dos SportSpaces aislados",
+      "status": "PASS"
+    },
+    {
+      "id": "V2.1",
+      "name": "El setup ofrece únicamente temporadas del SportSpace activo",
+      "status": "PASS"
+    },
+    {
+      "id": "V2.2",
+      "name": "La temporada activa se propone por defecto",
+      "status": "PASS"
+    },
+    {
+      "id": "V2.3",
+      "name": "Los equipos listados pertenecen a la temporada",
+      "status": "PASS"
+    },
+    {
+      "id": "V2.4",
+      "name": "Competiciones compatibles con temporada y deporte",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.1",
+      "name": "Partido creado y clasificado como match",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.2",
+      "name": "El partido queda como sesión realizada",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.3",
+      "name": "El roster sólo contiene jugadores del equipo del partido",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.4",
+      "name": "La pantalla de observación expone sólo métricas primarias y la configuración publicada",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.5",
+      "name": "El guardado produce valoración",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.6",
+      "name": "Score determinista igual al oráculo (0.800000)",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.7",
+      "name": "La derivada se calcula, no se registra",
+      "status": "PASS"
+    },
+    {
+      "id": "V3.8",
+      "name": "Sólo se persisten valores primarios",
+      "status": "PASS"
+    },
+    {
+      "id": "V4.1",
+      "name": "Entrenamiento futuro creado",
+      "status": "PASS"
+    },
+    {
+      "id": "V4.2",
+      "name": "Aparece como sesión programada",
+      "status": "PASS"
+    },
+    {
+      "id": "V4.3",
+      "name": "El histórico muestra partido y entrenamiento",
+      "status": "PASS"
+    },
+    {
+      "id": "V4.4",
+      "name": "El filtro de planificación aísla las sesiones programadas",
+      "status": "PASS"
+    },
+    {
+      "id": "V4.5",
+      "name": "Se pueden registrar observaciones en una sesión programada",
+      "status": "PASS"
+    },
+    {
+      "id": "V5.1",
+      "name": "La corrección reemplaza la valoración anterior",
+      "status": "PASS"
+    },
+    {
+      "id": "V5.2",
+      "name": "Nuevo score igual al oráculo (1.900000)",
+      "status": "PASS"
+    },
+    {
+      "id": "V5.3",
+      "name": "Histórico del jugador: una vigente y una reemplazada por sesión, con contexto",
+      "status": "PASS"
+    },
+    {
+      "id": "V5.4",
+      "name": "La valoración reemplazada es inmutable (RLS y trigger)",
+      "status": "PASS"
+    },
+    {
+      "id": "V6.1",
+      "name": "Se auditan las creaciones de sesión",
+      "status": "PASS"
+    },
+    {
+      "id": "V6.2",
+      "name": "Se auditan las observaciones (registro y corrección)",
+      "status": "PASS"
+    },
+    {
+      "id": "V6.3",
+      "name": "Se audita cada métrica registrada",
+      "status": "PASS"
+    },
+    {
+      "id": "V6.4",
+      "name": "Se auditan las valoraciones, incluida la sustitución",
+      "status": "PASS"
+    },
+    {
+      "id": "V6.5",
+      "name": "Cada entrada identifica SportSpace, equipo, jugador y sesión",
+      "status": "PASS"
+    },
+    {
+      "id": "V6.6",
+      "name": "El motivo de la corrección queda registrado",
+      "status": "PASS"
+    },
+    {
+      "id": "V6.7",
+      "name": "La auditoría filtra por jugador",
+      "status": "PASS"
+    },
+    {
+      "id": "V7.1",
+      "name": "Rechaza competición en un entrenamiento",
+      "status": "PASS"
+    },
+    {
+      "id": "V7.2",
+      "name": "Rechaza sesión en temporada cerrada",
+      "status": "PASS"
+    },
+    {
+      "id": "V7.3",
+      "name": "Rechaza equipo de otro SportSpace",
+      "status": "PASS"
+    },
+    {
+      "id": "V7.4",
+      "name": "Rechaza jugador que no pertenece al equipo de la sesión",
+      "status": "PASS"
+    },
+    {
+      "id": "V7.5",
+      "name": "Rechaza registrar una métrica derivada",
+      "status": "PASS"
+    },
+    {
+      "id": "V7.6",
+      "name": "Aplica la regla declarativa max=20",
+      "status": "PASS"
+    },
+    {
+      "id": "V7.7",
+      "name": "Rechaza operar sobre una sesión de otro SportSpace",
+      "status": "PASS"
+    },
+    {
+      "id": "V8.1",
+      "name": "El SportSpace B no ve sesiones de A",
+      "status": "PASS"
+    },
+    {
+      "id": "V8.2",
+      "name": "El SportSpace B no ve la auditoría de A",
+      "status": "PASS"
+    },
+    {
+      "id": "V8.3",
+      "name": "RLS impide leer los valores de A desde B",
+      "status": "PASS"
+    },
+    {
+      "id": "V8.4",
+      "name": "Las operaciones rechazadas no dejan datos huérfanos",
+      "status": "PASS"
+    }
+  ],
+  "finishedAt": "2026-08-19T10:32:51.532Z"
+}
