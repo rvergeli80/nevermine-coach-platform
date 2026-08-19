@@ -367,6 +367,85 @@ async function recordAudit(
   }
 }
 
+interface AuditEntry {
+  entityType: string;
+  entityId: string | null;
+  action: string;
+  reason?: string | null;
+  before?: unknown;
+  after?: unknown;
+  catalogVersionId?: string | null;
+}
+
+/** Varias entradas en una sola escritura: la auditoría nunca bloquea la operativa. */
+async function recordAuditBatch(ctx: ApplicationServiceContext, entries: AuditEntry[]) {
+  if (entries.length === 0) return;
+  try {
+    await ctx.supabase.from("audit_log").insert(
+      entries.map((entry) => ({
+        actor_id: ctx.userId,
+        owner_id: ctx.userId,
+        sport_space_id: ctx.sportSpaceId,
+        entity_type: entry.entityType,
+        entity_id: entry.entityId,
+        action: entry.action,
+        reason: entry.reason ?? null,
+        before_state: (entry.before ?? null) as never,
+        after_state: (entry.after ?? null) as never,
+        catalog_version_id: entry.catalogVersionId ?? null,
+      })),
+    );
+  } catch {
+    // Ídem: la trazabilidad no puede tumbar el registro del coach.
+  }
+}
+
+/** Vista de auditoría operativa del SportSpace activo. */
+export async function listAuditTrailService(
+  ctx: ApplicationServiceContext,
+  input: AuditTrailInput = {},
+) {
+  await requireOps(ctx, "valuation:read");
+  let query = ctx.supabase
+    .from("audit_log")
+    .select("id, entity_type, entity_id, action, reason, after_state, before_state, created_at")
+    .eq("sport_space_id", ctx.sportSpaceId)
+    .in("entity_type", ["observation_context", "observation", "metric_value", "valuation"]);
+  if (input.entityType) query = query.eq("entity_type", input.entityType);
+
+  const rows = unwrap<
+    {
+      id: string;
+      entity_type: string;
+      entity_id: string | null;
+      action: string;
+      reason: string | null;
+      after_state: Record<string, unknown> | null;
+      before_state: Record<string, unknown> | null;
+      created_at: string;
+    }[]
+  >(await query.order("created_at", { ascending: false }).limit(input.limit ?? 200));
+
+  const pick = (row: (typeof rows)[number], key: string) =>
+    (row.after_state?.[key] ?? row.before_state?.[key] ?? null) as string | null;
+
+  return rows
+    .map((row) => ({
+      id: row.id,
+      entityType: row.entity_type,
+      entityId: row.entity_id,
+      action: row.action,
+      reason: row.reason,
+      createdAt: row.created_at,
+      sessionLabel: pick(row, "sessionLabel"),
+      teamName: pick(row, "teamName"),
+      playerName: pick(row, "playerName"),
+      detail: row.after_state ?? row.before_state ?? null,
+    }))
+    .filter((row) => (input.playerId ? row.detail?.["playerId"] === input.playerId : true))
+    .filter((row) => (input.teamId ? row.detail?.["teamId"] === input.teamId : true));
+}
+
 /** Resuelve el tipo de evento canónico (Partido/Entrenamiento) del deporte. */
 async function resolveEventType(
   ctx: ApplicationServiceContext,
