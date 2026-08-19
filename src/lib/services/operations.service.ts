@@ -17,6 +17,8 @@ import {
   assertSeasonOperable,
   assertTeamInSeason,
   preferredSeasonId,
+  sessionSchedule,
+  type AuditTrailInput,
   type CreateSessionInput,
   type ListSessionsInput,
   type OpsAction,
@@ -367,6 +369,97 @@ async function recordAudit(
   }
 }
 
+interface AuditEntry {
+  entityType: string;
+  entityId: string | null;
+  action: string;
+  reason?: string | null;
+  before?: unknown;
+  after?: unknown;
+  catalogVersionId?: string | null;
+}
+
+/** Varias entradas en una sola escritura: la auditoría nunca bloquea la operativa. */
+async function recordAuditBatch(ctx: ApplicationServiceContext, entries: AuditEntry[]) {
+  if (entries.length === 0) return;
+  try {
+    await ctx.supabase.from("audit_log").insert(
+      entries.map((entry) => ({
+        actor_id: ctx.userId,
+        owner_id: ctx.userId,
+        sport_space_id: ctx.sportSpaceId,
+        entity_type: entry.entityType,
+        entity_id: entry.entityId,
+        action: entry.action,
+        reason: entry.reason ?? null,
+        before_state: (entry.before ?? null) as never,
+        after_state: (entry.after ?? null) as never,
+        catalog_version_id: entry.catalogVersionId ?? null,
+      })),
+    );
+  } catch {
+    // Ídem: la trazabilidad no puede tumbar el registro del coach.
+  }
+}
+
+export interface AuditDetail {
+  playerId?: string;
+  teamId?: string;
+  metricCode?: string | null;
+  metricName?: string | null;
+  value?: number | null;
+  score?: number;
+  skipped?: string;
+  occurredAt?: string;
+  metrics?: { metricId: string; code: string | null; value: number | null }[];
+}
+
+/** Vista de auditoría operativa del SportSpace activo. */
+export async function listAuditTrailService(
+  ctx: ApplicationServiceContext,
+  input: AuditTrailInput = {},
+) {
+  await requireOps(ctx, "valuation:read");
+  let query = ctx.supabase
+    .from("audit_log")
+    .select("id, entity_type, entity_id, action, reason, after_state, before_state, created_at")
+    .eq("sport_space_id", ctx.sportSpaceId)
+    .in("entity_type", ["observation_context", "observation", "metric_value", "valuation"]);
+  if (input.entityType) query = query.eq("entity_type", input.entityType);
+
+  const rows = unwrap<
+    {
+      id: string;
+      entity_type: string;
+      entity_id: string | null;
+      action: string;
+      reason: string | null;
+      after_state: Record<string, unknown> | null;
+      before_state: Record<string, unknown> | null;
+      created_at: string;
+    }[]
+  >(await query.order("created_at", { ascending: false }).limit(input.limit ?? 200));
+
+  const pick = (row: (typeof rows)[number], key: string) =>
+    (row.after_state?.[key] ?? row.before_state?.[key] ?? null) as string | null;
+
+  return rows
+    .map((row) => ({
+      id: row.id,
+      entityType: row.entity_type,
+      entityId: row.entity_id,
+      action: row.action,
+      reason: row.reason,
+      createdAt: row.created_at,
+      sessionLabel: pick(row, "sessionLabel"),
+      teamName: pick(row, "teamName"),
+      playerName: pick(row, "playerName"),
+      detail: (row.after_state ?? row.before_state ?? null) as AuditDetail | null,
+    }))
+    .filter((row) => (input.playerId ? row.detail?.playerId === input.playerId : true))
+    .filter((row) => (input.teamId ? row.detail?.teamId === input.teamId : true));
+}
+
 /** Resuelve el tipo de evento canónico (Partido/Entrenamiento) del deporte. */
 async function resolveEventType(
   ctx: ApplicationServiceContext,
@@ -495,22 +588,29 @@ export async function createSessionService(
     notes: input.notes ?? null,
   });
 
+  const session = await requireSession(ctx, created.id);
+
   await recordAudit(ctx, {
     entityType: "observation_context",
     entityId: created.id,
     action: `session.create.${input.kind}`,
     catalogVersionId,
     after: {
+      sportSpaceId: ctx.sportSpaceId,
       kind: input.kind,
+      sessionId: session.id,
+      sessionLabel: session.label ?? session.event_type_name,
       seasonId: input.seasonId,
+      seasonName: session.season_name,
       teamId: input.teamId,
+      teamName: session.team_name,
       competitionId: input.competitionId ?? null,
       occurredAt: created.occurred_at,
-      label: created.label,
+      schedule: sessionSchedule(created.occurred_at),
     },
   });
 
-  return requireSession(ctx, created.id);
+  return session;
 }
 
 /**
@@ -543,24 +643,77 @@ export async function recordPlayerObservationService(
     values: input.values,
   });
 
-  await recordAudit(ctx, {
-    entityType: "valuation",
-    entityId: result.valuation.status === "computed" ? result.valuation.id : null,
-    action: previous ? "observation.correct" : "observation.record",
-    reason: input.reason ?? null,
-    catalogVersionId: session.catalog_version_id,
-    before: previous ? { valuationId: previous.id, score: Number(previous.score) } : null,
-    after:
-      result.valuation.status === "computed"
-        ? {
-            valuationId: result.valuation.id,
-            score: result.valuation.score,
-            supersededId: result.valuation.supersededId,
-            sessionId: session.id,
-            playerId: player.id,
-          }
-        : { skipped: result.valuation.message, sessionId: session.id, playerId: player.id },
-  });
+  // Trazabilidad completa: observación, cada métrica registrada y la valoración.
+  const metricIds = input.values.map((entry) => entry.metricId);
+  const metricRows = metricIds.length
+    ? unwrap<{ id: string; code: string; name: string; unit: string | null }[]>(
+        await ctx.supabase.from("metrics").select("id, code, name, unit").in("id", metricIds),
+      )
+    : [];
+  const metricById = new Map(metricRows.map((row) => [row.id, row]));
+
+  const subject = {
+    sportSpaceId: ctx.sportSpaceId,
+    sessionId: session.id,
+    sessionKind: session.kind,
+    sessionLabel: session.label ?? session.event_type_name,
+    seasonId: session.season_id,
+    seasonName: session.season_name,
+    teamId: session.team_id,
+    teamName: session.team_name,
+    playerId: player.id,
+    playerName: player.full_name,
+  };
+
+  await recordAuditBatch(ctx, [
+    {
+      entityType: "observation",
+      entityId: session.id,
+      action: previous ? "observation.correct" : "observation.record",
+      reason: input.reason ?? null,
+      catalogVersionId: session.catalog_version_id,
+      after: {
+        ...subject,
+        metrics: input.values.map((entry) => ({
+          metricId: entry.metricId,
+          code: metricById.get(entry.metricId)?.code ?? null,
+          value: entry.value,
+        })),
+      },
+    },
+    ...input.values.map((entry) => ({
+      entityType: "metric_value",
+      entityId: entry.metricId,
+      action: previous ? "metric.correct" : "metric.record",
+      reason: input.reason ?? null,
+      catalogVersionId: session.catalog_version_id,
+      after: {
+        ...subject,
+        metricId: entry.metricId,
+        metricCode: metricById.get(entry.metricId)?.code ?? null,
+        metricName: metricById.get(entry.metricId)?.name ?? null,
+        unit: metricById.get(entry.metricId)?.unit ?? null,
+        value: entry.value,
+      },
+    })),
+    {
+      entityType: "valuation",
+      entityId: result.valuation.status === "computed" ? result.valuation.id : null,
+      action: previous ? "valuation.replace" : "valuation.create",
+      reason: input.reason ?? null,
+      catalogVersionId: session.catalog_version_id,
+      before: previous ? { ...subject, valuationId: previous.id, score: Number(previous.score) } : null,
+      after:
+        result.valuation.status === "computed"
+          ? {
+              ...subject,
+              valuationId: result.valuation.id,
+              score: result.valuation.score,
+              supersededId: result.valuation.supersededId,
+            }
+          : { ...subject, skipped: result.valuation.message },
+    },
+  ]);
 
   return { ...result, session, player: { id: player.id, fullName: player.full_name } };
 }

@@ -30,6 +30,7 @@ import { Route as AuthenticatedAppJugadoresRouteImport } from './routes/_authent
 import { Route as AuthenticatedAppEquiposRouteImport } from './routes/_authenticated/app/equipos'
 import { Route as AuthenticatedAppDeportesRouteImport } from './routes/_authenticated/app/deportes'
 import { Route as AuthenticatedAppCompeticionesRouteImport } from './routes/_authenticated/app/competiciones'
+import { Route as AuthenticatedAppAuditoriaRouteImport } from './routes/_authenticated/app/auditoria'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedAppCatalogosIndexRouteImport } from './routes/_authenticated/app/catalogos/index'
@@ -152,6 +153,12 @@ const AuthenticatedAppCompeticionesRoute =
     path: '/competiciones',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppAuditoriaRoute =
+  AuthenticatedAppAuditoriaRouteImport.update({
+    id: '/auditoria',
+    path: '/auditoria',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/app/equipos': typeof AuthenticatedAppEquiposRoute
@@ -210,6 +218,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
   '/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/app/equipos': typeof AuthenticatedAppEquiposRoute
@@ -238,6 +247,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/_authenticated/app/competiciones': typeof AuthenticatedAppCompeticionesRoute
   '/_authenticated/app/deportes': typeof AuthenticatedAppDeportesRoute
   '/_authenticated/app/equipos': typeof AuthenticatedAppEquiposRoute
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/app/auditoria'
     | '/app/competiciones'
     | '/app/deportes'
     | '/app/equipos'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/app/auditoria'
     | '/app/competiciones'
     | '/app/deportes'
     | '/app/equipos'
@@ -318,6 +330,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/app/auditoria'
     | '/_authenticated/app/competiciones'
     | '/_authenticated/app/deportes'
     | '/_authenticated/app/equipos'
@@ -496,6 +509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCompeticionesRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/auditoria': {
+      id: '/_authenticated/app/auditoria'
+      path: '/auditoria'
+      fullPath: '/app/auditoria'
+      preLoaderRoute: typeof AuthenticatedAppAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -528,6 +548,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppAuditoriaRoute: typeof AuthenticatedAppAuditoriaRoute
   AuthenticatedAppCompeticionesRoute: typeof AuthenticatedAppCompeticionesRoute
   AuthenticatedAppDeportesRoute: typeof AuthenticatedAppDeportesRoute
   AuthenticatedAppEquiposRoute: typeof AuthenticatedAppEquiposRoute
@@ -547,6 +568,7 @@ interface AuthenticatedAppRouteRouteChildren {
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppAuditoriaRoute: AuthenticatedAppAuditoriaRoute,
   AuthenticatedAppCompeticionesRoute: AuthenticatedAppCompeticionesRoute,
   AuthenticatedAppDeportesRoute: AuthenticatedAppDeportesRoute,
   AuthenticatedAppEquiposRoute: AuthenticatedAppEquiposRoute,

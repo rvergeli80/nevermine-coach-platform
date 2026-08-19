@@ -53,3 +53,6 @@ export function assertCanOperate(role: OrgRole | null, action: OpsAction): void 
     failOperations(`Tu rol (${role}) no permite ${OPS_ACTION_LABELS[action]}.`);
   }
 }
+
+/** Lectura de la auditoría operativa: cualquier miembro del SportSpace. */
+export const AUDIT_READ_ROLES: readonly OrgRole[] = ["owner", "coach"];

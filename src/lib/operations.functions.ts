@@ -8,12 +8,14 @@ import {
   getPlayerHistoryService,
   getPlayerObservationService,
   getSessionRosterService,
+  listAuditTrailService,
   listSeasonTeamsService,
   listSessionCompetitionsService,
   listSessionsService,
   recordPlayerObservationService,
 } from "@/lib/services/operations.service";
 import {
+  auditTrailSchema,
   createSessionSchema,
   listSessionsSchema,
   playerHistorySchema,
@@ -80,3 +82,9 @@ export const getPlayerHistory = createServerFn({ method: "GET" })
   .middleware([requireApplicationContext])
   .inputValidator((data: unknown) => playerHistorySchema.parse(data))
   .handler(async ({ data, context }) => getPlayerHistoryService(ctxOf(context), data));
+
+
+export const listAuditTrail = createServerFn({ method: "GET" })
+  .middleware([requireApplicationContext])
+  .inputValidator((data: unknown) => auditTrailSchema.parse(data ?? {}))
+  .handler(async ({ data, context }) => listAuditTrailService(ctxOf(context), data));
