@@ -110,6 +110,10 @@ function OperationsPage() {
     setPlayerId("");
   }, [teamId, kind]);
 
+  const visibleSessions = (sessions.data ?? []).filter((session) =>
+    schedule === "all" ? true : sessionSchedule(session.occurred_at) === schedule,
+  );
+
   const selectedTeam = (teams.data ?? []).find((team) => team.id === teamId) ?? null;
   const seasons = setup.data?.seasons ?? [];
   const canWrite = setup.data?.role === "owner" || setup.data?.role === "coach";
@@ -173,6 +177,23 @@ function OperationsPage() {
         </div>
 
         <div className="space-y-1.5">
+          <span className="text-sm font-medium">Planificación</span>
+          <div className="flex gap-2">
+            {(["all", "planned", "played"] as const).map((option) => (
+              <Button
+                key={option}
+                type="button"
+                size="sm"
+                variant={schedule === option ? "default" : "outline"}
+                onClick={() => setSchedule(option)}
+              >
+                {SCHEDULE_FILTER_LABEL[option]}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
           <span className="text-sm font-medium">Tipo de sesión</span>
           <div className="flex gap-2">
             {(["match", "training"] as const).map((option) => (
@@ -203,8 +224,12 @@ function OperationsPage() {
         <QueryState
           isLoading={sessions.isLoading}
           error={sessions.error}
-          isEmpty={(sessions.data ?? []).length === 0}
-          emptyText={`Todavía no hay ningún ${KIND_LABEL[kind].toLowerCase()} para este equipo.`}
+          isEmpty={visibleSessions.length === 0}
+          emptyText={
+            schedule === "planned"
+              ? `No hay ningún ${KIND_LABEL[kind].toLowerCase()} programado para este equipo.`
+              : `Todavía no hay ningún ${KIND_LABEL[kind].toLowerCase()} para este equipo.`
+          }
         >
           <div className="rounded-md border border-border bg-card">
             <Table>
@@ -217,10 +242,19 @@ function OperationsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(sessions.data ?? []).map((session) => (
+                {visibleSessions.map((session) => (
                   <TableRow key={session.id} data-selected={session.id === sessionId}>
                     <TableCell className="font-medium">
-                      {session.label ?? session.event_type_name}
+                      <span className="mr-2">{session.label ?? session.event_type_name}</span>
+                      <Badge
+                        variant={
+                          sessionSchedule(session.occurred_at) === "planned"
+                            ? "outline"
+                            : "secondary"
+                        }
+                      >
+                        {SESSION_SCHEDULE_LABELS[sessionSchedule(session.occurred_at)]}
+                      </Badge>
                     </TableCell>
                     <TableCell>{session.competition_name ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">
