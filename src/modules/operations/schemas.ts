@@ -49,3 +49,15 @@ export type CreateSessionInput = z.infer<typeof createSessionSchema>;
 export type SessionPlayerInput = z.infer<typeof sessionPlayerSchema>;
 export type RecordObservationInput = z.infer<typeof recordObservationSchema>;
 export type PlayerHistoryInput = z.infer<typeof playerHistorySchema>;
+
+export const auditTrailSchema = z.object({
+  entityType: z
+    .enum(["observation_context", "observation", "metric_value", "valuation"])
+    .optional()
+    .nullable(),
+  teamId: z.string().uuid().optional().nullable(),
+  playerId: z.string().uuid().optional().nullable(),
+  limit: z.number().int().min(1).max(500).optional(),
+});
+
+export type AuditTrailInput = z.infer<typeof auditTrailSchema>;
