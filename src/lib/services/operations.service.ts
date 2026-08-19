@@ -402,6 +402,18 @@ async function recordAuditBatch(ctx: ApplicationServiceContext, entries: AuditEn
   }
 }
 
+export interface AuditDetail {
+  playerId?: string;
+  teamId?: string;
+  metricCode?: string | null;
+  metricName?: string | null;
+  value?: number | null;
+  score?: number;
+  skipped?: string;
+  occurredAt?: string;
+  metrics?: { metricId: string; code: string | null; value: number | null }[];
+}
+
 /** Vista de auditoría operativa del SportSpace activo. */
 export async function listAuditTrailService(
   ctx: ApplicationServiceContext,
@@ -442,10 +454,10 @@ export async function listAuditTrailService(
       sessionLabel: pick(row, "sessionLabel"),
       teamName: pick(row, "teamName"),
       playerName: pick(row, "playerName"),
-      detail: row.after_state ?? row.before_state ?? null,
+      detail: (row.after_state ?? row.before_state ?? null) as AuditDetail | null,
     }))
-    .filter((row) => (input.playerId ? row.detail?.["playerId"] === input.playerId : true))
-    .filter((row) => (input.teamId ? row.detail?.["teamId"] === input.teamId : true));
+    .filter((row) => (input.playerId ? row.detail?.playerId === input.playerId : true))
+    .filter((row) => (input.teamId ? row.detail?.teamId === input.teamId : true));
 }
 
 /** Resuelve el tipo de evento canónico (Partido/Entrenamiento) del deporte. */

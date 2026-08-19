@@ -57,26 +57,24 @@ const ENTITY_LABEL: Record<string, string> = {
 const dateTime = (value: string) =>
   new Date(value).toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" });
 
-function detailOf(entry: {
-  entityType: string;
-  detail: Record<string, unknown> | null;
-}): string {
+type AuditEntry = Awaited<ReturnType<typeof listAuditTrail>>[number];
+
+function detailOf(entry: AuditEntry): string {
   const detail = entry.detail ?? {};
   if (entry.entityType === "metric_value") {
-    const code = (detail["metricCode"] as string) ?? "";
-    const value = detail["value"];
+    const code = detail.metricCode ?? "";
+    const value = detail.value;
     return `${code}${code ? " = " : ""}${value === null || value === undefined ? "—" : String(value)}`;
   }
   if (entry.entityType === "valuation") {
-    if (detail["skipped"]) return String(detail["skipped"]);
-    const score = detail["score"];
-    return score === undefined ? "—" : `Score ${Number(score).toFixed(2)}`;
+    if (detail.skipped) return String(detail.skipped);
+    return detail.score === undefined ? "—" : `Score ${Number(detail.score).toFixed(2)}`;
   }
   if (entry.entityType === "observation") {
-    const metrics = (detail["metrics"] as { code: string | null }[] | undefined) ?? [];
+    const metrics = detail.metrics ?? [];
     return `${metrics.length} métrica${metrics.length === 1 ? "" : "s"} registradas`;
   }
-  const occurred = detail["occurredAt"] as string | undefined;
+  const occurred = detail.occurredAt;
   return occurred ? dateTime(occurred) : "—";
 }
 
