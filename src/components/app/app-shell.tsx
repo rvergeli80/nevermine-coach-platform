@@ -31,6 +31,7 @@ const NAV = [
   { to: "/app/equipos", label: "Equipos", icon: Users, exact: false },
   { to: "/app/jugadores", label: "Jugadores", icon: UserRound, exact: false },
   { to: "/app/operativa", label: "Partidos y entrenamientos", icon: ClipboardList, exact: false },
+  { to: "/app/auditoria", label: "Auditoría", icon: History, exact: false },
   { to: "/app/valoraciones", label: "Valoraciones", icon: Gauge, exact: false },
   { to: "/app/catalogos", label: "Catálogos", icon: Library, exact: false },
   { to: "/app/packs", label: "Starter Packs", icon: Package, exact: false },
