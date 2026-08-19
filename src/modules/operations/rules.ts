@@ -108,3 +108,15 @@ export function preferredSeasonId(seasons: readonly SeasonRef[]): string | null 
   const operable = seasons.find((season) => season.state === "draft");
   return operable?.id ?? seasons[0]?.id ?? null;
 }
+
+/** Estado temporal de una sesión: planificada (futura) o ya disputada. */
+export type SessionSchedule = "planned" | "played";
+
+export function sessionSchedule(occurredAt: string, now: Date = new Date()): SessionSchedule {
+  return new Date(occurredAt).getTime() > now.getTime() ? "planned" : "played";
+}
+
+export const SESSION_SCHEDULE_LABELS: Record<SessionSchedule, string> = {
+  planned: "Programada",
+  played: "Realizada",
+};
