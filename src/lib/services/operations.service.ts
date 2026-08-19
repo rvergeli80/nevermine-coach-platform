@@ -17,6 +17,7 @@ import {
   assertSeasonOperable,
   assertTeamInSeason,
   preferredSeasonId,
+  type AuditTrailInput,
   type CreateSessionInput,
   type ListSessionsInput,
   type OpsAction,
