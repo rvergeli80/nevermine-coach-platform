@@ -623,24 +623,77 @@ export async function recordPlayerObservationService(
     values: input.values,
   });
 
-  await recordAudit(ctx, {
-    entityType: "valuation",
-    entityId: result.valuation.status === "computed" ? result.valuation.id : null,
-    action: previous ? "observation.correct" : "observation.record",
-    reason: input.reason ?? null,
-    catalogVersionId: session.catalog_version_id,
-    before: previous ? { valuationId: previous.id, score: Number(previous.score) } : null,
-    after:
-      result.valuation.status === "computed"
-        ? {
-            valuationId: result.valuation.id,
-            score: result.valuation.score,
-            supersededId: result.valuation.supersededId,
-            sessionId: session.id,
-            playerId: player.id,
-          }
-        : { skipped: result.valuation.message, sessionId: session.id, playerId: player.id },
-  });
+  // Trazabilidad completa: observación, cada métrica registrada y la valoración.
+  const metricIds = input.values.map((entry) => entry.metricId);
+  const metricRows = metricIds.length
+    ? unwrap<{ id: string; code: string; name: string; unit: string | null }[]>(
+        await ctx.supabase.from("metrics").select("id, code, name, unit").in("id", metricIds),
+      )
+    : [];
+  const metricById = new Map(metricRows.map((row) => [row.id, row]));
+
+  const subject = {
+    sportSpaceId: ctx.sportSpaceId,
+    sessionId: session.id,
+    sessionKind: session.kind,
+    sessionLabel: session.label ?? session.event_type_name,
+    seasonId: session.season_id,
+    seasonName: session.season_name,
+    teamId: session.team_id,
+    teamName: session.team_name,
+    playerId: player.id,
+    playerName: player.full_name,
+  };
+
+  await recordAuditBatch(ctx, [
+    {
+      entityType: "observation",
+      entityId: session.id,
+      action: previous ? "observation.correct" : "observation.record",
+      reason: input.reason ?? null,
+      catalogVersionId: session.catalog_version_id,
+      after: {
+        ...subject,
+        metrics: input.values.map((entry) => ({
+          metricId: entry.metricId,
+          code: metricById.get(entry.metricId)?.code ?? null,
+          value: entry.value,
+        })),
+      },
+    },
+    ...input.values.map((entry) => ({
+      entityType: "metric_value",
+      entityId: entry.metricId,
+      action: previous ? "metric.correct" : "metric.record",
+      reason: input.reason ?? null,
+      catalogVersionId: session.catalog_version_id,
+      after: {
+        ...subject,
+        metricId: entry.metricId,
+        metricCode: metricById.get(entry.metricId)?.code ?? null,
+        metricName: metricById.get(entry.metricId)?.name ?? null,
+        unit: metricById.get(entry.metricId)?.unit ?? null,
+        value: entry.value,
+      },
+    })),
+    {
+      entityType: "valuation",
+      entityId: result.valuation.status === "computed" ? result.valuation.id : null,
+      action: previous ? "valuation.replace" : "valuation.create",
+      reason: input.reason ?? null,
+      catalogVersionId: session.catalog_version_id,
+      before: previous ? { ...subject, valuationId: previous.id, score: Number(previous.score) } : null,
+      after:
+        result.valuation.status === "computed"
+          ? {
+              ...subject,
+              valuationId: result.valuation.id,
+              score: result.valuation.score,
+              supersededId: result.valuation.supersededId,
+            }
+          : { ...subject, skipped: result.valuation.message },
+    },
+  ]);
 
   return { ...result, session, player: { id: player.id, fullName: player.full_name } };
 }
