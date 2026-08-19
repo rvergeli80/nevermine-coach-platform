@@ -227,6 +227,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          session_kind: Database["public"]["Enums"]["session_kind"]
           sport_id: string
           status: Database["public"]["Enums"]["entity_status"]
         }
@@ -235,6 +236,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          session_kind?: Database["public"]["Enums"]["session_kind"]
           sport_id: string
           status?: Database["public"]["Enums"]["entity_status"]
         }
@@ -243,6 +245,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          session_kind?: Database["public"]["Enums"]["session_kind"]
           sport_id?: string
           status?: Database["public"]["Enums"]["entity_status"]
         }
@@ -1507,6 +1510,10 @@ export type Database = {
         Args: { _sport_space_id: string }
         Returns: boolean
       }
+      provision_sport_event_types: {
+        Args: { _sport_id: string }
+        Returns: undefined
+      }
       resolve_sport_space_for_user: {
         Args: { _user_id: string }
         Returns: string
@@ -1531,6 +1538,7 @@ export type Database = {
       metric_nature: "primary" | "derived"
       metric_value_type: "counter" | "duration" | "boolean" | "ratio" | "scale"
       season_state: "draft" | "active" | "closed" | "archived"
+      session_kind: "match" | "training" | "other"
       sport_space_role: "owner" | "coach"
       sport_space_type:
         | "club"
@@ -1691,6 +1699,7 @@ export const Constants = {
       metric_nature: ["primary", "derived"],
       metric_value_type: ["counter", "duration", "boolean", "ratio", "scale"],
       season_state: ["draft", "active", "closed", "archived"],
+      session_kind: ["match", "training", "other"],
       sport_space_role: ["owner", "coach"],
       sport_space_type: [
         "club",
